@@ -40,9 +40,9 @@ random_angle_min 	= -30		# Min of random rotation
 # Hourglass Parameters
 
 nbStacks 		= 8	 				# Number of stacks
-outDim 		= 16				# Number of output channels (how many joints)
+outDim 		  = 16				# Number of output channels (how many joints)
 nFeat 			= 256				# Number of feature channels 
-nLow 			= 4 				# Number of downsampling by stacks (3 or 4 for better results)
+nLow 			  = 4 				# Number of downsampling by stacks (3 or 4 for better results)
 nModule 		= 1					# Number of upsampling iterations (Not implemented yet)
 
 
