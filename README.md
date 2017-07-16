@@ -34,6 +34,7 @@ A 'config.cgf' is present in the directory.It contains all the variables needed 
 ## DataSet
 To create a dataset you need to put every images of your set on the 'img_directory'.
 Add information about your images into the 'training_txt_file':
+
 EXAMPLE:
 
 		055906773.jpgA 391 195 596 567 556 567 507 480 524 382 549 385 534 492 596 566 537 384 501 248 477 236 391 195 479 333 515 315 492 252 510 243 564 317 484 350
