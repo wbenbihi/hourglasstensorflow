@@ -56,3 +56,23 @@ The text file is formalized as follow:
 This data formalism consider a maximum of 10 persons in a single image (You can tweak the datagen.py file to consider more persons)
 
 /!\Missing part or values must be marked as -1
+
+## Training
+To train a model, make sure to have a 'config.cfg' file in your main directory and a text file with regard to your dataset. Then run train_launcher.py. It will run the training.
+
+On a TITAN GTX for mini_batches of 16 images on 100 epochs of 1000 iterations: 2 days of training (1.6 million images)
+
+## Saving And Restoring Models
+Saving is automatically done when training. In the 'saver_directory' you will find several files:
+	
+	'name'_'epoch'.data-00000-of-00001
+	'name'_'epoch'.index
+	'name'_'epoch'.meta
+
+You can manually load the graph from *.meta file using [TensorFlow methods](http://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/). Or you can use the Restore Method in hourglass_tiny.py.
+
+To do so, you first need to create the same graph as the saved one. To do so use the exact same 'config.cfg' that you used to train your model.	Then use HourglassModel('config.cfg').restore(modelToLoad) to restore pretrained model.
+	
+	modelToLoad: 'saver_directory'/'name'_'epoch'
+
+/!\ BE SURE TO USE THE SAME CONFIG.CFG FILE OR THE METHOD WON'T BE ABLE TO ASSIGN THE RIGHT WEIGHTS
