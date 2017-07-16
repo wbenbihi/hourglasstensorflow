@@ -1,5 +1,7 @@
 # Stacked Hourglass model : TensorFlow implementation
 Tensorflow implementation of Stacked Hourglass Networks for Human Pose Estimation by A.Newell et al.
+
+Code as part of MSc Computing Individual Project (Imperial College London 2017)
 ## Based on
 [Stacked Hourglass Networks for Human Pose Estimation](https://arxiv.org/abs/1603.06937) -- A.Newell et al.
 ## Status
@@ -82,3 +84,6 @@ To do so, you first need to create the same graph as the saved one. To do so use
 	modelToLoad: 'saver_directory'/'name'_'epoch'
 
 /!\ BE SURE TO USE THE SAME CONFIG.CFG FILE OR THE METHOD WON'T BE ABLE TO ASSIGN THE RIGHT WEIGHTS
+
+## Greetings
+A special thanks to A.Newell for his answers.
