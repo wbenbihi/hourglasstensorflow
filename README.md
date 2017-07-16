@@ -44,7 +44,7 @@ EXAMPLE:
 		026504353.jpgC 502 268 584 434 555 434 546 390 536 354 560 346 570 387 584 430 548 350 531 303 527 297 507 268 519 346 502 340 512 307 550 299 561 331 535 348
 In this example we consider 16 joints
 
-['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
+	['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
 The text file is formalized as follow:
 
 	image_name[LETTER] x_box_min y_box_min x_box_max y_box_max x1 y1 x2 y2 x3 y3 ...
