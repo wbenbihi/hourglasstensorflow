@@ -9,6 +9,8 @@ This is a WIP repo
 * Data Generator done (computationnaly efficient)
 * Multi-Person Pose Estimation (Working on It) 
 
+Currently trained on the [MPII DataSet](http://human-pose.mpi-inf.mpg.de/)
+
 ## Config File
 A 'config.cgf' is present in the directory.It contains all the variables needed to tweak the model.
 	
