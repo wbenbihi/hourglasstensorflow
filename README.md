@@ -43,14 +43,16 @@ EXAMPLE:
 		026504353.jpgB 555 137 623 375 586 375 577 310 580 266 609 263 609 310 604 374 595 265 581 184 577 176 555 137 570 261 559 238 561 193 601 174 623 207 591 233
 		026504353.jpgC 502 268 584 434 555 434 546 390 536 354 560 346 570 387 584 430 548 350 531 303 527 297 507 268 519 346 502 340 512 307 550 299 561 331 535 348
 In this example we consider 16 joints
-	['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
-	The text file is formalized as follow:
-		image_name[LETTER] x_box_min y_box_min x_box_max y_box_max x1 y1 x2 y2 x3 y3 ...
-		image_name is the file name
-		[LETTER] Indicates the person considered
-		(x_box_min y_box_min x_box_max y_box_max) Is the bounding box of the considered person in the scene
-		(x1 y1 x2 y2 x3 y3 ...) is the list of coordinates of every joints
-	This data formalism consider a maximum of 10 persons in a single image (You can tweak the datagen.py file to consider more persons)
-	
-	/!\
-	Missing part or values must be marked as -1
+
+['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
+The text file is formalized as follow:
+
+	image_name[LETTER] x_box_min y_box_min x_box_max y_box_max x1 y1 x2 y2 x3 y3 ...
+	image_name is the file name
+	[LETTER] Indicates the person considered
+	(x_box_min y_box_min x_box_max y_box_max) Is the bounding box of the considered person in the scene
+	(x1 y1 x2 y2 x3 y3 ...) is the list of coordinates of every joints
+
+This data formalism consider a maximum of 10 persons in a single image (You can tweak the datagen.py file to consider more persons)
+
+/!\Missing part or values must be marked as -1
