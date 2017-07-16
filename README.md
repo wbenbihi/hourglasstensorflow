@@ -4,6 +4,10 @@ Tensorflow implementation of Stacked Hourglass Networks for Human Pose Estimatio
 [Stacked Hourglass Networks for Human Pose Estimation](https://arxiv.org/abs/1603.06937) -- A.Newell et al.
 ## Status
 This is a WIP repo
+* Human Pose Estimation tested (working on accuracy)
+* Efficiency (working on a lighter model)
+* Data Generator done (computationnaly efficient)
+* Multi-Person Pose Estimation (Working on It) 
 
 ## Config File
 A 'config.cgf' is present in the directory.It contains all the variables needed to tweak the model.
