@@ -83,9 +83,9 @@ class DataGenerator():
 	def __init__(self, joints_name = None, img_dir=None, train_data_file = None):
 		""" Initializer
 		Args:
-			joints_name  	 	: List of joints condsidered
-			img_dir 	 	 	 	: Directory containing every images
-			train_data_file 	: Text file with training set data
+			joints_name			: List of joints condsidered
+			img_dir				: Directory containing every images
+			train_data_file		: Text file with training set data
 		"""
 		if joints_name == None:
 			self.joints_list = ['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
@@ -142,8 +142,8 @@ class DataGenerator():
 	def _give_batch_name(self, batch_size = 16, set = 'train'):
 		""" Returns a List of Samples
 		Args:
-			batch_size 	: Number of sample wanted
-			set 	 	 	: Set to use (valid/train)
+			batch_size	: Number of sample wanted
+			set				: Set to use (valid/train)
 		"""
 		list_file = []
 		for i in range(batch_size):
@@ -160,7 +160,7 @@ class DataGenerator():
 	def _create_sets(self, validation_rate = 0.1):
 		""" Select Elements to feed training and validation set 
 		Args:
-			validation_rate 	: Percentage of validation data (in ]0,1[, don't waste time use 0.1)
+			validation_rate		: Percentage of validation data (in ]0,1[, don't waste time use 0.1)
 		"""
 		sample = len(self.train_table)
 		valid_sample = int(sample * validation_rate)
@@ -197,10 +197,10 @@ class DataGenerator():
 	def _generate_hm(self, height, width ,joints, maxlenght):
 		""" Generate a full Heap Map for every joints in an array
 		Args:
-			height 	 	: Wanted Height for the Heat Map
-			width 	 	 	: Wanted Width for the Heat Map
-			joints 	 	: Array of Joints
-			maxlenght 	: Lenght of the Bounding Box
+			height			: Wanted Height for the Heat Map
+			width			: Wanted Width for the Heat Map
+			joints			: Array of Joints
+			maxlenght		: Lenght of the Bounding Box
 		"""
 		num_joints = joints.shape[0]
 		hm = np.zeros((height, width, num_joints), dtype = np.float32)
@@ -249,11 +249,11 @@ class DataGenerator():
 		""" Automatically returns a padding vector and a bounding box given
 		the size of the image and a list of joints.
 		Args:
-			height 	: Original Height
-			width 	 	: Original Width
-			box 	 	: Bounding Box
-			joints 	: Array of joints
-			boxp 	 	: Box percentage (Use 20% to get a good bounding box)
+			height		: Original Height
+			width		: Original Width
+			box			: Bounding Box
+			joints		: Array of joints
+			boxp		: Box percentage (Use 20% to get a good bounding box)
 		"""
 		padding = [[0,0],[0,0],[0,0]]
 		j = np.copy(joints)
@@ -287,9 +287,9 @@ class DataGenerator():
 	def _crop_img(self, img, padding, crop_box):
 		""" Given a bounding box and padding values return cropped image
 		Args:
-			img 	 	: Source Image
-			padding 	: Padding
-			crop_box 	: Bounding Box
+			img			: Source Image
+			padding	: Padding
+			crop_box	: Bounding Box
 		"""
 		img = np.pad(img, padding, mode = 'constant')
 		max_lenght = max(crop_box[2], crop_box[3])
@@ -299,10 +299,10 @@ class DataGenerator():
 	def _crop(self, img, hm, padding, crop_box):
 		""" Given a bounding box and padding values return cropped image and heatmap
 		Args:
-			img 	 	: Source Image
-			hm 	 	 	: Source Heat Map
-			padding 	: Padding
-			crop_box 	: Bounding Box
+			img			: Source Image
+			hm			: Source Heat Map
+			padding	: Padding
+			crop_box	: Bounding Box
 		"""
 		img = np.pad(img, padding, mode = 'constant')
 		hm = np.pad(hm, padding, mode = 'constant')
@@ -315,9 +315,9 @@ class DataGenerator():
 		""" Convert Absolute joint coordinates to crop box relative joint coordinates
 		(Used to compute Heat Maps)
 		Args:
-			box 	 	: Bounding Box 
-			padding 	: Padding Added to the original Image
-			to_size 	: Heat Map wanted Size
+			box			: Bounding Box 
+			padding	: Padding Added to the original Image
+			to_size	: Heat Map wanted Size
 		"""
 		new_j = np.copy(joints)
 		max_l = max(box[2], box[3])
@@ -339,12 +339,12 @@ class DataGenerator():
 	def _generator(self, batch_size = 16, stacks = 4, set = 'train', stored = False, normalize = True, debug = False):
 		""" Create Generator for Training
 		Args:
-			batch_size 	: Number of images per batch
-			stacks 	 	: Number of stacks/module in the network
-			set 	 	 	: Training/Testing/Validation set # TODO: Not implemented yet
-			stored  	 	: Use stored Value # TODO: Not implemented yet
-			normalize 	: True to return Image Value between 0 and 1
-			_debug  	 	: Boolean to test the computation time (/!\ Keep False)
+			batch_size	: Number of images per batch
+			stacks			: Number of stacks/module in the network
+			set				: Training/Testing/Validation set # TODO: Not implemented yet
+			stored			: Use stored Value # TODO: Not implemented yet
+			normalize		: True to return Image Value between 0 and 1
+			_debug			: Boolean to test the computation time (/!\ Keep False)
 		# Done : Optimize Computation time 
 			16 Images --> 1.3 sec (on i7 6700hq)
 		""" 
@@ -435,8 +435,8 @@ class DataGenerator():
 	def open_img(self, name, color = 'RGB'):
 		""" Open an image 
 		Args:
-			name 	 	: Name of the sample
-			color 	 	: Color Mode (RGB/BGR/GRAY)
+			name	: Name of the sample
+			color	: Color Mode (RGB/BGR/GRAY)
 		"""
 		if name[-1] in self.letter:
 			name = name[:-1]
@@ -454,8 +454,8 @@ class DataGenerator():
 	def plot_img(self, name, plot = 'cv2'):
 		""" Plot an image
 		Args:
-			name 	: Name of the Sample
-			plot 	: Library to use (cv2: OpenCV, plt: matplotlib)
+			name	: Name of the Sample
+			plot	: Library to use (cv2: OpenCV, plt: matplotlib)
 		"""
 		if plot == 'cv2':
 			img = self.open_img(name, color = 'BGR')
@@ -465,17 +465,3 @@ class DataGenerator():
 			plt.imshow(img)
 			plt.show()
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-		
-		

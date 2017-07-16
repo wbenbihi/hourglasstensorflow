@@ -39,21 +39,21 @@ class HourglassModel():
 	def __init__(self, nFeat = 512, nStack = 4, nModules = 1, nLow = 4, outputDim = 16, batch_size = 16, drop_rate = 0.2, lear_rate = 2.5e-4, decay = 0.96, decay_step = 2000, dataset = None, training = True, w_summary = True, logdir_train = None, logdir_test = None,tiny = True, modif = True, name = 'tiny_hourglass'):
 		""" Initializer
 		Args:
-			nStack  			 	: number of stacks (stage/Hourglass modules)
-			nFeat 	 			: number of feature channels on conv layers
-			nLow  	 			: number of downsampling (pooling) per module
-			outputDim 		 	: number of output Dimension (16 for MPII)
-			batch_size 		 	: size of training/testing Batch
-			dro_rate 	 		: Rate of neurons disabling for Dropout Layers
-			lear_rate 		 	: Learning Rate starting value
-			decay 	 	 		: Learning Rate Exponential Decay (decay in ]0,1], 1 for constant learning rate)
-			decay_step 		 	: Step to apply decay
-			dataset 	 	 	 	: Dataset (class DataGenerator)
-			training 	 		: (bool) True for training / False for prediction
-			w_summary 		 	: (bool) True/False for summary of weight (to visualize in Tensorboard)
-			tiny 	 	 		 	: (bool) Activate Tiny Hourglass
-			modif 	 	 		: (bool) Boolean to test some network modification # DO NOT USE IT ! USED TO TEST THE NETWORK
-			name 	 	 		 	: name of the model
+			nStack				: number of stacks (stage/Hourglass modules)
+			nFeat				: number of feature channels on conv layers
+			nLow				: number of downsampling (pooling) per module
+			outputDim			: number of output Dimension (16 for MPII)
+			batch_size			: size of training/testing Batch
+			dro_rate			: Rate of neurons disabling for Dropout Layers
+			lear_rate			: Learning Rate starting value
+			decay				: Learning Rate Exponential Decay (decay in ]0,1], 1 for constant learning rate)
+			decay_step			: Step to apply decay
+			dataset			: Dataset (class DataGenerator)
+			training			: (bool) True for training / False for prediction
+			w_summary			: (bool) True/False for summary of weight (to visualize in Tensorboard)
+			tiny				: (bool) Activate Tiny Hourglass
+			modif				: (bool) Boolean to test some network modification # DO NOT USE IT ! USED TO TEST THE NETWORK
+			name				: name of the model
 		"""
 		self.nStack = nStack
 		self.nFeat = nFeat
@@ -189,7 +189,7 @@ class HourglassModel():
 	def restore(self, load = None):
 		""" Restore a pretrained model
 		Args:
-			load			: Model to load (None if training from scratch) (see README for further information)
+			load	: Model to load (None if training from scratch) (see README for further information)
 		"""
 		with tf.name_scope('Session'):
 			with tf.device(self.gpu):
@@ -267,7 +267,7 @@ class HourglassModel():
 	def record_training(self, record):
 		""" Record Training Data and Export them in CSV file
 		Args:
-			record 	: record dictionnary
+			record		: record dictionnary
 		"""
 		out_file = open(self.name + '_train_record.csv', 'w')
 		for line in range(len(record['accur'])):
@@ -283,7 +283,7 @@ class HourglassModel():
 		""" Initialize the training
 		Args:
 			nEpochs		: Number of Epochs to train
-			epochSize	: Size of one Epoch
+			epochSize		: Size of one Epoch
 			saveStep		: Step to save 'train' summary (has to be lower than epochSize)
 			dataset		: Data Generator (see generator.py)
 			load			: Model to load (None if training from scratch) (see README for further information)
@@ -311,8 +311,8 @@ class HourglassModel():
 	def _define_saver_summary(self):
 		""" Create Summary and Saver
 		Args:
-			logdir_train 	: Path to train summary directory
-			logdir_test 		: Path to test summary directory
+			logdir_train		: Path to train summary directory
+			logdir_test		: Path to test summary directory
 		"""
 		if (self.logdir_train == None) or (self.logdir_test == None):
 			raise ValueError('Train/Test directory not assigned')
@@ -442,14 +442,14 @@ class HourglassModel():
 	def _conv(self, inputs, filters, kernel_size = 1, strides = 1, pad = 'VALID', name = 'conv'):
 		""" Spatial Convolution (CONV2D)
 		Args:
-			inputs 	 	: Input Tensor (Data Type : NHWC)
-			filters  	 	: Number of filters (channels)
-			kernel_size 	: Size of kernel
-			strides 	 	: Stride
-			pad 	 	 	: Padding Type (VALID/SAME) # DO NOT USE 'SAME' NETWORK BUILT FOR VALID
-			name 	 	 	: Name of the block
+			inputs			: Input Tensor (Data Type : NHWC)
+			filters		: Number of filters (channels)
+			kernel_size	: Size of kernel
+			strides		: Stride
+			pad				: Padding Type (VALID/SAME) # DO NOT USE 'SAME' NETWORK BUILT FOR VALID
+			name			: Name of the block
 		Returns:
-			conv 	 	 	: Output Tensor (Convolved Input)
+			conv			: Output Tensor (Convolved Input)
 		"""
 		with tf.name_scope(name):
 			# Kernel for convolution, Xavier Initialisation
@@ -463,14 +463,14 @@ class HourglassModel():
 	def _conv_bn_relu(self, inputs, filters, kernel_size = 1, strides = 1, pad = 'VALID', name = 'conv_bn_relu'):
 		""" Spatial Convolution (CONV2D) + BatchNormalization + ReLU Activation
 		Args:
-			inputs 	 	: Input Tensor (Data Type : NHWC)
-			filters  	 	: Number of filters (channels)
-			kernel_size 	: Size of kernel
-			strides 	 	: Stride
-			pad 	 	 	: Padding Type (VALID/SAME) # DO NOT USE 'SAME' NETWORK BUILT FOR VALID
-			name 	 	 	: Name of the block
+			inputs			: Input Tensor (Data Type : NHWC)
+			filters		: Number of filters (channels)
+			kernel_size	: Size of kernel
+			strides		: Stride
+			pad				: Padding Type (VALID/SAME) # DO NOT USE 'SAME' NETWORK BUILT FOR VALID
+			name			: Name of the block
 		Returns:
-			norm 	 	 	: Output Tensor
+			norm			: Output Tensor
 		"""
 		with tf.name_scope(name):
 			kernel = tf.Variable(tf.contrib.layers.xavier_initializer(uniform=False)([kernel_size,kernel_size, inputs.get_shape().as_list()[3], filters]), name= 'weights')
@@ -484,11 +484,11 @@ class HourglassModel():
 	def _conv_block(self, inputs, numOut, name = 'conv_block'):
 		""" Convolutional Block
 		Args:
-			inputs 	: Input Tensor
-			numOut 	: Desired output number of channel
-			name 	 	: Name of the block
+			inputs	: Input Tensor
+			numOut	: Desired output number of channel
+			name	: Name of the block
 		Returns:
-			conv_3 	: Output Tensor
+			conv_3	: Output Tensor
 		"""
 		if self.tiny:
 			with tf.name_scope(name):
@@ -513,9 +513,9 @@ class HourglassModel():
 	def _skip_layer(self, inputs, numOut, name = 'skip_layer'):
 		""" Skip Layer
 		Args:
-			inputs 	: Input Tensor
-			numOut 	: Desired output number of channel
-			name 	 	: Name of the bloc
+			inputs	: Input Tensor
+			numOut	: Desired output number of channel
+			name	: Name of the bloc
 		Returns:
 			Tensor of shape (None, inputs.height, inputs.width, numOut)
 		"""
@@ -529,9 +529,9 @@ class HourglassModel():
 	def _residual(self, inputs, numOut, name = 'residual_block'):
 		""" Residual Unit
 		Args:
-			inputs 	: Input Tensor
-			numOut 	: Number of Output Features (channels)
-			name 	 	: Name of the block
+			inputs	: Input Tensor
+			numOut	: Number of Output Features (channels)
+			name	: Name of the block
 		"""
 		with tf.name_scope(name):
 			convb = self._conv_block(inputs, numOut)
@@ -544,10 +544,10 @@ class HourglassModel():
 	def _hourglass(self, inputs, n, numOut, name = 'hourglass'):
 		""" Hourglass Module
 		Args:
-			inputs 	: Input Tensor
-			n 	 	 	: Number of downsampling step
-			numOut 	: Number of Output Features (channels)
-			name 	 	: Name of the block
+			inputs	: Input Tensor
+			n		: Number of downsampling step
+			numOut	: Number of Output Features (channels)
+			name	: Name of the block
 		"""
 		with tf.name_scope(name):
 			# Upper Branch
@@ -574,7 +574,7 @@ class HourglassModel():
 		Args:
 			tensor	: 2D - Tensor (Height x Width : 64x64 )
 		Returns:
-			arg 	: Tuple of max position
+			arg		: Tuple of max position
 		"""
 		resh = tf.reshape(tensor, [-1])
 		argmax = tf.arg_max(resh, 0)
@@ -583,8 +583,8 @@ class HourglassModel():
 	def _compute_err(self, u, v):
 		""" Given 2 tensors compute the euclidean distance (L2) between maxima locations
 		Args:
-			u 	: 2D - Tensor (Height x Width : 64x64 )
-			v 	: 2D - Tensor (Height x Width : 64x64 )
+			u		: 2D - Tensor (Height x Width : 64x64 )
+			v		: 2D - Tensor (Height x Width : 64x64 )
 		Returns:
 			(float) : Distance (in [0,1])
 		"""
@@ -596,8 +596,8 @@ class HourglassModel():
 		""" Given a Prediction batch (pred) and a Ground Truth batch (gtMaps),
 		returns one minus the mean distance.
 		Args:
-			pred 			: Prediction Batch (shape = num_image x 64 x 64)
-			gtMaps 		: Ground Truth Batch (shape = num_image x 64 x 64)
+			pred		: Prediction Batch (shape = num_image x 64 x 64)
+			gtMaps		: Ground Truth Batch (shape = num_image x 64 x 64)
 			num_image 	: (int) Number of images in batch
 		Returns:
 			(float)
