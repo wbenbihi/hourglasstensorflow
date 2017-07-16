@@ -6,8 +6,7 @@ Tensorflow implementation of Stacked Hourglass Networks for Human Pose Estimatio
 This is a WIP repo
 
 ## Config File
-A 'config.cgf' is present in the directory.
-	It contains all the variables needed to tweak the model.
+A 'config.cgf' is present in the directory.It contains all the variables needed to tweak the model.
 	
 	training_txt_file : Path to TEXT file containing information about images
 	img_directory : Path to folder containing images
@@ -34,16 +33,15 @@ A 'config.cgf' is present in the directory.
 	saver_directory: Directory to save trained Model
 ## DataSet
 To create a dataset you need to put every images of your set on the 'img_directory'.
-	Add information about your images into the 'training_txt_file':
-	
-	EXAMPLE:
+Add information about your images into the 'training_txt_file':
+EXAMPLE:
+
 		055906773.jpgA 391 195 596 567 556 567 507 480 524 382 549 385 534 492 596 566 537 384 501 248 477 236 391 195 479 333 515 315 492 252 510 243 564 317 484 350
 		055906773.jpgB 339 284 401 379 386 375 362 358 391 346 401 345 370 359 400 379 396 346 378 309 370 304 339 284 342 346 369 336 369 310 387 308 395 344 369 355
 		026504353.jpgA 566 159 680 490 623 442 584 379 616 322 658 323 658 398 666 490 637 323 645 230 645 212 647 159 590 273 566 259 611 222 679 237 680 287 652 301
 		026504353.jpgB 555 137 623 375 586 375 577 310 580 266 609 263 609 310 604 374 595 265 581 184 577 176 555 137 570 261 559 238 561 193 601 174 623 207 591 233
 		026504353.jpgC 502 268 584 434 555 434 546 390 536 354 560 346 570 387 584 430 548 350 531 303 527 297 507 268 519 346 502 340 512 307 550 299 561 331 535 348
-		
-	In this example we consider 16 joints
+In this example we consider 16 joints
 	['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
 	The text file is formalized as follow:
 		image_name[LETTER] x_box_min y_box_min x_box_max y_box_max x1 y1 x2 y2 x3 y3 ...
