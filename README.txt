@@ -23,7 +23,7 @@ I. CONFIG FILE
 	joint_list: List of joint name
 	name : Name of trained model
 	nFeats: Number of Features/Channels in the convolution layers (256 / 512 are good but you can set whatever you need )
-	nStacks: Number of Stacks (4 to make the faster prediction, 8 stacks are used in the paper)
+	nStacks: Number of Stacks (4 to make faster predictions, 8 stacks are used in the paper)
 	nModules : NOT USED
 	nLow : Number of downsampling in one stack (default: 4 => dim 64->4)
 	dropout_rate : Percentage of neurons deactivated at the end of Hourglass Module (Used for training)
