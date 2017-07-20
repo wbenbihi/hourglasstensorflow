@@ -31,7 +31,7 @@ Abstract:
 import sys
 sys.path.append('./')
 
-from hourglass_tiny_backup import HourglassModel
+from hourglass_tiny_testing import HourglassModel
 from time import time
 import numpy as np
 import tensorflow as tf
