@@ -85,5 +85,8 @@ To do so, you first need to create the same graph as the saved one. To do so use
 
 /!\ BE SURE TO USE THE SAME CONFIG.CFG FILE OR THE METHOD WON'T BE ABLE TO ASSIGN THE RIGHT WEIGHTS
 
+## Testing
+You can download a pretrained model (on MPII dataset) [here](https://drive.google.com/file/d/0B03jF2Gc59lRX0ZjbFJLaWZUSUk/view?usp=sharing). A new Python tool file should be available soon.
+
 ## Greetings
 A special thanks to A.Newell for his answers.
