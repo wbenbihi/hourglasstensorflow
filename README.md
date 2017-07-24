@@ -103,4 +103,4 @@ Pose estimation achived at 28-30 FPS (on nVidia GTX 1070) for single person dete
 Currently working on public accuracy benchmark (PCk, AP).
 
 ## Greetings
-A special thanks to A.Newell for his answers.
+A special thanks to A.Newell for his answers. And to [bhack](https://github.com/bhack) for his feedback.
