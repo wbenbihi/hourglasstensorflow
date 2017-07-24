@@ -562,7 +562,7 @@ class PredictProcessor():
 		fps = int(cam.get(cv2.CAP_PROP_FPS))
 		if outName != None:
 			fourcc = cv2.VideoWriter_fourcc(*codec)
-			outVid = cv2.VideoWriter('F:/Cours/DHPE/DHPE/hourglass_tiny/Combine/' + outName, fourcc, fps, tuple(shape.astype(np.int)), 1)
+			outVid = cv2.VideoWriter(outName, fourcc, fps, tuple(shape.astype(np.int)), 1)
 			print(shape)
 		cur_frame = 0
 		startT = time()
