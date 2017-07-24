@@ -90,10 +90,17 @@ You can download a pretrained model (on MPII dataset) [here](https://drive.googl
 
 [Tiny YOLO pretrained model](https://drive.google.com/file/d/0B-yiAeTLLamRekxqVE01Yi1RRlk/view?usp=sharing) (Credits: [nilboy](https://github.com/nilboy/tensorflow-yolo) )
 
+Unzip the archives in predictClass.py's directory.
+
 Run predictClass.py to use pretrained model tools. 
 * PredictProcessor().hpeWebcam() for single person detection on webcam (no YOLO needed).
 * PredictProcessor().mpeWebcam() for multiple person detection on webcam (YOLO needed).
 * PredictProcessor().videoProcessor() to process video (no YOLO needed).
+
+## Results
+Pose estimation achived at 28-30 FPS (on nVidia GTX 1070) for single person detection. 13-18 FPS for multiple person detection.
+
+Currently working on public accuracy benchmark (PCk, AP).
 
 ## Greetings
 A special thanks to A.Newell for his answers.
