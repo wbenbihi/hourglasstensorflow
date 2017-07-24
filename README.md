@@ -91,9 +91,9 @@ You can download a pretrained model (on MPII dataset) [here](https://drive.googl
 [Tiny YOLO pretrained model](https://drive.google.com/file/d/0B-yiAeTLLamRekxqVE01Yi1RRlk/view?usp=sharing) (Credits: [nilboy](https://github.com/nilboy/tensorflow-yolo) )
 
 Run predictClass.py to use pretrained model tools. 
-*PredictProcessor().hpeWebcam() for single person detection on webcam (no YOLO needed).
-*PredictProcessor().mpeWebcam() for multiple person detection on webcam (YOLO needed).
-*PredictProcessor().videoProcessor() to process video (no YOLO needed).
+* PredictProcessor().hpeWebcam() for single person detection on webcam (no YOLO needed).
+* PredictProcessor().mpeWebcam() for multiple person detection on webcam (YOLO needed).
+* PredictProcessor().videoProcessor() to process video (no YOLO needed).
 
 ## Greetings
 A special thanks to A.Newell for his answers.
