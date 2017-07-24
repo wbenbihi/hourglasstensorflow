@@ -95,7 +95,7 @@ Unzip the archives in predictClass.py's directory.
 Run predictClass.py to use pretrained model tools. 
 * PredictProcessor().hpeWebcam() for single person detection on webcam (no YOLO needed).
 * PredictProcessor().mpeWebcam() for multiple person detection on webcam (YOLO needed).
-* PredictProcessor().videoProcessor() to process video (no YOLO needed).
+* PredictProcessor().videoProcessor() to process video (no YOLO needed) (Issue with saving on Windows, and file opening on Ubuntu).
 
 ## Results
 Pose estimation achived at 28-30 FPS (on nVidia GTX 1070) for single person detection. 13-18 FPS for multiple person detection.
