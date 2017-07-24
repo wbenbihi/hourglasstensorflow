@@ -277,9 +277,10 @@ class HourglassModel():
 		out_file = open(self.name + '_train_record.csv', 'w')
 		for line in range(len(record['accur'])):
 			out_string = ''
-			labels = record['loss'][line] + record['err'][line] + record['accur'][line]
+			labels = [record['loss'][line]] + [record['err'][line]] + record['accur'][line]
 			for label in labels:
-				out_string += ', ' + str(label)
+				out_string += str(label) + ', '
+			out_string += '\n'
 			out_file.write(out_string)
 		out_file.close()
 		print('Training Record Saved')
@@ -612,3 +613,81 @@ class HourglassModel():
 		for i in range(num_image):
 			err = tf.add(err, self._compute_err(pred[i], gtMap[i]))
 		return tf.subtract(tf.to_float(1), err/num_image)
+	
+	# MULTI CONTEXT ATTENTION MECHANISM
+	# WORK IN PROGRESS DO NOT USE THESE METHODS
+	# BASED ON:
+	# Multi-Context Attention for Human Pose Estimation
+	# Authors: Xiao Chu, Wei Yang, Wanli Ouyang, Cheng Ma, Alan L. Yuille, Xiaogang Wang
+	# Paper: https://arxiv.org/abs/1702.07432
+	# GitHub Torch7 Code: https://github.com/bearpaw/pose-attention
+		
+	def _bn_relu(self, inputs):
+		norm = tf.contrib.layers.batch_norm(inputs, 0.9, epsilon=1e-5, activation_fn = tf.nn.relu, is_training = self.training)
+		return norm
+	
+	def _pool_layer(self, inputs, numOut, name = 'pool_layer'):
+		with tf.name_scope(name):
+			bnr_1 = self._bn_relu(inputs)
+			pool = tf.contrib.layers.max_pool2d(bnr_1,[2,2],[2,2],padding='VALID')
+			pad_1 = tf.pad(pool, np.array([[0,0],[1,1],[1,1],[0,0]]))
+			conv_1 = self._conv(pad_1, numOut, kernel_size=3, strides=1, name='conv')
+			bnr_2 = self._bn_relu(conv_1)
+			pad_2 = tf.pad(bnr_2, np.array([[0,0],[1,1],[1,1],[0,0]]))
+			conv_2 = self._conv(pad_2, numOut, kernel_size=3, strides=1, name='conv')
+			upsample = tf.image.resize_nearest_neighbor(conv_2, tf.shape(conv_2)[1:3]*2, name = 'upsampling')
+		return upsample
+	
+	
+	
+	def _attention_iter(self, inputs, lrnSize, itersize, name = 'attention_iter'):
+		with tf.name_scope(name):
+			numIn = inputs.get_shape().as_list()[3]
+			padding = np.floor(lrnSize/2)
+			pad = tf.pad(inputs, np.array([[0,0],[1,1],[1,1],[0,0]]))
+			U = self._conv(pad, filters=1, kernel_size=3, strides=1)
+			pad_2 = tf.pad(U, np.array([[0,0],[padding,padding],[padding,padding],[0,0]]))
+			sharedK = tf.Variable(tf.contrib.layers.xavier_initializer(uniform=False)([lrnSize,lrnSize, 1, 1]), name= 'shared_weights')
+			Q = []
+			C = []
+			for i in range(itersize):
+				if i ==0:
+					conv = tf.nn.conv2d(pad_2, sharedK, [1,1,1,1], padding='VALID', data_format='NHWC')
+				else:
+					conv = tf.nn.conv2d(Q[i-1], sharedK, [1,1,1,1], padding='SAME', data_format='NHWC')
+				C.append(conv)
+				Q_tmp = tf.nn.sigmoid(tf.add_n([C[i], U]))
+				Q.append(Q_tmp)
+			stacks = []
+			for i in range(numIn):
+				stacks.append(Q[-1]) 
+			pfeat = tf.multiply(inputs,tf.concat(stacks, axis = 3) )
+		return pfeat
+	
+	def _attention_part_crf(self, inputs, lrnSize, itersize, usepart, name = 'attention_part'):
+		with tf.name_scope(name):
+			if usepart == 0:
+				return self._attention_iter(inputs, lrnSize, itersize)
+			else:
+				partnum = self.outDim
+				pre = []
+				for i in range(partnum):
+					att = self._attention_iter(inputs, lrnSize, itersize)
+					pad = tf.pad(att, np.array([[0,0],[0,0],[0,0],[0,0]]))
+					s = self._conv(pad, filters=1, kernel_size=1, strides=1)
+					pre.append(s)
+				return tf.concat(pre, axis = 3)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
