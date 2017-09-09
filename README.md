@@ -110,6 +110,7 @@ On our testing set we achieve 90 % accuracy on the PCKh metric for the best mode
 
 ## Additional Features
 Filter's features are added, find out how it works by yourselves. (/!\ We are not responsible of the weird pose you are going to take).
+
 Run Inference.runVideoFilter(args) to check it out.
 
 ## Greetings
