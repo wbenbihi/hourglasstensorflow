@@ -87,18 +87,18 @@ To do so, you first need to create the same graph as the saved one. To do so use
 
 /!\ BE SURE TO USE THE SAME CONFIG.CFG FILE OR THE METHOD WON'T BE ABLE TO ASSIGN THE RIGHT WEIGHTS
 
-## Testing
+## Testing / Inference
 New Pretrained Model
 
-* Regular Hourglass (80 Convolution layer) [here](https://drive.google.com/open?id=0B03jF2Gc59lRbUJXWEpnc2dWemM). 
-* Regular Hourglass (218 Convolution layer) [here](https://drive.google.com/open?id=0B03jF2Gc59lRRkg4d2lNbzN4aTQ).
-* Multi Context Attention Mechanism [here](https://drive.google.com/open?id=0B03jF2Gc59lRZTduRU1yS1VXUzA).
+* Regular Hourglass (80 Convolution layer) [here](https://drive.google.com/open?id=0B03jF2Gc59lRbUJXWEpnc2dWemM) (ref/refined_tiny). 
+* Regular Hourglass (218 Convolution layer) [here](https://drive.google.com/open?id=0B03jF2Gc59lRRkg4d2lNbzN4aTQ) (ref/refined).
+* Multi Context Attention Mechanism [here](https://drive.google.com/open?id=0B03jF2Gc59lRZTduRU1yS1VXUzA) (mcam_mpii).
 
-[Tiny YOLO pretrained model](https://drive.google.com/file/d/0B-yiAeTLLamRekxqVE01Yi1RRlk/view?usp=sharing) (Credits: [nilboy](https://github.com/nilboy/tensorflow-yolo) )
+[YOLO pretrained model](https://github.com/hizhangp/yolo_tensorflow) (Credits: [Peng Zhang](https://github.com/hizhangp) )
 
 Unzip the archives in predictClass.py's directory.
 
-Run inference.py to use pretrained model tools. 
+Run inference.py to use pretrained model tools.
 
 ## Results
 Pose estimation achived at 28-30 FPS (on nVidia GTX 1070) for single person detection. 13-18 FPS for multiple person detection.
