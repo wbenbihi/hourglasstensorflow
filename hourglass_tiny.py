@@ -9,6 +9,7 @@ Created on Mon Jul 10 19:13:56 2017
 
 @author: Walid Benbihi
 @mail : w.benbihi(at)gmail.com
+@github : https://github.com/wbenbihi/hourglasstensorlfow/
 
 Abstract:
 	This python code creates a Stacked Hourglass Model
@@ -30,13 +31,14 @@ import tensorflow as tf
 import numpy as np
 import sys
 import datetime
+import os
 
 class HourglassModel():
 	""" HourglassModel class: (to be renamed)
 	Generate TensorFlow model to train and predict Human Pose from images (soon videos)
 	Please check README.txt for further information on model management.
 	"""
-	def __init__(self, nFeat = 512, nStack = 4, nModules = 1, nLow = 4, outputDim = 16, batch_size = 16, drop_rate = 0.2, lear_rate = 2.5e-4, decay = 0.96, decay_step = 2000, dataset = None, training = True, w_summary = True, logdir_train = None, logdir_test = None,tiny = True, modif = True, name = 'tiny_hourglass'):
+	def __init__(self, nFeat = 512, nStack = 4, nModules = 1, nLow = 4, outputDim = 16, batch_size = 16, drop_rate = 0.2, lear_rate = 2.5e-4, decay = 0.96, decay_step = 2000, dataset = None, training = True, w_summary = True, logdir_train = None, logdir_test = None,tiny = True, attention = False,modif = True,w_loss = False, name = 'tiny_hourglass',  joints = ['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']):
 		""" Initializer
 		Args:
 			nStack				: number of stacks (stage/Hourglass modules)
@@ -52,6 +54,7 @@ class HourglassModel():
 			training			: (bool) True for training / False for prediction
 			w_summary			: (bool) True/False for summary of weight (to visualize in Tensorboard)
 			tiny				: (bool) Activate Tiny Hourglass
+			attention			: (bool) Activate Multi Context Attention Mechanism (MCAM)
 			modif				: (bool) Boolean to test some network modification # DO NOT USE IT ! USED TO TEST THE NETWORK
 			name				: name of the model
 		"""
@@ -67,6 +70,7 @@ class HourglassModel():
 		self.learning_rate = lear_rate
 		self.decay = decay
 		self.name = name
+		self.attention = attention
 		self.decay_step = decay_step
 		self.nLow = nLow
 		self.modif = modif
@@ -75,7 +79,8 @@ class HourglassModel():
 		self.gpu = '/gpu:0'
 		self.logdir_train = logdir_train
 		self.logdir_test = logdir_test
-		self.joints = ['r_anckle', 'r_knee', 'r_hip', 'l_hip', 'l_knee', 'l_anckle', 'pelvis', 'thorax', 'neck', 'head', 'r_wrist', 'r_elbow', 'r_shoulder', 'l_shoulder', 'l_elbow', 'l_wrist']
+		self.joints = joints
+		self.w_loss = w_loss
 		
 	# ACCESSOR
 	
@@ -124,7 +129,6 @@ class HourglassModel():
 		return self.saver
 	
 	
-	
 	def generate_model(self):
 		""" Create the complete graph
 		"""
@@ -134,6 +138,8 @@ class HourglassModel():
 			with tf.name_scope('inputs'):
 				# Shape Input Image - batchSize: None, height: 256, width: 256, channel: 3 (RGB)
 				self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 'input_img')
+				if self.w_loss:
+					self.weights = tf.placeholder(dtype = tf.float32, shape = (None, self.outDim))
 				# Shape Ground Truth Map: batchSize x nStack x 64 x 64 x outDim
 				self.gtMaps = tf.placeholder(dtype = tf.float32, shape = (None, self.nStack, 64, 64, self.outDim))
 				# TODO : Implement weighted loss function
@@ -141,11 +147,17 @@ class HourglassModel():
 				#weights = tf.placeholder(dtype = tf.float32, shape = (None, self.nStack, 1, 1, self.outDim))
 			inputTime = time.time()
 			print('---Inputs : Done (' + str(int(abs(inputTime-startTime))) + ' sec.)')
-			self.output = self._graph_hourglass(self.img)
+			if self.attention:
+				self.output = self._graph_mcam(self.img)
+			else :
+				self.output = self._graph_hourglass(self.img)
 			graphTime = time.time()
 			print('---Graph : Done (' + str(int(abs(graphTime-inputTime))) + ' sec.)')
 			with tf.name_scope('loss'):
-				self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps), name= 'cross_entropy_loss')
+				if self.w_loss:
+					self.loss = tf.reduce_mean(self.weighted_bce_loss(), name='reduced_loss')
+				else:
+					self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps), name= 'cross_entropy_loss')
 			lossTime = time.time()	
 			print('---Loss : Done (' + str(int(abs(graphTime-lossTime))) + ' sec.)')
 		with tf.device(self.cpu):
@@ -195,7 +207,7 @@ class HourglassModel():
 		"""
 		with tf.name_scope('Session'):
 			with tf.device(self.gpu):
-				self._init_weight()
+				self._init_session()
 				self._define_saver_summary(summary = False)
 				if load is not None:
 					print('Loading Trained Model')
@@ -230,31 +242,40 @@ class HourglassModel():
 					tToEpoch = int((time.time() - epochstartTime) * (100 - percent)/(percent))
 					sys.stdout.write('\r Train: {0}>'.format("="*num) + "{0}>".format(" "*(20-num)) + '||' + str(percent)[:4] + '%' + ' -cost: ' + str(cost)[:6] + ' -avg_loss: ' + str(avg_cost)[:5] + ' -timeToEnd: ' + str(tToEpoch) + ' sec.')
 					sys.stdout.flush()
-					img_train, gt_train = next(self.generator)
+					img_train, gt_train, weight_train = next(self.generator)
 					if i % saveStep == 0:
-						_, c, summary = self.Session.run([self.train_rmsprop, self.loss, self.train_op], feed_dict = {self.img : img_train, self.gtMaps: gt_train})
+						if self.w_loss:
+							_, c, summary = self.Session.run([self.train_rmsprop, self.loss, self.train_op], feed_dict = {self.img : img_train, self.gtMaps: gt_train, self.weights: weight_train})
+						else:
+							_, c, summary = self.Session.run([self.train_rmsprop, self.loss, self.train_op], feed_dict = {self.img : img_train, self.gtMaps: gt_train})
 						# Save summary (Loss + Accuracy)
 						self.train_summary.add_summary(summary, epoch*epochSize + i)
 						self.train_summary.flush()
 					else:
-						_, c, = self.Session.run([self.train_rmsprop, self.loss], feed_dict = {self.img : img_train, self.gtMaps: gt_train})
+						if self.w_loss:
+							_, c, = self.Session.run([self.train_rmsprop, self.loss], feed_dict = {self.img : img_train, self.gtMaps: gt_train, self.weights: weight_train})
+						else:	
+							_, c, = self.Session.run([self.train_rmsprop, self.loss], feed_dict = {self.img : img_train, self.gtMaps: gt_train})
 					cost += c
 					avg_cost += c/epochSize
 				epochfinishTime = time.time()
 				#Save Weight (axis = epoch)
-				weight_summary = self.Session.run(self.weight_op, {self.img : img_train, self.gtMaps: gt_train})
+				if self.w_loss:
+					weight_summary = self.Session.run(self.weight_op, {self.img : img_train, self.gtMaps: gt_train, self.weights: weight_train})
+				else :
+					weight_summary = self.Session.run(self.weight_op, {self.img : img_train, self.gtMaps: gt_train})
 				self.train_summary.add_summary(weight_summary, epoch)
 				self.train_summary.flush()
 				#self.weight_summary.add_summary(weight_summary, epoch)
 				#self.weight_summary.flush()
 				print('Epoch ' + str(epoch) + '/' + str(nEpochs) + ' done in ' + str(int(epochfinishTime-epochstartTime)) + ' sec.' + ' -avg_time/batch: ' + str(((epochfinishTime-epochstartTime)/epochSize))[:4] + ' sec.')
 				with tf.name_scope('save'):
-					self.saver.save(self.Session, self.name + '_' + str(epoch + 1))
+					self.saver.save(self.Session, os.path.join(os.getcwd(),str(self.name + '_' + str(epoch + 1))))
 				self.resume['loss'].append(cost)
 				# Validation Set
 				accuracy_array = np.array([0.0]*len(self.joint_accur))
 				for i in range(validIter):
-					img_valid, gt_valid = next(self.generator)
+					img_valid, gt_valid, w_valid = next(self.generator)
 					accuracy_pred = self.Session.run(self.joint_accur, feed_dict = {self.img : img_valid, self.gtMaps: gt_valid})
 					accuracy_array += np.array(accuracy_pred, dtype = np.float32) / validIter
 				print('--Avg. Accuracy =', str((np.sum(accuracy_array) / len(accuracy_array)) * 100)[:6], '%' )
@@ -306,6 +327,15 @@ class HourglassModel():
 						#	print('Loading Failed! (Check README file for further information)')
 				self._train(nEpochs, epochSize, saveStep, validIter=10)
 	
+	def weighted_bce_loss(self):
+		""" Create Weighted Loss Function
+		WORK IN PROGRESS
+		"""
+		self.bceloss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps), name= 'cross_entropy_loss')
+		e1 = tf.expand_dims(self.weights,axis = 1, name = 'expdim01')
+		e2 = tf.expand_dims(e1,axis = 1, name = 'expdim02')
+		e3 = tf.expand_dims(e2,axis = 1, name = 'expdim03')
+		return tf.multiply(e3,self.bceloss, name = 'lossW')
 	
 	def _accuracy_computation(self):
 		""" Computes accuracy tensor
@@ -339,7 +369,15 @@ class HourglassModel():
 		t_start = time.time()
 		self.Session.run(self.init)
 		print('Sess initialized in ' + str(int(time.time() - t_start)) + ' sec.')
-			
+	
+	def _init_session(self):
+		""" Initialize Session
+		"""
+		print('Session initialization')
+		t_start = time.time()
+		self.Session = tf.Session()
+		print('Sess initialized in ' + str(int(time.time() - t_start)) + ' sec.')
+		
 	def _graph_hourglass(self, inputs):
 		"""Create the Network
 		Args:
@@ -638,8 +676,6 @@ class HourglassModel():
 			upsample = tf.image.resize_nearest_neighbor(conv_2, tf.shape(conv_2)[1:3]*2, name = 'upsampling')
 		return upsample
 	
-	
-	
 	def _attention_iter(self, inputs, lrnSize, itersize, name = 'attention_iter'):
 		with tf.name_scope(name):
 			numIn = inputs.get_shape().as_list()[3]
@@ -677,9 +713,106 @@ class HourglassModel():
 					s = self._conv(pad, filters=1, kernel_size=1, strides=1)
 					pre.append(s)
 				return tf.concat(pre, axis = 3)
+
+	def _residual_pool(self, inputs, numOut, name = 'residual_pool'):
+		with tf.name_scope(name):
+			return tf.add_n([self._conv_block(inputs, numOut), self._skip_layer(inputs, numOut), self._pool_layer(inputs, numOut)])
 	
+	def _rep_residual(self, inputs, numOut, nRep, name = 'rep_residual'):
+		with tf.name_scope(name):
+			out = [None]*nRep
+			for i in range(nRep):
+				if i == 0:
+					tmpout = self._residual(inputs,numOut)
+				else:
+					tmpout = self._residual_pool(out[i-1],numOut)
+				out[i] = tmpout
+			return out[nRep-1]
 	
+	def _hg_mcam(self, inputs, n, numOut, imSize, nModual, name = 'mcam_hg'):
+		with tf.name_scope(name):
+			#------------Upper Branch
+			pool = tf.contrib.layers.max_pool2d(inputs,[2,2],[2,2],padding='VALID')
+			up = []
+			low = [] 
+			for i in range(nModual):
+				if i == 0:
+					if n>1:
+						tmpup = self._rep_residual(inputs, numOut, n -1)
+					else:
+						tmpup = self._residual(inputs, numOut)
+					tmplow = self._residual(pool, numOut)
+				else:
+					if n>1:
+						tmpup = self._rep_residual(up[i-1], numOut, n-1)
+					else:
+						tmpup = self._residual_pool(up[i-1], numOut)
+					tmplow = self._residual(low[i-1], numOut)
+				up.append(tmpup)
+				low.append(tmplow)
+				#up[i] = tmpup
+				#low[i] = tmplow
+			#----------------Lower Branch
+			if n>1:
+				low2 = self._hg_mcam(low[-1], n-1, numOut, int(imSize/2), nModual)
+			else:
+				low2 = self._residual(low[-1], numOut)
+			low3 = self._residual(low2, numOut)
+			up_2 = tf.image.resize_nearest_neighbor(low3, tf.shape(low3)[1:3]*2, name = 'upsampling')
+			return tf.add_n([up[-1], up_2], name = 'out_hg')
 	
+	def _lin(self, inputs, numOut, name = 'lin'):
+		l = self._conv(inputs, filters = numOut, kernel_size = 1, strides = 1)
+		return self._bn_relu(l)
+	
+	def _graph_mcam(self, inputs):
+		with tf.name_scope('preprocessing'):
+			pad1 = tf.pad(inputs, np.array([[0,0],[3,3],[3,3],[0,0]]))
+			cnv1_ = self._conv(pad1, filters = 64, kernel_size = 7, strides = 1)
+			cnv1 = self._bn_relu(cnv1_)
+			r1 = self._residual(cnv1, 64)
+			pool1 = tf.contrib.layers.max_pool2d(r1,[2,2],[2,2],padding='VALID')
+			r2 = self._residual(pool1, 64)
+			r3 = self._residual(r2, 128)
+			pool2 = tf.contrib.layers.max_pool2d(r3,[2,2],[2,2],padding='VALID')
+			r4 = self._residual(pool2,128)
+			r5 = self._residual(r4, 128)
+			r6 = self._residual(r5, 256)
+		out = []
+		inter = []
+		inter.append(r6)
+		if self.nLow == 3:
+			nModual = int(16/self.nStack)
+		else:
+			nModual = int(8/self.nStack)
+		with tf.name_scope('stacks'):
+			for i in range(self.nStack):
+				with tf.name_scope('houglass_' + str(i+1)):
+					hg = self._hg_mcam(inter[i], self.nLow, self.nFeat, 64, nModual)
+				
+				if i == self.nStack - 1:
+					ll1 = self._lin(hg, self.nFeat*2)
+					ll2 = self._lin(ll1, self.nFeat*2)
+					drop = tf.layers.dropout(ll2, rate=0.1, training = self.training)
+					att =  self._attention_part_crf(drop, 1, 3, 0)
+					tmpOut = self._attention_part_crf(att, 1, 3, 1)
+				else:
+					ll1 = self._lin(hg, self.nFeat)
+					ll2 = self._lin(ll1, self.nFeat)
+					drop = tf.layers.dropout(ll2, rate=0.1, training = self.training)
+					if i > self.nStack // 2:
+						att = self._attention_part_crf(drop, 1, 3, 0)
+						tmpOut = self._attention_part_crf( att, 1, 3, 1)
+					else:
+						att = self._attention_part_crf(ll2, 1, 3, 0)
+						tmpOut = self._conv(att, filters = self.outDim, kernel_size = 1, strides = 1)
+				out.append(tmpOut)
+				if i < self.nStack - 1:
+					outmap = self._conv(tmpOut, filters = self.nFeat, kernel_size = 1, strides = 1)
+					ll3 = self._lin(outmap, self.nFeat)
+					tmointer = tf.add_n([inter[i], outmap, ll3])
+					inter.append(tmointer)
+		return tf.stack(out, axis= 1 , name = 'final_output')
 	
 	
 	

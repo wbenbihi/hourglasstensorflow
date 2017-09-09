@@ -9,6 +9,7 @@ Created on Mon Jul 17 15:50:43 2017
 
 @author: Walid Benbihi
 @mail : w.benbihi(at)gmail.com
+@github : https://github.com/wbenbihi/hourglasstensorlfow/
 
 Abstract:
 	This python code creates a Stacked Hourglass Model
@@ -25,21 +26,23 @@ Abstract:
 	
 	This work is free of use, please cite the author if you use it!
 
-@author: Walid
 """
 
 import sys
 sys.path.append('./')
 
 from hourglass_tiny import HourglassModel
-from time import time, clock
+from time import time, clock, sleep
 import numpy as np
 import tensorflow as tf
+import scipy.io
 from train_launcher import process_config
 import cv2
-from yolo_tiny_net import YoloTinyNet
-import copy
-
+#from yolo_tiny_net import YoloTinyNet
+from yolo_net import YOLONet
+from datagen import DataGenerator
+import config as cfg
+import threading
 
 class PredictProcessor():
 	"""
@@ -63,8 +66,9 @@ class PredictProcessor():
 						decay = self.params['learning_rate_decay'], decay_step = self.params['decay_step'], dataset = None, training = False,
 						w_summary = True, logdir_test = self.params['log_dir_test'],
 						logdir_train = self.params['log_dir_test'], tiny = self.params['tiny'], 
-						modif = False, name = self.params['name'])
+						modif = False, name = self.params['name'], attention = self.params['mcam'], w_loss=self.params['weighted_loss'] , joints= self.params['joint_list'])
 		self.graph = tf.Graph()
+		self.src = 0
 		self.cam_res = (480,640)
 		
 	def color_palette(self):
@@ -110,9 +114,12 @@ class PredictProcessor():
 		self.links = {}
 		# Edit Links with your needed skeleton
 		LINKS = [(0,1),(1,2),(2,6),(6,3),(3,4),(4,5),(6,8),(8,13),(13,14),(14,15),(8,12),(12,11),(11,10)]
+		self.LINKS_ACP = [(0,1),(1,2),(3,4),(4,5),(7,8),(8,9),(10,11),(11,12)]
 		color_id = [1,2,3,3,2,1,5,27,26,25,27,26,25]
-		#LINKS = [(0,1),(1,2),(2,6),(6,3),(3,4),(4,5),(6,8),(8,9),(8,13),(13,14),(14,15),(8,12),(12,11),(11,10)]
-		#color_id = [1,2,3,3,2,1,5,7,27,26,25,27,26,25]
+		self.color_id_acp = [8,9,9,8,19,20,20,19]
+		# 13 joints version
+		#LINKS = [(0,1),(1,2),(2,3),(3,4),(4,5),(6,7),(6,11),(11,12),(12,13),(6,11),(10,9),(9,8)]
+		#color_id = [1,2,3,2,1,0,27,26,25,27,26,25]
 		# 10 lines version
 		# LINKS = [(0,1),(1,2),(3,4),(4,5),(6,8),(8,9),(13,14),(14,15),(12,11),(11,10)]
 		for i in range(len(LINKS)):
@@ -149,6 +156,8 @@ class PredictProcessor():
 	
 	def load_model(self, load = None):
 		""" Load pretrained weights (See README)
+		Args:
+			load : File to load
 		"""
 		with self.graph.as_default():
 			self.HG.restore(load)
@@ -336,35 +345,35 @@ class PredictProcessor():
 	
 	
 	#-------------------------------PLOT FUNCTION------------------------------
-	def plt_skeleton(self, img, copy = True, debug = False, sess = None):
+	def plt_skeleton(self, img, tocopy = True, debug = False, sess = None):
 		""" Given an Image, returns Image with plotted limbs (TF VERSION)
 		Args:
 			img 	: Source Image shape = (256,256,3)
-			copy 	: (bool) False to write on source image / True to return a new array
+			tocopy 	: (bool) False to write on source image / True to return a new array
 			debug	: (bool) for testing puposes
 			sess	: KEEP NONE
 		"""
 		joints = self.joints_pred(np.expand_dims(img, axis = 0), coord = 'img', debug = False, sess = sess)
-		if copy:
+		if tocopy:
 			img = np.copy(img)
 		for i in range(len(self.links)):
 			position = self.givePixel(self.links[i]['link'],joints)
-			cv2.line(img, tuple(position[0])[::-1], tuple(position[1])[::-1], self.links[i]['color'], thickness = 2)
-		if copy:
+			cv2.line(img, tuple(position[0])[::-1], tuple(position[1])[::-1], self.links[i]['color'][::-1], thickness = 2)
+		if tocopy:
 			return img
 		
-	def plt_skeleton_numpy(self, img, copy = True, thresh = 0.2, sess = None, joint_plt = True):
+	def plt_skeleton_numpy(self, img, tocopy = True, thresh = 0.2, sess = None, joint_plt = True):
 		""" Given an Image, returns Image with plotted limbs (NUMPY VERSION)
 		Args:
 			img			: Source Image shape = (256,256,3)
-			copy		: (bool) False to write on source image / True to return a new array
+			tocopy		: (bool) False to write on source image / True to return a new array
 			thresh		: Joint Threshold
 			sess		: KEEP NONE
 			joint_plt	: (bool) True to plot joints (as circles)
 		"""
 		joints = self.joints_pred_numpy(np.expand_dims(img, axis = 0), coord = 'img', thresh = thresh, sess = sess)
-		if copy:
-			img = np.copy(img)
+		if tocopy:
+			img = np.copy(img)*255
 		for i in range(len(self.links)):
 			l = self.links[i]['link']
 			good_link = True
@@ -373,60 +382,243 @@ class PredictProcessor():
 					good_link = False
 			if good_link:
 				position = self.givePixel(self.links[i]['link'],joints)
-				cv2.line(img, tuple(position[0])[::-1], tuple(position[1])[::-1], self.links[i]['color'], thickness = 2)
+				cv2.line(img, tuple(position[0])[::-1], tuple(position[1])[::-1], self.links[i]['color'][::-1], thickness = 2)
 		if joint_plt:
 			for p in range(len(joints)):
 				if not(np.array_equal(joints[p], [-1,-1])):
-					cv2.circle(img, (int(joints[p,0]), int(joints[p,1])), radius = 3, color = self.color[p], thickness = -1)
-		if copy:
+					cv2.circle(img, (int(joints[p,1]), int(joints[p,0])), radius = 3, color = self.color[p][::-1], thickness = -1)
+		if tocopy:
 			return img
-			
 		
-	def streamPredict(self, src = 0, mirror = True, numpy = True, thresh = 0.4, sess = None, crop = True, fps = True):
-		""" Runs prediction on Webcam
+	def pltSkeleton(self, img, thresh = 0.2, pltJ = True, pltL = True, tocopy = True, norm = True):
+		""" Plot skeleton on Image (Single Detection)
 		Args:
-			src	 : Stream Source (0 if single webcam)
-			mirror : (bool) Mirroring image
-			numpy : (bool) True to make joints computation with numpy/ False to make it with tensorflow
-			thresh : Joint Threshold
-			sess : KEEP NONE
-			crop : KEEP TRUE
-			fps : True to plot FPS
+			img			: Input Image ( RGB IMAGE 256x256x3)
+			thresh		: Joints Threshold
+			pltL		: (bool) Plot Limbs
+			tocopy		: (bool) Plot on imput image or return a copy
+			norm		: (bool) Normalize input Image (DON'T MODIFY)
+		Returns:
+			img			: Copy of input image if 'tocopy'
 		"""
-		cam = cv2.VideoCapture(0)
+		if tocopy:
+			img = np.copy(img)
+		if norm:
+			img_hg = img / 255
+		hg = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict = {self.HG.img: np.expand_dims(img_hg, axis = 0)})
+		j = np.ones(shape = (self.params['num_joints'],2)) * -1
+		for i in range(len(j)):
+			idx = np.unravel_index( hg[0,:,:,i].argmax(), (64,64))
+			if hg[0, idx[0], idx[1], i] > thresh:
+					j[i] = np.asarray(idx) * 256 / 64
+					if pltJ:
+						cv2.circle(img, center = tuple(j[i].astype(np.int))[::-1], radius= 5, color= self.color[i][::-1], thickness= -1)
+		if pltL:
+			for i in range(len(self.links)):
+					l = self.links[i]['link']
+					good_link = True
+					for p in l:
+						if np.array_equal(j[p], [-1,-1]):
+							good_link = False
+					if good_link:
+						pos = self.givePixel(l, j)
+						cv2.line(img, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.links[i]['color'][::-1], thickness = 5)
+		if tocopy:
+			return img
+		
+	#------------------------Visualiazing Methods------------------------------
+	def jointsToMat(self, joints):
+		""" Given a 16 Joints Matrix, returns a 13 joints Matrix
+		MPII Formalism to PennAction DeepDragon Formalism
+		(Neck, Torso, Pelvis) erased
+		Args:
+			joints : Joints of shape (16,2) (HAS TO FOLLOW MPII FORMALISM)
+		Returns:
+			position : Joints of shape (13,2)
+		"""
+		position = np.zeros((13,2))
+		position[0:6,:] = joints[0:6,:]
+		position[6,:] = joints[9,:]
+		position[7:,:] = joints[10:,:]
+		position = np.reshape(position,(26,1),order = 'F')
+		return position
+	
+	def computeErr(self, history, frame = 3):
+		""" Given frames, compute error vector to project into new basis
+		Args:
+			history	: List of Joints detected in previous frames
+			frame		: Number of previous frames to consider
+		Returns:
+			err			: Error vector
+		"""
+		err = np.zeros((13*2*(frame-1),1))
+		rsho = 9
+		lhip = 3
+		eps = 0.00000001
+		for i in range(frame-1):
+			jf,js = history[-i-1], history[-i-2]
+			xf,yf = jf[:13], jf[13:]
+			xs,ys = js[:13], js[13:]
+			x = xf / abs(xf[rsho] - xf[lhip] + eps) - xs / abs(xs[rsho] - xs[lhip] + eps)
+			y = yf / abs(yf[rsho] - yf[lhip] + eps) - ys / abs(ys[rsho] - ys[lhip] + eps)
+			err[26*(i):26*(i)+26,:] = np.concatenate([x,y],axis = 0)
+		return err
+	
+	def errToJoints(self, err, frame, hFrame):
+		""" Given an error vector and the frame considered, compute the joint's 
+		location from the error
+		Args:
+			err			: Error Vector
+			frame		: Current Frame Detected Joints
+			hFrame		: Previous Frames Detected Joints
+		Returns:
+			joints		: Joints computed from error
+		"""
+		# Don't change Matrix computed with those joints to normalize
+		lhip = 3
+		rsho = 9
+		# Epsilon to avoir ZeroDivision Exception
+		eps = 0.00000001
+		# Compute X and Y coordinates
+		x = err[:,0:13]
+		y = err[:,13:26]
+		x = np.transpose(x)
+		y = np.transpose(y)
+		xh,yh = hFrame[0:13,:], hFrame[13:26,:]
+		xf,yf = frame[0:13,:], frame[13:26,:]
+		x = (x + (xh /np.abs(xh[rsho,:] - xh[lhip,:] + eps))) * np.abs(xf[rsho,:] - xf[lhip,:] + eps)
+		y = (y + (yh /np.abs(yh[rsho,:] - yh[lhip,:] + eps))) * np.abs(yf[rsho,:] - yf[lhip,:] + eps)
+		joints = np.concatenate([x,y], axis = 1).astype(np.int64)
+		return joints
+	
+	def reconstructACPVideo(self, load = 'F:/Cours/DHPE/DHPE/hourglass_tiny/withyolo/p4frames.mat',n = 5):
+		""" Single Person Detection with Principle Componenent Analysis (PCA)
+		This method reconstructs joints given an error matrix (computed on MATLAB and available on GitHub)
+		and try to use temporal information from previous frames to improve detection and reduce False Positive
+		/!\Work In Progress on this model
+		/!\Our PCA considers the current frames and the last 3 frames
+		/!\WORKS ONLY ON 13 JOINTS FOR 16 JOINTS TRAINED MODELS
+		Args:
+			load	: MATLAB file to load (the eigenvectors matrix should be called P for convenience)
+			n		: Numbers of Dimensions to consider
+		"""
+		# OpenCv Video Capture : 0 is Webcam
+		cam = cv2.VideoCapture(self.src)
+		frame = 0
+		#/!\NOT USED YET
+		#rsho = 9
+		#lhip = 3
+		# Keep History of previous frames
+		jHistory = []
+		# Load Eigenvectors MATLAB matrix
+		P = scipy.io.loadmat(load)['P']
 		while True:
-			if fps: t = time()
-			i = 0
+			# Detection As Usual (See hpeWebcam)
+			t = time()
+			rec = np.zeros((500,500,3)).astype(np.uint8)
+			plt = np.zeros((500,500,3)).astype(np.uint8)
 			ret_val, img = cam.read()
-			if crop:
-				img = img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
-			img = cv2.resize(img, (256,256))
-			if numpy:
-				self.plt_skeleton_numpy(img, copy = False, thresh = thresh, sess = sess)
-			else :
-				self.plt_skeleton(img, copy = False, sess= sess)
-			img= cv2.resize(img, (800,800))
-			if mirror: 
-				img = cv2.flip(img, 1)
-			if fps: cv2.putText(img, 'FPS: ' + str(1/(time()-t))[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
-			cv2.imshow('stream', img)
-			i = i + 1
+			img = cv2.flip(img,1)
+			img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
+			img_hg = cv2.resize(img, (256,256))
+			img_res = cv2.resize(img, (500,500))
+			img_hg = cv2.cvtColor(img_hg, cv2.COLOR_BGR2RGB)
+			j = self.HG.Session.run(self.HG.joint_tensor_final, feed_dict = {self.HG.img: np.expand_dims(img_hg/255, axis = 0)})
+			j = np.asarray(j * 500 / 64).astype(np.int)
+			joints = self.jointsToMat(j)
+			jHistory.append(joints)
+			# When enough frames are available
+			if frame > 4:
+				#Compute Error
+				err = np.transpose(self.computeErr(jHistory, frame = 4))
+				# Dismiss useless frame
+				jHistory.pop(0)
+				# Project Error into New Basis (PCA new basis)
+				projectedErr = np.dot(err, P)
+				nComp = n
+				# Reconstruct Error by dimensionality reduction
+				recErr = np.dot(projectedErr[:,:nComp], np.transpose(P[:,:nComp]))
+				# Compute joints position from reconstructed error
+				newJ = self.errToJoints(recErr, jHistory[-1], jHistory[-2])
+				for i in range(8):
+				#for i in [4,5,6,7]:
+					pos = self.givePixel(self.LINKS_ACP[i], newJ)
+					cv2.line(img_res, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.color[self.color_id_acp[i]][::-1], thickness = 8)
+					cv2.line(rec, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.color[self.color_id_acp[i]][::-1], thickness = 8)
+			for i in range(13):
+			#for i in [8,9,11,12]:
+					l = self.links[i]['link']
+					pos = self.givePixel(l, j)
+					cv2.line(img_res, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.links[i]['color'][::-1], thickness = 5)
+					cv2.line(plt, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.links[i]['color'][::-1], thickness = 5)
+			fps = 1/(time()-t)
+			cv2.putText(img_res, 'FPS: ' + str(fps)[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
+			toplot = np.concatenate([rec, img_res, plt], axis = 1)
+			cv2.imshow('stream', toplot)
+			frame += 1
 			if cv2.waitKey(1) == 27:
 				print('Stream Ended')
 				cv2.destroyAllWindows()
 				break
 		cv2.destroyAllWindows()
 		cam.release()
-		
-	def hpeWebcam(self, thresh = 0.6, plt_j = True, plt_l = True, plt_hm = False):
+
+	
+	
+	def _singleDetection(self, plt_j = True, plt_l = True):
+		""" /!\/!\DO NOT USE THIS FUNCTION/!\/!\
+		/!\/!\METHOD FOR TEST PURPOSES ONLY/!\/!\
+		PREFER HPE WEBCAM METHOD
+		"""
+		cam = cv2.VideoCapture(self.src)
+		frame = 0
+		position = np.zeros((32,1))
+		while True:
+			t = time()
+			ret_val, img = cam.read()
+			img = cv2.flip(img, 1)
+			img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
+			img_hg = cv2.resize(img, (256,256))
+			img_res = cv2.resize(img, (400,400))
+			cv2.imwrite('F:/Cours/DHPE/photos/acp/%04d.png' % (frame,), img_res)
+			img_hg = cv2.cvtColor(img_hg, cv2.COLOR_BGR2RGB)
+			j = self.HG.Session.run(self.HG.joint_tensor_final, feed_dict = {self.HG.img: np.expand_dims(img_hg/255, axis = 0)})
+			j = np.asarray(j * 400 / 64).astype(np.int)
+			joints = self.jointsToMat(j)
+			X = j.reshape((32,1),order = 'F')
+			position = np.hstack((position, X))
+			if plt_j:
+				for i in range(len(j)):
+					cv2.circle(img_res, center = tuple(j[i].astype(np.int))[::-1], radius= 5, color= self.color[i][::-1], thickness= -1)
+			if plt_l:
+				for i in range(len(self.links)):
+					l = self.links[i]['link']
+					pos = self.givePixel(l, j)
+					cv2.line(img_res, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.links[i]['color'][::-1], thickness = 5)
+			fps = 1/(time()-t)
+			cv2.putText(img_res, 'FPS: ' + str(fps)[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
+			cv2.imshow('stream', img_res)
+			frame += 1
+			if cv2.waitKey(1) == 27:
+				print('Stream Ended')
+				cv2.destroyAllWindows()
+				scipy.io.savemat('acpTest2.mat', dict(history = position))
+				break
+		cv2.destroyAllWindows()
+		cam.release()
+			
+			
+	def hpeWebcam(self, thresh = 0.6, plt_j = True, plt_l = True, plt_hm = False, debug = True):
 		""" Single Person Detector
 		Args:
-			thresh 	: Threshold for joint plotting
-			plt_j 	: (bool) To plot joints (as circles)
-			plt_l 	: (bool) To plot links/limbs (as lines)
-			plt_hm 	: (bool) To plot heat map
+			thresh		: Threshold for joint plotting
+			plt_j		: (bool) To plot joints (as circles)
+			plt_l		: (bool) To plot links/limbs (as lines)
+			plt_hm		: (bool) To plot heat map
 		"""
-		cam = cv2.VideoCapture(0)
+		cam = cv2.VideoCapture(self.src)
+		if debug:
+			framerate = []
 		while True:
 			t = time()
 			ret_val, img = cam.read()
@@ -437,7 +629,7 @@ class PredictProcessor():
 			#img_copy = np.copy(img_res)
 			img_hg = cv2.cvtColor(img_hg, cv2.COLOR_BGR2RGB)
 			hg = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict = {self.HG.img: np.expand_dims(img_hg/255, axis = 0)})
-			j = np.ones(shape = (16,2)) * -1
+			j = np.ones(shape = (self.params['num_joints'],2)) * -1
 			if plt_hm:
 				hm = np.sum(hg[0], axis = 2)
 				hm = np.repeat(np.expand_dims(hm, axis = 2), 3, axis = 2)
@@ -448,7 +640,7 @@ class PredictProcessor():
 				if hg[0, idx[0], idx[1], i] > thresh:
 					j[i] = np.asarray(idx) * 800 / 64
 					if plt_j:
-						cv2.circle(img_res, center = tuple(j[i].astype(np.int))[::-1], radius= 5, color= self.color[i], thickness= -1)
+						cv2.circle(img_res, center = tuple(j[i].astype(np.int))[::-1], radius= 5, color= self.color[i][::-1], thickness= -1)
 			if plt_l:
 				for i in range(len(self.links)):
 					l = self.links[i]['link']
@@ -458,9 +650,195 @@ class PredictProcessor():
 							good_link = False
 					if good_link:
 						pos = self.givePixel(l, j)
-						cv2.line(img_res, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.links[i]['color'], thickness = 5)
-			cv2.putText(img_res, 'FPS: ' + str(1/(time()-t))[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
+						cv2.line(img_res, tuple(pos[0])[::-1], tuple(pos[1])[::-1], self.links[i]['color'][::-1], thickness = 5)
+			fps = 1/(time()-t)
+			if debug:
+				framerate.append(fps)
+			cv2.putText(img_res, 'FPS: ' + str(fps)[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
 			cv2.imshow('stream', img_res)
+			if cv2.waitKey(1) == 27:
+				print('Stream Ended')
+				cv2.destroyAllWindows()
+				break
+		cv2.destroyAllWindows()
+		cam.release()
+		if debug:
+			return framerate
+	
+	def mpe(self, j_thresh = 0.5, nms_thresh = 0.5, plt_l = True, plt_j = True, plt_b = True, img_size = 800,  skeleton = False):
+		""" Multiple Person Estimation (WebCam usage)
+		Args:
+			j_thresh		: Joint Threshold
+			nms_thresh	: Non Maxima Suppression Threshold
+			plt_l			: (bool) Plot Limbs
+			plt_j			: (bool) Plot Joints
+			plt_b			: (bool) Plot Bounding Boxes
+			img_size		: Resolution of Output Image
+			skeleton		: (bool) Plot Skeleton alone next to image
+		"""
+		cam = cv2.VideoCapture(self.src)
+		res = img_size
+		fpsl = []
+		while True:
+			t = time()
+			if skeleton:
+				skel = np.zeros((img_size,img_size,3)).astype(np.uint8)
+			ret_val, img = cam.read()
+			img = cv2.flip(img,1)
+			img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
+			img_res = cv2.resize(img, (res,res))
+			img_yolo = np.copy(img_res)
+			img_yolo = cv2.cvtColor(img_yolo, cv2.COLOR_BGR2RGB)
+			results = self.detect(img_yolo)
+			results_person = []
+			for i in range(len(results)):
+				if results[i][0] == 'person':
+					results_person.append(results[i])
+			results_person = self.nms(results_person, nms_thresh)
+			for box in results_person:
+				class_name = box[0]
+				x = int(box[1])
+				y = int(box[2])
+				w = int(box[3] / 2)
+				h = int(box[4] / 2)
+				prob = box[5]
+				bbox = np.asarray((max(0,x-w), max(0, y-h), min(img_size-1, x+w), min(img_size-1, y+h)))
+				if plt_b:
+					cv2.rectangle(img_res, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
+					cv2.rectangle(img_res, (bbox[0], bbox[1] - 20),(bbox[2], bbox[1]), (125, 125, 125), -1)
+					cv2.putText(img_res, class_name + ' : %.2f' % prob, (bbox[0] + 5, bbox[1] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+				maxl = np.max([w+0,h+0])
+				lenghtarray = np.array([maxl/h, maxl/w])
+				nbox = np.array([x-maxl, y-maxl, x+maxl, y+maxl])
+				padding = np.abs(nbox-bbox).astype(np.int)
+				img_person = np.copy(img_yolo[bbox[1]:bbox[3],bbox[0]:bbox[2],:])
+				padd = np.array([[padding[1],padding[3]],[padding[0],padding[2]],[0,0]])
+				img_person = np.pad(img_person, padd, mode = 'constant')
+				img_person = cv2.resize(img_person, (256,256))
+				hm = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict={self.HG.img: np.expand_dims(img_person/255, axis= 0)})
+				j = -1*np.ones(shape = (self.params['num_joints'],2))
+				joint = -1*np.ones(shape = (self.params['num_joints'],2))
+				for i in range(self.params['num_joints']):
+					idx = np.unravel_index(hm[0,:,:,i].argmax(), (64,64))
+					if hm[0, idx[0], idx[1],i] > j_thresh:
+						j[i] = idx
+						joint[i] = np.asarray(np.array([y,x]) + ((j[i]-32)/32 * np.array([h,w])* lenghtarray )).astype(np.int)
+						if plt_j:
+							cv2.circle(img_res, tuple(joint[i].astype(np.int))[::-1], radius = 5, color = self.color[i][::-1], thickness = -1)
+				if plt_l:
+					for k in range(len(self.links)):
+						l = self.links[k]['link']
+						good_link = True
+						for p in l:
+							if np.array_equal(joint[p], [-1,-1]):
+								good_link = False
+						if good_link:
+							cv2.line(img_res, tuple(joint[l[0]][::-1].astype(np.int)), tuple(joint[l[1]][::-1].astype(np.int)), self.links[k]['color'][::-1], thickness = 3)
+							if skeleton:
+								cv2.line(skel, tuple(joint[l[0]][::-1].astype(np.int)), tuple(joint[l[1]][::-1].astype(np.int)), self.links[k]['color'][::-1], thickness = 3)
+			t_f = time()
+			cv2.putText(img_res, 'FPS: ' + str(1/(t_f-t))[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
+			fpsl.append(1/(t_f-t))
+			if skeleton:
+				img_res = np.concatenate([img_res,skel], axis = 1)
+			cv2.imshow('stream', img_res)
+			if cv2.waitKey(1) == 27:
+				print('Stream Ended')
+				cv2.destroyAllWindows()
+				return fpsl
+				break
+		cv2.destroyAllWindows()
+		cam.release()
+	
+	
+	
+	
+	
+	# ---------------------------------MPE MULTITHREAD--------------------------
+	def threadProcessing(self, box, img_size, j_thresh, plt_l, plt_j, plt_b):
+		#if not coord.should_stop():
+		class_name = box[0]
+		x = int(box[1])
+		y = int(box[2])
+		w = int(box[3] / 2)
+		h = int(box[4] / 2)
+		prob = box[5]
+		bbox = np.asarray((max(0,x-w), max(0, y-h), min(img_size-1, x+w), min(img_size-1, y+h)))
+		if plt_b:
+			cv2.rectangle(self.img_res, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
+			cv2.rectangle(self.img_res, (bbox[0], bbox[1] - 20),(bbox[2], bbox[1]), (125, 125, 125), -1)
+			cv2.putText(self.img_res, class_name + ' : %.2f' % prob, (bbox[0] + 5, bbox[1] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+		maxl = np.max([w+0,h+0])
+		lenghtarray = np.array([maxl/h, maxl/w])
+		nbox = np.array([x-maxl, y-maxl, x+maxl, y+maxl])
+		padding = np.abs(nbox-bbox).astype(np.int)
+		img_person = np.copy(self.img_yolo[bbox[1]:bbox[3],bbox[0]:bbox[2],:])
+		padd = np.array([[padding[1],padding[3]],[padding[0],padding[2]],[0,0]])
+		img_person = np.pad(img_person, padd, mode = 'constant')
+		img_person = cv2.resize(img_person, (256,256))
+		hm = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict={self.HG.img: np.expand_dims(img_person/255, axis= 0)})
+		j = -1*np.ones(shape = (self.params['num_joints'],2))
+		joint = -1*np.ones(shape = (self.params['num_joints'],2))
+		for i in range(self.params['num_joints']):
+			idx = np.unravel_index(hm[0,:,:,i].argmax(), (64,64))
+			if hm[0, idx[0], idx[1],i] > j_thresh:
+				j[i] = idx
+				joint[i] = np.asarray(np.array([y,x]) + ((j[i]-32)/32 * np.array([h,w])* lenghtarray )).astype(np.int)
+				if plt_j:
+					cv2.circle(self.img_res, tuple(joint[i].astype(np.int))[::-1], radius = 5, color = self.color[i][::-1], thickness = -1)
+		if plt_l:
+			for k in range(len(self.links)):
+				l = self.links[k]['link']
+				good_link = True
+				for p in l:
+					if np.array_equal(joint[p], [-1,-1]):
+						good_link = False
+				if good_link:
+					cv2.line(self.img_res, tuple(joint[l[0]][::-1].astype(np.int)), tuple(joint[l[1]][::-1].astype(np.int)), self.links[k]['color'][::-1], thickness = 3)
+	#	self.pprocessed += 1
+	#	if self.pprocessed == self.pnum:
+	#		coord.request_stop()
+	
+	
+	def imgPrepare(self, img, res):
+		img = cv2.flip(img,1)
+		img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
+		self.img_res = cv2.resize(img, (res,res))
+		self.img_yolo = np.copy(self.img_res)
+		self.img_yolo = cv2.cvtColor(self.img_yolo, cv2.COLOR_BGR2RGB)
+	
+	def yoloPrepare(self, nms):
+		results = self.detect(self.img_yolo)
+		results_person = []
+		for i in range(len(results)):
+			if results[i][0] == 'person':
+				results_person.append(results[i])
+		results_person = self.nms(results_person, nms)
+		return results_person
+	
+	def mpeThread(self, jThresh = 0.2, nms = 0.5, plt_l = True, plt_j = True, plt_b = True, img_size = 800, wait = 0.07):
+		cam = cv2.VideoCapture(self.src)
+		res = img_size
+		while True:
+			#coord = tf.train.Coordinator()
+			t = time()
+			ret_val, img = cam.read()
+			self.img_res, self.img_yolo = self.imgPrepare(img, res)
+			results_person = self.yoloPrepare(nms)
+			self.pnum = len(results_person)
+			self.pprocessed = 0
+			#workers = []
+			for box in results_person:
+				Thr = threading.Thread(target = self.threadProcessing, args = (box,img_size, jThresh, plt_l, plt_j, plt_b))
+				Thr.start()
+				#workers.append(Thr)
+			sleep(wait)
+			#coord.join(workers)
+			#for i in workers:
+			#	i.join()
+			t_f = time()
+			cv2.putText(self.img_res, 'FPS: ' + str(1/(t_f-t))[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
+			cv2.imshow('stream', self.img_res)
 			if cv2.waitKey(1) == 27:
 				print('Stream Ended')
 				cv2.destroyAllWindows()
@@ -468,102 +846,30 @@ class PredictProcessor():
 		cv2.destroyAllWindows()
 		cam.release()
 	
-	def mpeWebcam(self, j_thresh = 0.6, cls_thresh = 0.13, nms_thresh = 0.5, cbox = 0, plt_j = True, plt_l = True, plt_b = True, plt_hm = True, img_size = 800,hm_size = 256):
-		""" Multi Person Estimation via WebCam
+	
+	
+	#---------------------------Conversion Method------------------------------
+	
+	def videoDetection(self, src = None, outName = None, codec = 'DIVX', j_thresh = 0.5, nms_thresh = 0.5, show = True, plt_j = True, plt_l = True, plt_b = True):
+		""" Process Video with Pose Estimation
 		Args:
-			j_thresh 	: Joint Threshold (This method won't plot joints with prediction probability lower than j_thresh)
-			cls_thresh	: Class Threshold (Won't check for people with YOLO probability lower than cls_thresh)
-			nms_thresh	: Non Maximum Suppresion Threshold
-			cbox		: Apply a percentage to resize bounding Box
-			plt_j		: (bool) To plot joints (as circles)
-			plt_l		: (bool) To plot links/limbs (as lines)
-			plt_b		: (bool) To plot bounding boxes (as rectangles)
-			plt_hm		: (bool) To plot heat map
-			img_size	: (int) Size of Window
-			hm_size		: (int) Size of Heat Map Window (if plt_hm == True)
-		'Keep Thresholds between 0 and 1'
+			src				: Source (video path or 0 for webcam)
+			outName		: outName (set name of output file, set to None if you don't want to save)
+			codec			: Codec to use for video compression (see OpenCV documentation)
+			j_thresh		: Joint Threshold
+			nms_thresh	: Non Maxima Suppression Threshold
+			show			: (bool) True to show the video
+			plt_j			: (bool) Plot Body Joints as circles
+			plt_l			: (bool) Plot Limbs
+			plt_b			: (bool) Plot Bounding Boxes
 		"""
-		cam = cv2.VideoCapture(0)
-		res = min(self.cam_res)
-		res = img_size
-		while True:
-			t = time()
-			ret_val, img = cam.read()
-			img = cv2.flip(img, 1)
-			img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
-			img_frame = cv2.resize(img, (448,448))
-			img_frame = cv2.cvtColor(img_frame, cv2.COLOR_BGR2RGB)
-			img_res = cv2.resize(img, (res,res))
-			img_box = (np.copy(img_frame.astype(np.float32)) - 127.0) / 128.0
-			img_box = np.expand_dims(img_box,0)
-			prediction_boxes = self.HG.Session.run(self.predicts_od, feed_dict = {self.image_od: img_box})
-			process_boxes = self._processboxes(prediction_boxes, num_classes = self.common_params['num_classes'],
-									 class_thresh = cls_thresh, nms_thresh = nms_thresh, debug = False)
-			person = process_boxes[14]
-			b = 0
-			for box in person:
-				b = b + 1
-				xmin, ymin, xmax, ymax = box
-				bbox = np.asarray((max(0,int(xmin - cbox*(xmax-xmin))),max(0,int(ymin - cbox*(ymax-ymin))), min(447,int(xmax + cbox*(xmax-xmin))), min(447,int(ymax + cbox*(ymax-ymin)))))
-				if plt_b:
-					bbox_to_img = np.copy(bbox *res / 448).astype(np.int)
-					cv2.rectangle(img_res, tuple(bbox_to_img[:2]), tuple(bbox_to_img[2:]), color = self.color[14], thickness = 3)
-				w = bbox[2] - bbox[0]
-				h = bbox[3] - bbox[1]
-				maxl = np.max([w + 0,h + 0])
-				nbox = np.array([bbox[0] + w/2 - maxl/2, bbox[1] + h/2 - maxl/2, bbox[2] - w/2 + maxl/2 , bbox[3] - h/2 + maxl/2 ])
-				#nbox_i = np.copy(nbox).astype(np.int)
-				padding = np.abs(nbox - bbox).astype(np.int)
-				padd = np.array([[padding[1],padding[3]],[padding[0],padding[2]],[0,0]])
-				img_crop = np.copy(img_frame[bbox[1]:bbox[3], bbox[0]:bbox[2]])
-				img_padd = np.pad(img_crop, padd, mode = 'constant')
-				img_padd = cv2.resize(img_padd, (256,256))
-				hm = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict={self.HG.img: np.expand_dims(img_padd/255, axis= 0)})
-				j = -1 * np.ones((self.params['num_joints'],2))
-				a_j = -1 * np.ones((self.params['num_joints'],2))
-				for i in range(self.params['num_joints']):
-					idx = np.unravel_index(hm[0,:,:,i].argmax(), (64,64)) 
-					if hm[0,idx[0], idx[1], i] > j_thresh:
-						j[i] = idx
-						center_j = np.asarray((bbox[:2][::-1] + (j[i] * np.array([h, w]) /64 ))*res/448).astype(np.int)
-						a_j[i] = center_j
-						if plt_j:
-							cv2.circle(img_res, tuple(center_j[::-1]), radius = 8, color = self.color[i], thickness = -1)
-				if plt_l:
-					for k in range(len(self.links)):
-						l = self.links[k]['link']
-						good_link = True
-						for p in l:
-							if np.array_equal(j[p], [-1,-1]):
-								good_link = False
-						if good_link:
-							#coordinates = np.asarray(np.asarray((bbox[0]+j[l[0]][1]*w/64-padding[0], bbox[1]+j[l[0]][0]*h/64-padding[1], bbox[0]+j[l[1]][1]*w/64-padding[0], bbox[1]+j[l[1]][0]*h/64-padding[1] ))*res/448 ).astype(np.int)
-							cv2.line(img_res, tuple(a_j[l[0]][::-1].astype(np.int)), tuple(a_j[l[1]][::-1].astype(np.int)), self.links[k]['color'], thickness = 3)
-			t_f = time()
-			cv2.putText(img_res, 'FPS: ' + str(1/(t_f-t))[:4], (60, 40), 2, 2, (0,0,0), thickness = 2)
-			cv2.imshow('stream', img_res)
-			if plt_hm:
-				cv2.imshow('box', img_crop)
-				img_hm = img_padd / 255 + 2*np.expand_dims(cv2.resize(np.sum(hm[0], axis = 2), (256,256)), axis = 2)
-				if hm_size != 256:
-					img_hm = cv2.resize(img_hm, (hm_size,hm_size))
-				cv2.imshow('joints', img_hm)
-			if cv2.waitKey(1) == 27:
-				print('Stream Ended')
-				cv2.destroyAllWindows()
-				break
-		cv2.destroyAllWindows()
-		cam.release()
-						
-	def videoProcessor(self, src = None, outName = None, codec = 'DIVX', use_od = True, cbox = 0.0, j_thresh = 0.5,cls_thresh = 0.12, nms_thresh =0.6, show = True, plt_j = True, plt_b = True, plt_l = True, plt_fps = True):
 		cam = cv2.VideoCapture(src)
 		shape = np.asarray((cam.get(cv2.CAP_PROP_FRAME_HEIGHT),cam.get(cv2.CAP_PROP_FRAME_WIDTH))).astype(np.int)
 		frames = cam.get(cv2.CAP_PROP_FRAME_COUNT)
-		fps = int(cam.get(cv2.CAP_PROP_FPS))
+		fps = cam.get(cv2.CAP_PROP_FPS)
 		if outName != None:
 			fourcc = cv2.VideoWriter_fourcc(*codec)
-			outVid = cv2.VideoWriter(outName, fourcc, fps, tuple(shape.astype(np.int)), 1)
-			print(shape)
+			outVid = cv2.VideoWriter( outName, fourcc, fps, tuple(shape.astype(np.int))[::-1], 1)
 		cur_frame = 0
 		startT = time()
 		while (cur_frame < frames or frames == -1) and outVid.isOpened():
@@ -573,7 +879,6 @@ class PredictProcessor():
 			HEIGHT = shape[0].astype(np.int)
 			XC = WIDTH // 2
 			YC = HEIGHT // 2
-			sLENGHT = min(WIDTH,HEIGHT)
 			if WIDTH > HEIGHT:
 				top = np.copy(IMG_BASE[:,:XC - HEIGHT //2])
 				bottom = np.copy(IMG_BASE[:,XC + HEIGHT //2:])
@@ -584,72 +889,53 @@ class PredictProcessor():
 				img_square = np.copy(IMG_BASE[YC - WIDTH //2:YC + WIDTH //2])
 			else:
 				img_square = np.copy(IMG_BASE)
-			if use_od:
-				img_od = cv2.cvtColor(np.copy(img_square), cv2.COLOR_BGR2RGB)
-				img_od = cv2.resize(img_od, (448,448))
-				img_np = (np.copy(img_od).astype(np.float32) -127.0) / 128.0
-				img_np = np.expand_dims(img_np, axis = 0)
-				predictionBoxes = self.HG.Session.run(self.predicts_od, feed_dict={self.image_od: img_np})
-				process_boxes = self._processboxes(predictionBoxes, num_classes = self.common_params['num_classes'],
-									 class_thresh = cls_thresh, nms_thresh = nms_thresh, debug = False)
-				person = process_boxes[14]
-				for box in person:
-					xmin, ymin, xmax, ymax = box
-					bbox = np.asarray((max(0,int(xmin - cbox*(xmax-xmin))),max(0,int(ymin - cbox*(ymax-ymin))), min(447,int(xmax + cbox*(xmax-xmin))), min(447,int(ymax + cbox*(ymax-ymin)))))
-					if plt_b:
-						plotbox = np.asarray(bbox.astype(np.float32) * sLENGHT / 448).astype(np.int)
-						cv2.rectangle(img_square, tuple(plotbox[:2]), tuple(plotbox[2:]), color = self.color[14], thickness = 3)
-					w = bbox[2] - bbox[0]
-					h = bbox[3] - bbox[1]
-					maxl = np.max([w + 0,h + 0])
-					nbox = np.array([bbox[0] + w/2 - maxl/2, bbox[1] + h/2 - maxl/2, bbox[2] - w/2 + maxl/2 , bbox[3] - h/2 + maxl/2 ])
-					padding = np.abs(nbox - bbox).astype(np.int)
-					padd = np.array([[padding[1],padding[3]],[padding[0],padding[2]],[0,0]])
-					img_crop = np.copy(img_od[bbox[1]:bbox[3], bbox[0]:bbox[2]])
-					img_padd = np.pad(img_crop, padd, mode = 'constant')
-					img_padd = cv2.resize(img_padd, (256,256))
-					hm = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict={self.HG.img: np.expand_dims(img_padd/255, axis= 0)})
-					j = -1 * np.ones((self.params['num_joints'],2))
-					a_j = -1 * np.ones((self.params['num_joints'],2))
-					for i in range(self.params['num_joints']):
-						idx = np.unravel_index(hm[0,:,:,i].argmax(), (64,64)) 
-						if hm[0,idx[0], idx[1], i] > j_thresh:
-							j[i] = idx
-							center_j = np.asarray((bbox[:2][::-1] + (j[i] * np.array([h, w]) /64 ))* sLENGHT/448).astype(np.int)
-							a_j[i] = center_j
-							if plt_j:
-								cv2.circle(img_square, tuple(center_j[::-1]), radius = 8, color = self.color[i], thickness = -1)
-					if plt_l:
-						for k in range(len(self.links)):
-							l = self.links[k]['link']
-							good_link = True
-							for p in l:
-								if np.array_equal(j[p], [-1,-1]):
-									good_link = False
-							if good_link:
-								cv2.line(img_square, tuple(a_j[l[0]][::-1].astype(np.int)), tuple(a_j[l[1]][::-1].astype(np.int)), self.links[k]['color'], thickness = 3)
-			else:
-				img_np = cv2.resize(np.copy(img_square), (256,256))
-				hm = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict={self.HG.img: np.expand_dims(img_np/255, axis= 0)})
-				j = -1 * np.ones((self.params['num_joints'],2))
-				a_j = -1 * np.ones((self.params['num_joints'],2))
+			img_od = cv2.cvtColor(np.copy(img_square), cv2.COLOR_BGR2RGB)
+			shapeOd = img_od.shape
+			results = self.detect(img_od)
+			results_person = []
+			for i in range(len(results)):
+				if results[i][0] == 'person':
+					results_person.append(results[i])
+			results_person = self.nms(results_person, nms_thresh)
+			for box in results_person:
+				class_name = box[0]
+				x = int(box[1])
+				y = int(box[2])
+				w = int(box[3] / 2)
+				h = int(box[4] / 2)
+				prob = box[5]
+				bbox = np.asarray((max(0,x-w), max(0, y-h), min(shapeOd[1]-1, x+w), min(shapeOd[0]-1, y+h)))
+				if plt_b:
+					cv2.rectangle(img_square, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
+					cv2.rectangle(img_square, (bbox[0], bbox[1] - 20),(bbox[2], bbox[1]), (125, 125, 125), -1)
+					cv2.putText(img_square, class_name + ' : %.2f' % prob, (bbox[0] + 5, bbox[1] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+				maxl = np.max([w+0,h+0])
+				lenghtarray = np.array([maxl/h, maxl/w])
+				nbox = np.array([x-maxl, y-maxl, x+maxl, y+maxl])
+				padding = np.abs(nbox-bbox).astype(np.int)
+				img_person = np.copy(img_od[bbox[1]:bbox[3],bbox[0]:bbox[2],:])
+				padd = np.array([[padding[1],padding[3]],[padding[0],padding[2]],[0,0]])
+				img_person = np.pad(img_person, padd, mode = 'constant')
+				img_person = cv2.resize(img_person, (256,256))
+				hm = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict={self.HG.img: np.expand_dims(img_person/255, axis= 0)})
+				j = -1*np.ones(shape = (self.params['num_joints'],2))
+				joint = -1*np.ones(shape = (self.params['num_joints'],2))
 				for i in range(self.params['num_joints']):
-					idx = np.unravel_index(hm[0,:,:,i].argmax(), (64,64)) 
-					if hm[0,idx[0], idx[1], i] > j_thresh:
+					idx = np.unravel_index(hm[0,:,:,i].argmax(), (64,64))
+					if hm[0, idx[0], idx[1],i] > j_thresh:
 						j[i] = idx
-						center_j = np.asarray((j[i] /64 )* sLENGHT).astype(np.int)
-						a_j[i] = center_j
+						joint[i] = np.asarray(np.array([y,x]) + ((j[i]-32)/32 * np.array([h,w])* lenghtarray )).astype(np.int)
 						if plt_j:
-							cv2.circle(img_square, tuple(center_j[::-1]), radius = 8, color = self.color[i], thickness = -1)
+							cv2.circle(img_square, tuple(joint[i].astype(np.int))[::-1], radius = 5, color = self.color[i][::-1], thickness = -1)
 				if plt_l:
 					for k in range(len(self.links)):
 						l = self.links[k]['link']
 						good_link = True
 						for p in l:
-							if np.array_equal(j[p], [-1,-1]):
+							if np.array_equal(joint[p], [-1,-1]):
 								good_link = False
 						if good_link:
-							cv2.line(img_square, tuple(a_j[l[0]][::-1].astype(np.int)), tuple(a_j[l[1]][::-1].astype(np.int)), self.links[k]['color'], thickness = 3)
+							cv2.line(img_square, tuple(joint[l[0]][::-1].astype(np.int)), tuple(joint[l[1]][::-1].astype(np.int)), self.links[k]['color'][::-1], thickness = 3)
 			if WIDTH > HEIGHT:
 				RECONSTRUCT_IMG[:,:XC - HEIGHT //2] = top
 				RECONSTRUCT_IMG[:,XC + HEIGHT //2:] = bottom
@@ -661,14 +947,13 @@ class PredictProcessor():
 			else:
 				RECONSTRUCT_IMG = img_square.astype(np.uint8)
 			RECONSTRUCT_IMG = RECONSTRUCT_IMG.astype(np.uint8)
-			if outName !=None:
-				outVid.write(np.uint8(RECONSTRUCT_IMG))
-			cur_frame = cur_frame + 1
+			outVid.write(np.uint8(RECONSTRUCT_IMG))
+			cur_frame = cur_frame + 1		
 			if frames != -1:
 				percent = ((cur_frame+1)/frames) * 100
 				num = np.int(20*percent/100)
 				tToEpoch = int((time() - startT) * (100 - percent)/(percent))
-				sys.stdout.write('\r Train: {0}>'.format("="*num) + "{0}>".format(" "*(20-num)) + '||' + str(percent)[:4] + '%' + ' -timeToEnd: ' + str(tToEpoch) + ' sec.')
+				sys.stdout.write('\r Processing: {0}>'.format("="*num) + "{0}>".format(" "*(20-num)) + '||' + str(percent)[:4] + '%' + ' -timeToEnd: ' + str(tToEpoch) + ' sec.')
 				sys.stdout.flush()
 			if show:
 				cv2.imshow('stream', RECONSTRUCT_IMG)
@@ -685,237 +970,322 @@ class PredictProcessor():
 			print(outVid.isOpened())
 			outVid.release()
 			print(outVid.isOpened())
-		print(time() - startT)
+		print(time() - startT)	
 
-	# YOLO MODEL TO LOAD
-	# FROM GITHUB REPO : https://github.com/nilboy/tensorflow-yolo
-	# -------------------------OBJECT DETECTOR---------------------------------
-	def od_init(self):
-		""" Initialize YOLO net
-		"""
-		print('Adding YOLO Graph to Main Graph')
-		t = time() 
-		with self.graph.as_default():
-			self.common_params = {'image_size': 448, 'num_classes': 20, 'batch_size':8}
-			self.net_params = {'cell_size': 7, 'boxes_per_cell':2, 'weight_decay': 0.0005}
-			self.net = YoloTinyNet(self.common_params, self.net_params, test = True)
-			self.image_od = tf.placeholder(tf.float32, (1,448,448,3))
-			self.predicts_od = self.net.inference(self.image_od)
-		print('YOLO created: ', time() - t, ' sec.')
-		
-	def restore_od(self, load = 'yolo_tiny.ckpt', sess = None):
-		""" Restore YOLO model
+	
+	 #-------------------------Benchmark Methods (PCK)-------------------------
+	
+	def pcki(self, joint_id, gtJ, prJ, idlh = 3, idrs = 12):
+		""" Compute PCK accuracy on a given joint
 		Args:
-			load	: (str) model to load
-			sess	: /!\ DON'T MODIFY SET TO NONE
+			joint_id	: Index of the joint considered
+			gtJ			: Ground Truth Joint
+			prJ			: Predicted Joint
+			idlh		: Index of Normalizer (Left Hip on PCK, neck on PCKh)
+			idrs		: Index of Normalizer (Right Shoulder on PCK, top head on PCKh)
+		Returns:
+			(float) NORMALIZED L2 ERROR
+		"""
+		return np.linalg.norm(gtJ[joint_id]-prJ[joint_id][::-1]) / np.linalg.norm(gtJ[idlh]-gtJ[idrs])
+		
+	def pck(self, weight, gtJ, prJ, gtJFull, boxL, idlh = 3, idrs = 12):
+		""" Compute PCK accuracy for a sample
+		Args:
+			weight		: Index of the joint considered
+			gtJFull	: Ground Truth (sampled on whole image)
+			gtJ			: Ground Truth (sampled on reduced image)
+			prJ			: Prediction
+			boxL		: Box Lenght
+			idlh		: Index of Normalizer (Left Hip on PCK, neck on PCKh)
+			idrs		: Index of Normalizer (Right Shoulder on PCK, top head on PCKh)
+		"""
+		for i in range(len(weight)):
+			if weight[i] == 1:
+				self.ratio_pck.append(self.pcki(i, gtJ, prJ, idlh=idlh, idrs = idrs))
+				self.ratio_pck_full.append(self.pcki(i, gtJFull, np.asarray(prJ / 255 * boxL)))
+				self.pck_id.append(i)
+	
+	def compute_pck(self, datagen, idlh = 3, idrs = 12, testSet = None):
+		""" Compute PCK on dataset
+		Args:
+			datagen	: (DataGenerator)
+			idlh		: Index of Normalizer (Left Hip on PCK, neck on PCKh)
+			idrs		: Index of Normalizer (Right Shoulder on PCK, top head on PCKh)
+		"""
+		datagen.pck_ready(idlh = idlh, idrs = idrs, testSet = testSet)
+		self.ratio_pck = []
+		self.ratio_pck_full = []
+		self.pck_id = []
+		samples = len(datagen.pck_samples)
+		startT = time()
+		for idx, sample in enumerate(datagen.pck_samples):
+			percent = ((idx+1)/samples) * 100
+			num = np.int(20*percent/100)
+			tToEpoch = int((time() - startT) * (100 - percent)/(percent))
+			sys.stdout.write('\r PCK : {0}>'.format("="*num) + "{0}>".format(" "*(20-num)) + '||' + str(percent)[:4] + '%' + ' -timeToEnd: ' + str(tToEpoch) + ' sec.')
+			sys.stdout.flush()
+			res = datagen.getSample(sample)
+			if res != False:
+				img, gtJoints, w, gtJFull, boxL = res
+				prJoints = self.joints_pred_numpy(np.expand_dims(img/255, axis = 0), coord = 'img', thresh = 0)
+				self.pck(w, gtJoints, prJoints, gtJFull, boxL, idlh=idlh, idrs = idrs)
+		print('Done in ', int(time() - startT), 'sec.')
+			
+	#-------------------------Object Detector (YOLO)-------------------------
+	
+	# YOLO MODEL
+	# Source : https://github.com/hizhangp/yolo_tensorflow
+	# Author : Peng Zhang (https://github.com/hizhangp/)
+	# yolo_init, iou, detect, detect_from_cvmat, interpret_output are methods
+	# to the credit of Peng Zhang
+	def yolo_init(self):
+		"""YOLO Initializer
+		Initialize the YOLO Model
+		"""
+		t = time()
+		self.classes = cfg.CLASSES
+		self.num_class = len(self.classes)
+		self.image_size = cfg.IMAGE_SIZE
+		self.cell_size = cfg.CELL_SIZE
+		self.boxes_per_cell = cfg.BOXES_PER_CELL
+		self.threshold = cfg.THRESHOLD
+		self.iou_threshold = cfg.IOU_THRESHOLD
+		self.boundary1 = self.cell_size * self.cell_size * self.num_class
+		self.boundary2 = self.boundary1 + self.cell_size * self.cell_size * self.boxes_per_cell
+		with self.graph.as_default():
+			self.net = YOLONet(is_training=False)
+		print('YOLO created: ', time() - t, ' sec.')
+	
+	def restore_yolo(self, load = 'yolo_small.ckpt'):
+		""" Restore Weights
+		Args:
+			load : File to load
 		"""
 		print('Loading YOLO...')
+		print('Restoring weights from: ' + load)
 		t = time()
 		with self.graph.as_default():
-			self.saverYOLO = tf.train.Saver(self.net.trainable_collection)
-			if sess is None:
-				self.saverYOLO.restore(self.HG.Session, load)
-			else:
-				self.saverYOLO.restore(sess, load)
+			self.saver = tf.train.Saver(tf.contrib.framework.get_trainable_variables(scope='yolo'))
+			self.saver.restore(self.HG.Session, load)
 		print('Trained YOLO Loaded: ', time() - t, ' sec.')
-		
-	def largestind(self, array, n):
-		""" Give the indices of the n largest values
-		Args:
-			array		: array to process
-			n			: number of indices wanted
-		"""
-		flat = array.flatten()
-		indices = np.argpartition(flat, -n)[-n:]
-		indices = indices[np.argsort(-flat[indices])]
-		return  np.transpose(np.asarray(np.unravel_index(indices, array.shape)))
 	
-	def non_max_suppression_fast(self, boxes, overlapThresh):
+	
+	def iou(self, box1, box2):
+		""" Intersection over Union (IoU)
+		Args:
+			box1 : Bounding Box
+			box2 : Bounding Box
+		Returns:
+			IoU
+		"""
+		tb = min(box1[0] + 0.5 * box1[2], box2[0] + 0.5 * box2[2]) - max(box1[0] - 0.5 * box1[2], box2[0] - 0.5 * box2[2])
+		lr = min(box1[1] + 0.5 * box1[3], box2[1] + 0.5 * box2[3]) - max(box1[1] - 0.5 * box1[3], box2[1] - 0.5 * box2[3])
+		if tb < 0 or lr < 0:
+			intersection = 0
+		else:
+			intersection = tb * lr
+		return intersection / (box1[2] * box1[3] + box2[2] * box2[3] - intersection)
+	
+	def detect(self, img):
+		""" Method for Object Detection
+		Args:
+			img			: Input Image (BGR Image)
+		Returns:
+			result		: List of Bounding Boxes
+		"""
+		img_h, img_w, _ = img.shape
+		inputs = cv2.resize(img, (self.image_size, self.image_size))
+		inputs = cv2.cvtColor(inputs, cv2.COLOR_BGR2RGB).astype(np.float32)
+		inputs = (inputs / 255.0) * 2.0 - 1.0
+		inputs = np.reshape(inputs, (1, self.image_size, self.image_size, 3))
+		result = self.detect_from_cvmat(inputs)[0]
+		for i in range(len(result)):
+			result[i][1] *= (1.0 * img_w / self.image_size)
+			result[i][2] *= (1.0 * img_h / self.image_size)
+			result[i][3] *= (1.0 * img_w / self.image_size)
+			result[i][4] *= (1.0 * img_h / self.image_size)
+		return result
+	
+	def detect_from_cvmat(self, inputs):
+		""" Runs detection on Session (TENSORFLOW RELATED)
+		"""
+		net_output = self.HG.Session.run(self.net.logits,feed_dict={self.net.images: inputs})
+		results = []
+		for i in range(net_output.shape[0]):
+			results.append(self.interpret_output(net_output[i]))
+		return results
+	
+	def interpret_output(self, output):
+		""" Post Process the Output of the network
+		Args:
+			output : Network Prediction (Tensor)
+		"""
+		probs = np.zeros((self.cell_size, self.cell_size, self.boxes_per_cell, self.num_class))
+		class_probs = np.reshape(output[0:self.boundary1], (self.cell_size, self.cell_size, self.num_class))
+		scales = np.reshape(output[self.boundary1:self.boundary2], (self.cell_size, self.cell_size, self.boxes_per_cell))
+		boxes = np.reshape(output[self.boundary2:], (self.cell_size, self.cell_size, self.boxes_per_cell, 4))
+		offset = np.transpose(np.reshape(np.array([np.arange(self.cell_size)] * self.cell_size * self.boxes_per_cell),[self.boxes_per_cell, self.cell_size, self.cell_size]), (1, 2, 0))
+		boxes[:, :, :, 0] += offset
+		boxes[:, :, :, 1] += np.transpose(offset, (1, 0, 2))
+		boxes[:, :, :, :2] = 1.0 * boxes[:, :, :, 0:2] / self.cell_size
+		boxes[:, :, :, 2:] = np.square(boxes[:, :, :, 2:])
+		boxes *= self.image_size
+		for i in range(self.boxes_per_cell):
+			for j in range(self.num_class):
+				probs[:, :, i, j] = np.multiply(class_probs[:, :, j], scales[:, :, i])
+		filter_mat_probs = np.array(probs >= self.threshold, dtype='bool')
+		filter_mat_boxes = np.nonzero(filter_mat_probs)
+		boxes_filtered = boxes[filter_mat_boxes[0],filter_mat_boxes[1], filter_mat_boxes[2]]
+		probs_filtered = probs[filter_mat_probs]
+		classes_num_filtered = np.argmax(filter_mat_probs, axis=3)[filter_mat_boxes[0], filter_mat_boxes[1], filter_mat_boxes[2]]
+		argsort = np.array(np.argsort(probs_filtered))[::-1]
+		boxes_filtered = boxes_filtered[argsort]
+		probs_filtered = probs_filtered[argsort]
+		classes_num_filtered = classes_num_filtered[argsort]
+		for i in range(len(boxes_filtered)):
+			if probs_filtered[i] == 0:
+				continue
+			for j in range(i + 1, len(boxes_filtered)):
+				if self.iou(boxes_filtered[i], boxes_filtered[j]) > self.iou_threshold:
+					probs_filtered[j] = 0.0
+		filter_iou = np.array(probs_filtered > 0.0, dtype='bool')
+		boxes_filtered = boxes_filtered[filter_iou]
+		probs_filtered = probs_filtered[filter_iou]
+		classes_num_filtered = classes_num_filtered[filter_iou]
+		result = []
+		for i in range(len(boxes_filtered)):
+			result.append([self.classes[classes_num_filtered[i]], boxes_filtered[i][0], boxes_filtered[i][1], boxes_filtered[i][2], boxes_filtered[i][3], probs_filtered[i]])
+		return result
+	
+	def nms(self, boxes, overlapThresh):
 		""" Non Maxima Suppression
 		Args:
-			boxes				: List of boxes to compare
-			overlapThresh	: Threshold for suppression
+			boxes					: List of Bounding Boxes
+			overlapThreshold	: Non Maxima Suppression Threshold
+		Returns:
+			ret						: List of processed Bounding Boxes
 		"""
-		# if there are no boxes, return an empty list
 		if len(boxes) == 0:
 			return []
-	 
-		# if the bounding boxes integers, convert them to floats --
-		# this is important since we'll be doing a bunch of divisions
-		if boxes.dtype.kind == "i":
-			boxes = boxes.astype("float")
-	 
-		# initialize the list of picked indexes	
+		array = []
+		for i in range(len(boxes)):
+			array.append(boxes[i][1:5])
+		array = np.array(array)
 		pick = []
-	 
-		# grab the coordinates of the bounding boxes
-		x1 = boxes[:,0]
-		y1 = boxes[:,1]
-		x2 = boxes[:,2]
-		y2 = boxes[:,3]
-	 
-		# compute the area of the bounding boxes and sort the bounding
-		# boxes by the bottom-right y-coordinate of the bounding box
+		x = array[:,0]
+		y = array[:,1]
+		w = array[:,2]
+		h = array[:,3]
+		x1 = x - w / 2
+		x2 = x + w / 2
+		y1 = y - h / 2
+		y2 = y + h / 2
 		area = (x2 - x1 + 1) * (y2 - y1 + 1)
 		idxs = np.argsort(y2)
-	 
-		# keep looping while some indexes still remain in the indexes
-		# list
 		while len(idxs) > 0:
-			# grab the last index in the indexes list and add the
-			# index value to the list of picked indexes
 			last = len(idxs) - 1
 			i = idxs[last]
 			pick.append(i)
-	 
-			# find the largest (x, y) coordinates for the start of
-			# the bounding box and the smallest (x, y) coordinates
-			# for the end of the bounding box
 			xx1 = np.maximum(x1[i], x1[idxs[:last]])
 			yy1 = np.maximum(y1[i], y1[idxs[:last]])
 			xx2 = np.minimum(x2[i], x2[idxs[:last]])
 			yy2 = np.minimum(y2[i], y2[idxs[:last]])
-	 
-			# compute the width and height of the bounding box
 			w = np.maximum(0, xx2 - xx1 + 1)
 			h = np.maximum(0, yy2 - yy1 + 1)
-	 
-			# compute the ratio of overlap
 			overlap = (w * h) / area[idxs[:last]]
-	 
-			# delete all indexes from the index list that have
-			idxs = np.delete(idxs, np.concatenate(([last],
-				np.where(overlap > overlapThresh)[0])))
-	 
-		# return only the bounding boxes that were picked using the
-		# integer data type
-		return boxes[pick].astype("int")
-		
-	def _processboxes(self, predicts, num_objects = 30, num_classes = 2, class_thresh = 0.10,nms_thresh = 0.5, debug = False):
-		""" Given box predictions from YOLO net, returns boxes per classes
-		Args:
-			predicts			: Prediction from YOLO net (array)
-			num_objects		: Maximum number of object to detect
-			num_classes		: Numner of Classes
-			class_thresh		: Class threshold
-			nms_thresh		: Non Maxima Suppression Threshold
-			debug				: (bool) for testing purposes /!\ DON'T MODIFY
-		"""
-		p_classes = predicts[0, :, :, 0:num_classes]
-		C = predicts[0, :, :, num_classes:num_classes+2]
-		coordinate = predicts[0, :, :, num_classes+2:]
-		
-		p_classes = np.reshape(p_classes, (7,7,1,num_classes))
-		C = np.reshape(C, (7,7,2,1))
-		P = C * p_classes
-		coordinate = np.reshape(coordinate, (7, 7, 2, 4))
-		
-		indices = self.largestind(P, num_objects)
-		boxes = [[]] * num_classes
-		for i in range(num_objects):
-			index = indices[i]
-			prob = P[index[0], index[1], index[2], index[3]]
-			max_coordinate = coordinate[index[0], index[1], index[2], :]
-			class_num = index[3]
-			xcenter = max_coordinate[0]
-			ycenter = max_coordinate[1]
-		
-			w = max_coordinate[2]
-			h = max_coordinate[3]
-		
-			xcenter = (index[1] + xcenter) * (448/7.0)
-			ycenter = (index[0] + ycenter) * (448/7.0)
-		
-			w = w * 448
-			h = h * 448
-		
-			xmin = xcenter - w/2.0
-			ymin = xcenter - h/2.0
-			xmax = xmin + w
-			ymax = ymin + h
-			if prob > class_thresh:
-				class_box = copy.deepcopy(boxes[class_num])
-				class_box.append([xmin, ymin , xmax, ymax])
-				boxes[class_num] = class_box
-		for i in range(num_classes):
-			boxes[i] = self.non_max_suppression_fast(np.asarray(boxes[i]), overlapThresh = nms_thresh)
-		if debug:
-			return boxes, P
-		else:
-			return boxes
+			idxs = np.delete(idxs, np.concatenate(([last],np.where(overlap > overlapThresh)[0])))
+		ret = []
+		for i in pick:
+			ret.append(boxes[i])
+		return ret
 	
-	def camYolo(self, src = 0, mirror = True, cbox = 0.0, cls_thresh = 0.12, nms_thresh = 0.6, sess = None, crop = True):
-		""" YOLO Visualizer
-		Run YOLO prediction on Webcam
+	def camera_detector(self, cap, wait=10, mirror = True):
+		""" YOLO Webcam Detector
 		Args:
-			mirror		: Apply mirroring to image
-			cbox		: Apply a percentage to resize bounding Box
-			cls_thresh	: Threshold for class
-			nms_thresh	: Threshold for Non Maximum Suppression
-			sess		: /!\ For debuging ONLY (use None)
-			crop		: /!\ Set to True
+			cap			: Video Capture (OpenCv Related)
+			wait		: Time between frames
+			mirror		: Apply mirror Effect
 		"""
-		cam = cv2.VideoCapture(src)
-		i = 0
 		while True:
-			t_start = time()
-			# Getting Source Image
-			ret_val, img = cam.read()
-			if crop:
-				img = img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
-			t_read = time()
-			# Mirror Image
+			t = time()
+			ret, frame = cap.read()
 			if mirror:
-				img = cv2.flip(img, 1)
-			# Resize Image to fit placeholder
-			resized_img = cv2.resize(img, (448,448))
-			# Color Mode conversion
-			np_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB)
-			np_img = np_img.astype(np.float32)
-			# Fit to [-1,1]
-			np_img = (np_img - 127.0) / 128.0 
-			# Expand Dim
-			np_img = np.reshape(np_img, (1,448,448,3))
-			# Prediction
-			t_preprocess = time()
-			if sess is None:
-				np_predict = self.HG.Session.run(self.predicts_od, feed_dict={self.image_od : np_img})
-			else:
-				np_predict = sess.run(self.predicts_od, feed_dict={self.image_od : np_img})
-			t_predict = time()
-			# PostProcessing
-			results, P = self._processboxes(np_predict, num_classes= self.common_params['num_classes'], class_thresh = cls_thresh, nms_thresh = nms_thresh, debug = True)
-			# DRAWING BOX
-			for class_num in range(self.common_params['num_classes']):
-				class_name = self.classes_name[class_num]
-				for xmin, ymin , xmax, ymax in results[class_num]:
-					bbox = (max(0,int(xmin - cbox*(xmax-xmin))),max(0,int(ymin - cbox*(ymax-ymin))), min(447,int(xmax + cbox*(xmax-xmin))), min(447,int(ymax + cbox*(ymax-ymin))))
-					cv2.rectangle(resized_img, (bbox[0],bbox[1]), (bbox[2], bbox[3]), self.color[class_num], thickness = 2)
-					cv2.rectangle(resized_img, (bbox[0], bbox[1]), (bbox[0] + 100, bbox[1] + 30), self.color[class_num], thickness = -1)
-					cv2.putText(resized_img, class_name, (bbox[0] + 15, bbox[1] + 15), 2, 0.6, (0,0,0), thickness = 2)
-			t_postprocess = time()
-			resized_img = cv2.resize(resized_img, (800,800))
-			cv2.imshow('stream', resized_img)
-			if i % 25 == 0:
-				print('------Frame-----')
-				print('--Read:\t\t ' + str(t_read - t_start) + '\n--Preproc:\t ' + str(t_preprocess - t_read) + '\n--Predict:\t ' + str(t_predict-t_preprocess) + '\n--Postproc:\t ' + str(t_postprocess-t_predict) + '\n--Full:\t\t ' + str(t_postprocess - t_start))
-			i += 1
+				frame = cv2.flip(frame, 1)
+			result = self.detect(frame)
+			shapeOd = frame.shape
+			for box in result:
+				class_name = box[0]
+				x = int(box[1])
+				y = int(box[2])
+				w = int(box[3] / 2)
+				h = int(box[4] / 2)
+				prob = box[5]
+				bbox = np.asarray((max(0,x-w), max(0, y-h), min(shapeOd[1]-1, x+w), min(shapeOd[0]-1, y+h)))
+				cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
+				cv2.rectangle(frame, (bbox[0], bbox[1] - 20),(bbox[2], bbox[1]), (125, 125, 125), -1)
+				cv2.putText(frame, class_name + ' : %.2f' % prob, (bbox[0] + 5, bbox[1] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+			fps = 1/(time() - t)
+			cv2.putText(frame, str(fps)[:4] + ' fps', (20, 20), 2, 1, (255,255,255), thickness = 2)
+			cv2.imshow('Camera', frame)
+			ret, frame = cap.read()
 			if cv2.waitKey(1) == 27:
 				print('Stream Ended')
 				cv2.destroyAllWindows()
-				break
+				cap.release()
 		cv2.destroyAllWindows()
-		cam.release()
-	
+		cap.release()
+		
+	def person_detector(self, wait=10, mirror = True, plot = True):
+		""" YOLO Webcam Detector
+		Args:
+			cap			: Video Capture (OpenCv Related)
+			wait		: Time between frames
+			mirror		: Apply mirror Effect
+		"""
+		cap = cv2.VideoCapture(0)
+		while True:
+			t = time()
+			ret, frame = cap.read()
+			if mirror:
+				frame = cv2.flip(frame, 1)
+			result_all = self.detect(frame)
+			result = []
+			for i in range(len(result_all)):
+				if result_all[i][0] == 'person':
+					result.append(result_all[i])
+			shapeOd = frame.shape
+			if plot:
+				for box in result:
+					class_name = box[0]
+					x = int(box[1])
+					y = int(box[2])
+					w = int(box[3] / 2)
+					h = int(box[4] / 2)
+					prob = box[5]
+					bbox = np.asarray((max(0,x-w), max(0, y-h), min(shapeOd[1]-1, x+w), min(shapeOd[0]-1, y+h)))
+					cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
+					cv2.rectangle(frame, (bbox[0], bbox[1] - 20),(bbox[2], bbox[1]), (125, 125, 125), -1)
+					cv2.putText(frame, class_name + ' : %.2f' % prob, (bbox[0] + 5, bbox[1] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+			fps = 1/(time() - t)
+			cv2.putText(frame, str(fps)[:4] + ' fps' + ' PinS:' + str(len(result)), (20, 20), 2, 1, (0,0,0), thickness = 2)
+			cv2.imshow('Camera', frame)
+			ret, frame = cap.read()
+			if cv2.waitKey(1) == 27:
+				print('Stream Ended')
+				cv2.destroyAllWindows()
+				cap.release()
+		cv2.destroyAllWindows()
+		cap.release()
+		
 if __name__ == '__main__':
 	t = time()
-	params = process_config('config.cfg')
+	params = process_config('configTiny.cfg')
 	predict = PredictProcessor(params)
 	predict.color_palette()
 	predict.LINKS_JOINTS()
 	predict.model_init()
-	predict.load_model(load = 'hourglass_bn_100')
-	predict.od_init()
-	predict.restore_od(load = './yolo_tiny.ckpt')
+	predict.load_model(load = 'hg_refined_tiny_200')
+	predict.yolo_init()
+	predict.restore_yolo(load = 'YOLO_small.ckpt')
 	predict._create_prediction_tensor()
 	print('Done: ', time() - t, ' sec.')
