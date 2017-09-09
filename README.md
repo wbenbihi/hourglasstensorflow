@@ -103,7 +103,6 @@ Run inference.py to use pretrained model tools.
 ## Results
 Pose estimation achived at 28-30 FPS (on nVidia GTX 1070) for single person detection. 13-18 FPS for multiple person detection.
 
-Currently working on public accuracy benchmark (PCk, AP).
 
 ## PCKh
 On our testing set we achieve 90 % accuracy on the PCKh metric for the best models.
