@@ -109,5 +109,9 @@ Currently working on public accuracy benchmark (PCk, AP).
 On our testing set we achieve 90 % accuracy on the PCKh metric for the best models.
 ![PCKh on different trained models](https://github.com/wbenbihi/hourglasstensorlfow/blob/master/pckhfULL.png)
 
+## Additional Features
+Filter's features are added, find out how it works by yourselves. (/!\ We are not responsible of the weird pose you are going to take).
+Run Inference.runVideoFilter(args) to check it out.
+
 ## Greetings
 A special thanks to A.Newell for his answers. And to [bhack](https://github.com/bhack) for his feedback.
