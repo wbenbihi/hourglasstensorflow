@@ -3,13 +3,15 @@ Tensorflow implementation of Stacked Hourglass Networks for Human Pose Estimatio
 
 Code as part of MSc Computing Individual Project (Imperial College London 2017)
 ## Based on
-[Stacked Hourglass Networks for Human Pose Estimation](https://arxiv.org/abs/1603.06937) -- A.Newell et al.
+[Stacked Hourglass Networks for Human Pose Estimation](https://arxiv.org/abs/1603.06937) -- A.Newell et al. 
+
+Implentation of [Multi Context Attention Mechanism](https://arxiv.org/abs/1702.07432) -- Xiao Chu et al. -- Available (heavy model)
 ## Status
 This is a WIP repo
-* Human Pose Estimation tested (working on accuracy)
+* Human Pose Estimation tested
 * Efficiency (working on a lighter model)
-* Data Generator done (computationnaly efficient)
-* Multi-Person Pose Estimation (Working on It) 
+* Data Generator done (works on Protocol Buffers)
+* Multi-Person Pose Estimation (Trying to achieve fixed frame rate) 
 
 Currently trained on the [MPII DataSet](http://human-pose.mpi-inf.mpg.de/)
 
@@ -86,21 +88,26 @@ To do so, you first need to create the same graph as the saved one. To do so use
 /!\ BE SURE TO USE THE SAME CONFIG.CFG FILE OR THE METHOD WON'T BE ABLE TO ASSIGN THE RIGHT WEIGHTS
 
 ## Testing
-You can download a pretrained model (on MPII dataset) [here](https://drive.google.com/file/d/0B03jF2Gc59lRX0ZjbFJLaWZUSUk/view?usp=sharing).
+New Pretrained Model
+
+* Regular Hourglass (80 Convolution layer) [here](https://drive.google.com/open?id=0B03jF2Gc59lRbUJXWEpnc2dWemM). 
+* Regular Hourglass (218 Convolution layer) [here](https://drive.google.com/open?id=0B03jF2Gc59lRRkg4d2lNbzN4aTQ).
+* Multi Context Attention Mechanism [here](https://drive.google.com/open?id=0B03jF2Gc59lRZTduRU1yS1VXUzA).
 
 [Tiny YOLO pretrained model](https://drive.google.com/file/d/0B-yiAeTLLamRekxqVE01Yi1RRlk/view?usp=sharing) (Credits: [nilboy](https://github.com/nilboy/tensorflow-yolo) )
 
 Unzip the archives in predictClass.py's directory.
 
-Run predictClass.py to use pretrained model tools. 
-* PredictProcessor().hpeWebcam() for single person detection on webcam (no YOLO needed).
-* PredictProcessor().mpeWebcam() for multiple person detection on webcam (YOLO needed).
-* PredictProcessor().videoProcessor() to process video (no YOLO needed) (Issue with saving on Windows, and file opening on Ubuntu).
+Run inference.py to use pretrained model tools. 
 
 ## Results
 Pose estimation achived at 28-30 FPS (on nVidia GTX 1070) for single person detection. 13-18 FPS for multiple person detection.
 
 Currently working on public accuracy benchmark (PCk, AP).
+
+## PCKh
+On our testing set we achieve 90 % accuracy on the PCKh metric for the best models.
+![PCKh on different trained models](https://github.com/wbenbihi/hourglasstensorlfow/blob/master/pckhfULL.png)
 
 ## Greetings
 A special thanks to A.Newell for his answers. And to [bhack](https://github.com/bhack) for his feedback.
