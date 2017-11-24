@@ -112,7 +112,7 @@ class Inference():
 	def webcamYOLO(self):
 		""" Run Object Detection on Webcam Stream
 		"""
-		cam = cv2.VideoCapture(self.predict.src)
+		cam = cv2.VideoCapture(0)
 		return self.predict.camera_detector( cam, wait=0, mirror = True)
 		
 	# ----------------------- Heat Map Prediction ------------------------------
@@ -142,9 +142,9 @@ class Inference():
 			SIZE = True
 		if SIZE:
 			if mode == 'cpu':
-				return self.predict.joints_pred_numpy(self, batch / 255, coord = 'img', thresh = thresh, sess = None)
+				return self.predict.joints_pred_numpy(batch / 255, coord = 'img', thresh = thresh, sess = None)
 			elif mode == 'gpu':
-				return self.predict.joints_pred(self, batch / 255, coord = 'img', debug = False, sess = None)
+				return self.predict.joints_pred(batch / 255, coord = 'img', debug = False, sess = None)
 			else :
 				print("Error : Mode should be 'cpu'/'gpu'")
 		else:
@@ -160,7 +160,7 @@ class Inference():
 			pltJ: (bool) True to plot joints
 			pltL: (bool) True to plot limbs
 		"""
-		return self.predict.pltSkeleton(self, img, thresh = thresh, pltJ = pltJ, pltL = pltL, tocopy = True, norm = True)
+		return self.predict.pltSkeleton(img, thresh = thresh, pltJ = pltJ, pltL = pltL, tocopy = True, norm = True)
 	
 	# -------------------------- Video Processing ------------------------------
 	
