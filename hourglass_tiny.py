@@ -332,6 +332,10 @@ class HourglassModel():
 		WORK IN PROGRESS
 		"""
 		#self.output shape:[batch_size, stacks, 64, 64, num_of_joints]
+		#self.gtMaps shape:[batch_size, stacks, 64, 64, num_of_joints]
+		#self.weight shape:[batch_size, num_of_joints]
+		self.bceloss = tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps,name= 'cross_entropy_loss')
+		# self.bceloss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps), name= 'cross_entropy_loss')
 		e1 = tf.expand_dims(self.weights,axis = 1, name = 'expdim01')
 		e2 = tf.expand_dims(e1,axis = 1, name = 'expdim02')
 		e3 = tf.expand_dims(e2,axis = 1, name = 'expdim03')
