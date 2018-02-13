@@ -60,7 +60,7 @@ class PredictProcessor():
 			config_dict	: config_dict
 		"""
 		self.params = config_dict
-		self.HG = HourglassModel(nFeat= self.params['nfeats'], nStack = self.params['nstacks'], 
+		self.HG = HourglassModel(nFeat= self.params['nfeats'], nStack = self.params['nstacks'],
 						nModules = self.params['nmodules'], nLow = self.params['nlow'], outputDim = self.params['num_joints'], 
 						batch_size = self.params['batch_size'], drop_rate = self.params['dropout_rate'], lear_rate = self.params['learning_rate'],
 						decay = self.params['learning_rate_decay'], decay_step = self.params['decay_step'], dataset = None, training = False,
@@ -185,7 +185,7 @@ class PredictProcessor():
 				resh = tf.reshape(tensor[-1,:,:,0], [-1])
 			if debug:
 				print(resh)
-			arg = tf.arg_max(resh,0)
+			arg = tf.argmax(resh,0)
 			if debug:
 				print(arg, arg.get_shape(), arg.get_shape().as_list())
 			joints = tf.expand_dims(tf.stack([arg // tf.to_int64(shape[1]), arg % tf.to_int64(shape[1])], axis = -1), axis = 0)
@@ -194,7 +194,7 @@ class PredictProcessor():
 					resh = tf.reshape(tensor[:,:,i], [-1])
 				elif len(shape) == 4:
 					resh = tf.reshape(tensor[-1,:,:,i], [-1])
-				arg = tf.arg_max(resh,0)
+				arg = tf.argmax(resh,0)
 				j = tf.expand_dims(tf.stack([arg // tf.to_int64(shape[1]), arg % tf.to_int64(shape[1])], axis = -1), axis = 0)
 				joints = tf.concat([joints, j], axis = 0)
 			return tf.identity(joints, name = 'joints')
@@ -623,12 +623,14 @@ class PredictProcessor():
 			t = time()
 			ret_val, img = cam.read()
 			img = cv2.flip(img, 1)
-			img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
+			# print(np.shape(img))
+			# img[:, self.cam_res[1]//2 - self.cam_res[0]//2:self.cam_res[1]//2 + self.cam_res[0]//2]
+			# print(np.shape(img))
 			img_hg = cv2.resize(img, (256,256))
 			img_res = cv2.resize(img, (800,800))
 			#img_copy = np.copy(img_res)
 			img_hg = cv2.cvtColor(img_hg, cv2.COLOR_BGR2RGB)
-			hg = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict = {self.HG.img: np.expand_dims(img_hg/255, axis = 0)})
+			hg = self.HG.Session.run(self.HG.pred_sigmoid, feed_dict = {self.HG.img: np.expand_dims(img_hg/255, axis = 0)}) #1*H*W*16 last output of heatmap
 			j = np.ones(shape = (self.params['num_joints'],2)) * -1
 			if plt_hm:
 				hm = np.sum(hg[0], axis = 2)
@@ -1278,14 +1280,15 @@ class PredictProcessor():
 		cap.release()
 		
 if __name__ == '__main__':
+	ROOT_PATH = "D:/Document/Superlee/Data/HumanPose/MPII/HG-Model/TinyHG/"
 	t = time()
 	params = process_config('configTiny.cfg')
 	predict = PredictProcessor(params)
 	predict.color_palette()
 	predict.LINKS_JOINTS()
 	predict.model_init()
-	predict.load_model(load = 'hg_refined_tiny_200')
+	predict.load_model(load = ROOT_PATH + 'hg_refined_tiny_200')
 	predict.yolo_init()
-	predict.restore_yolo(load = 'YOLO_small.ckpt')
+	predict.restore_yolo(load = ROOT_PATH + 'YOLO_small.ckpt')
 	predict._create_prediction_tensor()
 	print('Done: ', time() - t, ' sec.')

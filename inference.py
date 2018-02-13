@@ -244,6 +244,17 @@ class Inference():
 				break
 		cv2.destroyAllWindows()
 		cam.release()
+
+if __name__ == '__main__':
+	ROOT_PATH = "D:/Document/Superlee/Data/HumanPose/MPII/HG-Model/TinyHG/"
+	config_file = "configTiny.cfg"
+	model_file = ROOT_PATH + 'hg_refined_tiny_200'
+	yoyo_file = ROOT_PATH + 'YOLO_small.ckpt'
+	inference = Inference(config_file,model_file,yoyo_file)
+	# inference.webcamSingle()
+	inference.webcamMultiple()
+
+
 			
 				
 		
