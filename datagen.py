@@ -279,7 +279,7 @@ class DataGenerator():
 			bounds = (crop_box[1] - new_w //2, crop_box[1] + new_w //2)
 			if bounds[0] < 0:
 				padding[0][0] = abs(bounds[0])
-			if bounds[1] > width - 1:
+			if bounds[1] > height - 1:
 				padding[0][1] = abs(height - bounds[1])
 		crop_box[0] += padding[1][0]
 		crop_box[1] += padding[0][0]
