@@ -329,13 +329,11 @@ class HourglassModel():
 	
 	def weighted_bce_loss(self):
 		""" Create Weighted Loss Function
-		WORK IN PROGRESS
 		"""
-		self.bceloss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps), name= 'cross_entropy_loss')
-		e1 = tf.expand_dims(self.weights,axis = 1, name = 'expdim01')
-		e2 = tf.expand_dims(e1,axis = 1, name = 'expdim02')
-		e3 = tf.expand_dims(e2,axis = 1, name = 'expdim03')
-		return tf.multiply(e3,self.bceloss, name = 'lossW')
+		loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=self.output, labels= self.gtMaps)
+		weights = tf.reduce_sum(self.gtMaps, axis=[2, 3], keepdims=True)
+		
+		return weights * loss
 	
 	def _accuracy_computation(self):
 		""" Computes accuracy tensor
