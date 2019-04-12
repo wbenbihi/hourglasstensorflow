@@ -1,9 +1,11 @@
 # This function does 2 things:
 
-# 1) Changes from List to Dict, so you can access the name of the body part, i.e. "Right Ankle"
+# 1) Changes from List to Dict, so you can access the coordinates using the name of a body part, i.e. "Right Ankle"
 
 # 2) Scales the data from 256x256 back to your original height and width
 # For example, if original image is 1280x720, the returned result will be the X,Y coordinates for a 1280x720 image, rather than for a 256x256 image
+
+# Takes the prediction from hourglass, plus the original height and width, as input. Returns a dict of coordinates.
 
 def formatAndScaleCoords(predictions,height,width):
 
