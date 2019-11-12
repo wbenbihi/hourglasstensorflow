@@ -4,9 +4,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-jupyter = "*"
-ipython = "*"
 pylint = "*"
+ipython = "*"
+black = "*"
+tqdm = "*"
 
 [packages]
 numpy = "*"
@@ -14,7 +15,12 @@ scipy = "*"
 pandas = "*"
 scikit-image = "*"
 tensorflow = "*"
+jupyter = "*"
 jupyter-contrib-nbextensions = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
