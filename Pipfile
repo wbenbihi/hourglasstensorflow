@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+jupyter = "*"
+ipython = "*"
+pylint = "*"
+
+[packages]
+numpy = "*"
+scipy = "*"
+pandas = "*"
+scikit-image = "*"
+tensorflow = "*"
+jupyter-contrib-nbextensions = "*"
+
+[requires]
+python_version = "3.7"
