@@ -18,6 +18,7 @@ tensorflow = "*"
 jupyter = "*"
 jupyter-contrib-nbextensions = "*"
 matplotlib = "*"
+click = "*"
 
 [requires]
 python_version = "3.7"
