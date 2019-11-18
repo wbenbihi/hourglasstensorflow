@@ -8,6 +8,7 @@ pylint = "*"
 ipython = "*"
 black = "*"
 tqdm = "*"
+memory-profiler = "*"
 
 [packages]
 numpy = "*"
@@ -19,6 +20,8 @@ jupyter = "*"
 jupyter-contrib-nbextensions = "*"
 matplotlib = "*"
 click = "*"
+seaborn = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"
