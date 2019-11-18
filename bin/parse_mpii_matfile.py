@@ -10,6 +10,9 @@ from utils.mpii_mat_handler import parse_act, parse_img_train, parse_single_pers
 @click.option('--filename', help='Path of .mat file')
 @click.option('--output', default='', help='Output folder')
 def main(filename, output):
+    """
+
+    """
     click.echo(f'Lauching {filename} parsing...')
     click.echo(f'Reading {filename}...')
     # Opening Data
@@ -33,13 +36,13 @@ def main(filename, output):
         (annolist, 'annolist.json'),
         (act, 'act.json'),
         (single_person, 'single_person.json'),
-        (img_train, 'img_traion.json'),
+        (img_train, 'img_train.json'),
         (video_list, 'video_list.json')
     ]
     for j, f in list_to_save:
-        with open(os.path.join(output, f), 'w') as fp:
+        with open(os.path.join(output, f), 'w', encoding='utf8') as fp:
             click.echo(f'Saving {os.path.join(output, f)}...')
-            json.dump(j, fp)
+            json.dump(j, fp, ensure_ascii=False)
 
 
 
