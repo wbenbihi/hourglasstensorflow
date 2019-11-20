@@ -9,6 +9,7 @@ ipython = "*"
 black = "*"
 tqdm = "*"
 memory-profiler = "*"
+pydot = "*"
 
 [packages]
 numpy = "*"
