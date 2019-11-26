@@ -15,14 +15,14 @@ import tensorflow as tf
 
 # TODO (wben): Parametrize the shape with regard to config files
 
-def argmax2D_with_batch(tensor):
+def argmax2D_with_batch(tensor, STAGES):
     indices = tf.argmax(tf.reshape(tensor, (tensor.shape[0], STAGES, 4096, 14)), axis=-2)
     col_indices = tf.reduce_mean(indices // 64, axis=-2)
     row_indices = tf.reduce_mean(indices % 64, axis=-2)
     final_indices = tf.transpose(tf.stack([col_indices, row_indices]), perm=[1,2, 0])
     return final_indices
 
-def argmax2D_without_batch(tensor):
+def argmax2D_without_batch(tensor, STAGES):
     indices = tf.argmax(tf.reshape(tensor, (STAGES, 4096, 14)), axis=-2)
     col_indices = tf.reduce_mean(indices // 64, axis=-2)
     row_indices = tf.reduce_mean(indices % 64, axis=-2)
