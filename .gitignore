@@ -3,3 +3,4 @@
 data/*
 __pycache__
 IGNORE_*
+notebooks/logs/*
