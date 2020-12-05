@@ -25,6 +25,7 @@ seaborn = "*"
 pillow = "*"
 loguru = "*"
 dacite = "*"
+tensorflow-addons = "*"
 
 [requires]
 python_version = "3.7"
