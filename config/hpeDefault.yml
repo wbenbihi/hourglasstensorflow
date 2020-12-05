@@ -1,0 +1,54 @@
+version: '1'
+
+dataset:
+  data_folder: 'data/images'
+  summary_file: 'data/MPII_DATASET_TRAIN_TEST.csv'
+  image_column: 'image'
+  joint_column_format: 'joint_{JOINTNUMBER}_{IDVISIBILITY}'
+  joint_index_format: 'id'
+  joint_visibility_format: 'is_visible'
+  train_test_split: 'is_training'
+  n_joints: 16
+  joint_name: 
+    - "00_rAnkle"
+    - "01_rKnee"
+    - "02_rHip"
+    - "03_lHip"
+    - "04_lKnee"
+    - "05_lAnkle"
+    - "06_pelvis"
+    - "07_thorax"
+    - "08_upperNeck"
+    - "09_topHead"
+    - "10_rWrist"
+    - "11_rElbow"
+    - "12_rShoulder"
+    - "13_lShoulder"
+    - "14_lElbow"
+    - "14_lWrist"
+
+
+data:
+  input_mode: "RGB"
+  input_size: 256
+  output_size: 64
+  shuffle_data: False
+  augment_rotation: True
+  max_rotation_deg: 45
+  input_normalization: 'by255|minmax|normal' 
+
+model:
+  model_name: "HourglassNetwork"
+  hourglass_stages: 4
+  hourglass_latent_features: 256
+  hourglass_downsamplings: 4
+
+train:
+  intermediate_supervision: True
+  validation_size: 0.2
+  n_epochs: 50
+  epoch_size: 10000
+  batch_size: 16
+  learning_rate: 0.01
+  decay_learning_rate: False
+  decay_step: 2000
