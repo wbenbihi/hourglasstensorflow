@@ -1,7 +1,7 @@
 import pandas as pd
 from config import CFG
 import tensorflow as tf
-from libs.tf_functions import tf_parse_dataset, tf_preprocess
+from .functions import tf_parse_dataset, tf_preprocess
 
 
 class HPEDatasetGenerator:
