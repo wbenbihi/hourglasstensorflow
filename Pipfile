@@ -23,6 +23,8 @@ matplotlib = "*"
 click = "*"
 seaborn = "*"
 pillow = "*"
+loguru = "*"
+dacite = "*"
 
 [requires]
 python_version = "3.7"
