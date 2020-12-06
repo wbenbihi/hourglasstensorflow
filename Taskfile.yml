@@ -12,3 +12,7 @@ tasks:
   lock:
     cmds:
       - pipenv lock -r > requirements.txt
+
+  kernel:
+    cmds:
+      - pipenv run ipython
