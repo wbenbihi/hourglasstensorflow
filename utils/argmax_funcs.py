@@ -15,16 +15,34 @@ import tensorflow as tf
 
 # TODO (wben): Parametrize the shape with regard to config files
 
-def argmax2D_with_batch(tensor, STAGES):
-    indices = tf.argmax(tf.reshape(tensor, (tensor.shape[0], STAGES, 4096, 14)), axis=-2)
-    col_indices = tf.reduce_mean(indices // 64, axis=-2)
-    row_indices = tf.reduce_mean(indices % 64, axis=-2)
-    final_indices = tf.transpose(tf.stack([col_indices, row_indices]), perm=[1,2, 0])
-    return final_indices
+def argmax2D_no_mean(tensor, stages, size, channels):
+    # Reshape as STAGES X (Spatial) X Channels
+    indices = tf.argmax(tf.reshape(tensor, (stages, size**2, channels)), axis=1)
+    constant = tf.cast(tf.transpose(size), tf.int64)
+    col_indices = indices // constant
+    row_indices = indices % constant
+    argmax = tf.transpose(tf.stack([col_indices, row_indices]), [1, 2, 0])
+    reshaped = tf.reshape(argmax, (stages*channels, 2))
+    # Final Shape [Channels*Stages] X 2 - Every Stage is Taken Into Account
+    return reshaped
 
-def argmax2D_without_batch(tensor, STAGES):
-    indices = tf.argmax(tf.reshape(tensor, (STAGES, 4096, 14)), axis=-2)
-    col_indices = tf.reduce_mean(indices // 64, axis=-2)
-    row_indices = tf.reduce_mean(indices % 64, axis=-2)
-    final_indices = tf.transpose(tf.stack([col_indices, row_indices]))
-    return tf.cast(final_indices, tf.float32)
+def argmax2D_mean(tensor, stages, size, channels):
+    # Reshape as STAGES X (Spatial) X Channels
+    indices = tf.argmax(tf.reshape(tensor, (stages, size**2, channels)), axis=1)
+    constant = tf.cast(tf.transpose(size), tf.int64)
+    col_indices = tf.reduce_mean(indices // constant, axis=0)
+    row_indices = tf.reduce_mean(indices % constant, axis=0)
+    argmax = tf.transpose(tf.stack([col_indices, row_indices]))
+    reshaped = tf.reshape(argmax, (stages*channels, 2))
+    # Final Shape Channels X 2 - Every Stage is Taken Into Account and has the same weight
+    return reshaped
+
+def argmax2D_last_stage(tensor, stages, size, channels):
+    # Reshape as (Spatial) X Channels
+    indices = tf.argmax(tf.reshape(tensor[-1], (size**2, channels)), axis=0)
+    constant = tf.cast(tf.transpose(size), tf.int64)
+    col_indices = indices // constant
+    row_indices = indices % constant
+    argmax = tf.transpose(tf.stack([col_indices, row_indices]))
+    # Final Shape Stages X 2 - Only Last Stage is Taken into account
+    return argmax
