@@ -66,6 +66,14 @@ class HPEDataset:
         )
         self._has_augments = True
 
+        # Batch Datasets
+        self.train_dataset = self.train_dataset.batch(self.config.train.batch_size)
+        self.test_dataset = self.test_dataset.batch(self.config.train.batch_size)
+        self.val_dataset = (
+            self.val_dataset.batch(self.config.train.batch_size) if self.val_dataset is not None else None
+        )
+        self._has_augments = True
+
     def _create_summaries(self):
         # Open File
         self.summary = pd.read_csv(self.config.dataset.summary_file, sep=";")
