@@ -64,7 +64,9 @@ train:
   optimizer:
     type: "RMSprop"
     params:
-      null: "null"
+      rho: 0.9
+      momentum: 0.0
+      centered: False
   loss:
     type: 'binary_crossentropy'
   metrics:
