@@ -1,54 +1,150 @@
-version: '1'
+version: "1"
 
 dataset:
-  data_folder: 'data/images'
-  summary_file: 'data/MPII_DATASET_TRAIN_TEST.csv'
-  image_column: 'image'
-  joint_column_format: 'joint_{JOINTNUMBER}_{IDVISIBILITY}'
-  joint_index_format: 'id'
-  joint_visibility_format: 'is_visible'
-  train_test_split: 'is_training'
-  n_joints: 16
-  joint_name: 
-    - "00_rAnkle"
-    - "01_rKnee"
-    - "02_rHip"
-    - "03_lHip"
-    - "04_lKnee"
-    - "05_lAnkle"
-    - "06_pelvis"
-    - "07_thorax"
-    - "08_upperNeck"
-    - "09_topHead"
-    - "10_rWrist"
-    - "11_rElbow"
-    - "12_rShoulder"
-    - "13_lShoulder"
-    - "14_lElbow"
-    - "14_lWrist"
-
+  images_folder: "data/images"
+  summary_file: "data/MPII_DATASET_TRAIN_TEST.csv"
+  description:
+    image_column: "image"
+    train_test_column: "is_training"
+    n_joints: 16
+    joints:
+      column_format: "joint_{JOINTNUMBER}_{IDVISIBILITY}"
+      index_format: "id"
+      visibility_format: "is_visible"
+      names:
+        - "00_rAnkle"
+        - "01_rKnee"
+        - "02_rHip"
+        - "03_lHip"
+        - "04_lKnee"
+        - "05_lAnkle"
+        - "06_pelvis"
+        - "07_thorax"
+        - "08_upperNeck"
+        - "09_topHead"
+        - "10_rWrist"
+        - "11_rElbow"
+        - "12_rShoulder"
+        - "13_lShoulder"
+        - "14_lElbow"
+        - "14_lWrist"
 
 data:
-  input_mode: "RGB"
+  mode: "RGB"
   input_size: 256
   output_size: 64
-  shuffle_data: False
-  augment_rotation: True
-  max_rotation_deg: 45
-  input_normalization: 'by255|minmax|normal' 
+  shuffle: False
+  normalization: "by255"
+  augmentation:
+    rotation: 45
 
 model:
-  model_name: "HourglassNetwork"
-  hourglass_stages: 4
-  hourglass_latent_features: 256
-  hourglass_downsamplings: 4
+  name: "HourglassNetwork"
+  stages: 4
+  latent_features: 256
+  downsamplings: 4
+  logs:
+    log_folder: 'logs/'
+  checkpoints:
+    filepath: 'models/'
+
+
 
 train:
   intermediate_supervision: True
-  validation_size: 0.2
-  n_epochs: 50
+  validation_ratio: 0.1
+  epochs: 50
   epoch_size: 10000
   batch_size: 16
-  learning_rate: 0.01
-  decay_learning_rate: False
-  decay_step: 2000
+  learning_rate:
+    value: 0.01
+    decay: False
+    decay_step: 2000
+    decay_value: 0.99
+  optimizer:
+    type: "RMSprop"
+    params:
+      null: "null"
+  loss:
+    type: 'binary_crossentropy'
+  metrics:
+    - metric:
+      type: MeanAmountCorrectKeypointsMetric
+      params:
+        name: mACKt5
+        threshold: 5
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: MeanAmountCorrectKeypointsMetric
+      params:
+        name: mACKt15
+        threshold: 15
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: MeanAmountCorrectKeypointsMetric
+      params:
+        name: mACKt25
+        threshold: 25
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: LastAmountCorrectKeypointsMetric
+      params:
+        name: lACKt5
+        threshold: 5
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: LastAmountCorrectKeypointsMetric
+      params:
+        name: lACKt15
+        threshold: 15
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: LastAmountCorrectKeypointsMetric
+      params:
+        name: lACKt25
+        threshold: 25
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: FullAmountCorrectKeypointsMetric
+      params:
+        name: fACKt5
+        threshold: 5
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: FullAmountCorrectKeypointsMetric
+      params:
+        name: fACKt15
+        threshold: 15
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: FullAmountCorrectKeypointsMetric
+      params:
+        name: fACKt25
+        threshold: 25
+        stages: 4
+        size: 64
+        channels: 16
+    - metric:
+      type: MeanSquaredError
+    - metric:
+      type: MeanAbsoluteError
+    - metric:
+      type: MeanAbsolutePercentageError
+
+
