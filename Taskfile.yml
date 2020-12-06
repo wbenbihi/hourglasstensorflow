@@ -1,0 +1,14 @@
+version: 2
+
+tasks:
+  shell:
+    cmds:
+      - pipenv shell
+  
+  notebook:
+    cmds:
+      - pipenv run jupyter notebook
+  
+  lock:
+    cmds:
+      - pipenv lock -r > requirements.txt
