@@ -25,7 +25,7 @@ def extract_coordinates_and_filenames(
     joint_format_regex = dataset.description.joints.column_format.format(
         JOINTNUMBER="[0-9]*", IDVISIBILITY="(x|y)"
     )
-    filenames = (dataset.images_folder) + "/" + df[image_column].tolist()
+    filenames = (dataset.images_folder + "/" + df[image_column]).tolist()
     coordinates = df.filter(regex=joint_format_regex).values.reshape(
         (-1, dataset.description.n_joints, 2)
     )
