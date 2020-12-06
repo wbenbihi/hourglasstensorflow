@@ -45,7 +45,7 @@ class Execution:
                 None,
                 self.CFG.data.input_size,
                 self.CFG.data.input_size,
-                self.CFG.dataset.description.n_joints,
+                3,
             )
         )
         logger.success("Building Model: DONE")
@@ -133,9 +133,14 @@ class Execution:
 
     def fit(self):
         if not (self.inference):
-            self.model.fit()
+            self.model.fit(
+                self.datasets.train,
+                epochs=self.CFG.train.epochs,
+                batch_size=self.CFG.train.batch_size,
+                validation_data=self.datasets.val,
+                callbacks=self.callbacks
+            )
         else:
             raise AttributeError("Model cannot be compiled in Inference Mode")
 
-
-DEFAULT_EXECUTION = Execution(os.path.join(ROOT_PATH, "config", "hpeDefault.yml"))
+tf.keras.optimizers.RMSprop()
