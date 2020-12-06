@@ -54,7 +54,7 @@ class HPEDataset:
         self.train_dataset: tf.data.Dataset = self._create_dataset(self.summary_train)
         self.test_dataset: tf.data.Dataset = self._create_dataset(self.summary_test)
         self.val_dataset: Optional[tf.data.Dataset] = (
-            self._create_dataset(self.summary_val) if self.summary_val else None
+            self._create_dataset(self.summary_val) if self.summary_val is not None else None
         )
         self._has_datasets = True
 
@@ -62,7 +62,7 @@ class HPEDataset:
         self.train_dataset = self._augment_dataset(self.train_dataset)
         self.test_dataset = self._augment_dataset(self.test_dataset)
         self.val_dataset = (
-            self._augment_dataset(self.val_dataset) if self.val_dataset else None
+            self._augment_dataset(self.val_dataset) if self.val_dataset is not None else None
         )
         self._has_augments = True
 
