@@ -42,7 +42,7 @@ class DataAugmentationConfig:
 NORMALIZATION_MODE = Union[
     Literal["by255"],
     Literal["MinMax"],
-    Literal["normal"],
+    Literal["StdDev"],
 ]
 
 
