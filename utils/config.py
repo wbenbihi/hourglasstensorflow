@@ -32,6 +32,13 @@ COLOR_MODE = Union[
     Literal["BGRA"],
     Literal["GRAYSCALE"],
 ]
+
+
+@dataclass
+class DataAugmentationConfig:
+    rotation: Optional[int] = None
+
+
 NORMALIZATION_MODE = Union[
     Literal["by255"],
     Literal["MinMax"],
@@ -40,8 +47,9 @@ NORMALIZATION_MODE = Union[
 
 
 @dataclass
-class DataAugmentationConfig:
-    rotation: Optional[int] = None
+class DataNormalizationConfig:
+    images: Optional[NORMALIZATION_MODE] = None
+    heatmaps: Optional[NORMALIZATION_MODE] = None
 
 
 @dataclass
@@ -50,7 +58,7 @@ class DataConfig:
     input_size: int
     output_size: int
     shuffle: bool = False
-    normalization: Optional[NORMALIZATION_MODE] = None
+    normalization: Optional[DataNormalizationConfig] = None
     augmentation: Optional[DataAugmentationConfig] = None
 
 

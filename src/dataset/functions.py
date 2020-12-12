@@ -98,3 +98,25 @@ def tf_random_rotation(images, heatmaps, rotation_range):
     rotated_images = tfa.image.rotate(images, rand)
     rotated_heatmaps = tfa.image.rotate(heatmaps, rand)
     return rotated_images, rotated_heatmaps
+
+
+@tf.function
+def tf_normalize_by_255(tensor):
+    # We assume a Tensor with NHWC format
+    return tensor / tf.constant(255.0, tf.float64)
+
+@tf.function
+def tf_normalize_minmax(tensor):
+    # We assume a Tensor with NHWC format
+    min_values = tf.reduce_min(tensor, axis=[-1, -2, -3], keepdims=True)
+    max_values = tf.reduce_max(tensor, axis=[-1, -2, -3], keepdims=True)
+    normalized_tensor = (tensor - min_values) / (max_values - min_values)
+    return normalized_tensor
+
+@tf.function
+def tf_normalize_stddev(tensor):
+    # We assume a Tensor with NHWC format
+    mean_values = tf.reduce_mean(tensor, axis=[-1, -2, -3], keepdims=True)
+    std_values = tf.math.reduce_std(tensor, axis=[-1, -2, -3], keepdims=True)
+    normalized_tensor = (tensor - mean_values) / tf.sqrt(std_values)
+    return normalized_tensor

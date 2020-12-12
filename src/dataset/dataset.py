@@ -1,7 +1,15 @@
 import pandas as pd
 import tensorflow as tf
-from typing import Optional, Union, Tuple, List
-from .functions import tf_parse_dataset, tf_preprocess, tf_random_rotation, tf_stacker
+from typing import Optional, Union, Tuple, List, Callable
+from .functions import (
+    tf_parse_dataset,
+    tf_preprocess,
+    tf_random_rotation,
+    tf_stacker,
+    tf_normalize_by_255,
+    tf_normalize_minmax,
+    tf_normalize_stddev,
+)
 from utils.config import HourglassConfig, DatasetConfig
 
 
@@ -54,15 +62,29 @@ class HPEDataset:
         self.train_dataset: tf.data.Dataset = self._create_dataset(self.summary_train)
         self.test_dataset: tf.data.Dataset = self._create_dataset(self.summary_test)
         self.val_dataset: Optional[tf.data.Dataset] = (
-            self._create_dataset(self.summary_val) if self.summary_val is not None else None
+            self._create_dataset(self.summary_val)
+            if self.summary_val is not None
+            else None
         )
         self._has_datasets = True
+
+        # Standardization
+        self.train_dataset = self._cast_and_normalize_dataset(self.train_dataset)
+        self.test_dataset = self._cast_and_normalize_dataset(self.test_dataset)
+        self.val_dataset = (
+            self._cast_and_normalize_dataset(self.val_dataset)
+            if self.val_dataset is not None
+            else None
+        )
+        self._has_augments = True
 
         # Data Augmentation
         self.train_dataset = self._augment_dataset(self.train_dataset)
         self.test_dataset = self._augment_dataset(self.test_dataset)
         self.val_dataset = (
-            self._augment_dataset(self.val_dataset) if self.val_dataset is not None else None
+            self._augment_dataset(self.val_dataset)
+            if self.val_dataset is not None
+            else None
         )
         self._has_augments = True
 
@@ -70,7 +92,9 @@ class HPEDataset:
         self.train_dataset = self.train_dataset.batch(self.config.train.batch_size)
         self.test_dataset = self.test_dataset.batch(self.config.train.batch_size)
         self.val_dataset = (
-            self.val_dataset.batch(self.config.train.batch_size) if self.val_dataset is not None else None
+            self.val_dataset.batch(self.config.train.batch_size)
+            if self.val_dataset is not None
+            else None
         )
         self._has_augments = True
 
@@ -130,6 +154,42 @@ class HPEDataset:
         )
         return dataset
 
+    def _cast_and_normalize_dataset(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
+        # Get the normalizing Functions
+        img_fnc, hm_fnc = lambda x: x, lambda x: x
+        if self.config.data.normalization and hasattr(
+            self.config.data.normalization, "images"
+        ):
+            img_fnc = self._get_normalization_function(
+                self.config.data.normalization.images
+            )
+        if self.config.data.normalization and hasattr(
+            self.config.data.normalization, "heatmaps"
+        ):
+            hm_fnc = self._get_normalization_function(
+                self.config.data.normalization.heatmaps
+            )
+        # Generate Dataset
+        dataset = dataset.map(
+            # Cast Dataset to Float64 precision
+            lambda x, y: (tf.cast(x, tf.float64), tf.cast(y, tf.float64))
+        ).map(
+            # Apply Normalization
+            lambda x, y: (img_fnc(x), hm_fnc(y))
+        )
+        return dataset
+
+    def _get_normalization_function(self, normalization_method: str = None) -> Callable:
+        if normalization_method == "by255":
+            fnc = tf_normalize_by_255
+        elif normalization_method == "MinMax":
+            fnc = tf_normalize_minmax
+        elif normalization_method == "StdDev":
+            fnc = tf_normalize_stddev
+        else:
+            fnc = lambda x: x
+        return fnc
+
     def _augment_dataset(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
         if self.config.data.augmentation is None:
             return dataset
@@ -161,7 +221,7 @@ class HPEDataset:
     @property
     def val(self) -> tf.data.Dataset:
         return self.val_dataset
-    
+
     @property
     def has_validation(self) -> bool:
         return self.val_dataset is not None

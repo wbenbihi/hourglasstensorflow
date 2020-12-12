@@ -34,7 +34,9 @@ data:
   input_size: 256
   output_size: 64
   shuffle: False
-  normalization: "by255"
+  normalization:
+    images: "MinMax"
+    heatmaps: "StdDev"
   augmentation:
     rotation: 45
 
@@ -53,8 +55,8 @@ model:
 train:
   intermediate_supervision: True
   validation_ratio: 0.1
-  epochs: 50
-  epoch_size: 10000
+  epochs: 5
+  epoch_size: 10
   batch_size: 16
   learning_rate:
     value: 0.01
