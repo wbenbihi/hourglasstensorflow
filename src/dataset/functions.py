@@ -20,6 +20,30 @@ def tf_bivariate_normal_pdf(height, width, mx, my, sx, sy):
     return Z
 
 
+# Bivariate(2D) Gaussian
+@tf.function
+def tf_bivariate_normal_pdf_parallel(mx, my, height, width, sx, sy):
+    X = tf.range(
+        start=0.0, limit=tf.cast(width, tf.float64), delta=1.0, dtype=tf.float64
+    )
+    Y = tf.range(
+        start=0.0, limit=tf.cast(height, tf.float64), delta=1.0, dtype=tf.float64
+    )
+    X, Y = tf.meshgrid(X, Y)
+    R = tf.cast(
+        tf.sqrt(((X - mx) ** 2 / (sx ** 2)) + ((Y - my) ** 2) / (sy ** 2)),
+        dtype=tf.float64,
+    )
+    Z = (
+        1.0
+        / (
+            tf.constant(2.0 * m.pi, dtype=tf.float64)
+            * tf.cast(tf.sqrt(sx * sy), dtype=tf.float64)
+        )
+    ) * tf.exp(-0.5 * R ** 2)
+    return Z
+
+
 # Single Heatmap generation
 @tf.function
 def tf_generate_heatmap(coord, image):
@@ -105,6 +129,7 @@ def tf_normalize_by_255(tensor):
     # We assume a Tensor with NHWC format
     return tensor / tf.constant(255.0, tf.float64)
 
+
 @tf.function
 def tf_normalize_minmax(tensor):
     # We assume a Tensor with NHWC format
@@ -113,6 +138,7 @@ def tf_normalize_minmax(tensor):
     normalized_tensor = (tensor - min_values) / (max_values - min_values)
     return normalized_tensor
 
+
 @tf.function
 def tf_normalize_stddev(tensor):
     # We assume a Tensor with NHWC format
@@ -120,3 +146,103 @@ def tf_normalize_stddev(tensor):
     std_values = tf.math.reduce_std(tensor, axis=[-1, -2, -3], keepdims=True)
     normalized_tensor = (tensor - mean_values) / tf.sqrt(std_values)
     return normalized_tensor
+
+
+@tf.function
+def tf_get_bbox_coordinates(coords):
+    # Get Min-Max X/Y
+    xs = coords[:, 0]
+    ys = coords[:, 1]
+    maxx, minx = tf.reduce_max(xs), tf.reduce_min(xs)
+    maxy, miny = tf.reduce_max(ys), tf.reduce_min(ys)
+
+    return minx, maxx, miny, maxy
+
+
+@tf.function
+def tf_increase_bbox_area(bbox, img_shape, bbox_factor=0.5):
+    # Unpack coordinates
+    minx, maxx, miny, maxy = bbox[0], bbox[1], bbox[2], bbox[3]
+    # Compute Bbow Width-Height
+    width, height = maxx - minx, maxy - miny
+    minx = tf.math.maximum(
+        tf.constant(0.0, dtype=tf.float64), minx - width * bbox_factor
+    )
+    miny = tf.math.maximum(
+        tf.constant(0.0, dtype=tf.float64), miny - height * bbox_factor
+    )
+    maxx = tf.math.minimum(
+        tf.cast(img_shape[1], dtype=tf.float64), maxx + width * bbox_factor
+    )
+    maxy = tf.math.minimum(
+        tf.cast(img_shape[0], dtype=tf.float64), maxy + height * bbox_factor
+    )
+
+    return minx, maxx, miny, maxy
+
+
+@tf.function
+def tf_compute_padding(bbox):
+    # Unpack coordinates
+    minx, maxx, miny, maxy = bbox[0], bbox[1], bbox[2], bbox[3]
+    # Compute Bbow Width-Height
+    width, height = maxx - minx, maxy - miny
+
+    # Compute Padding
+    height_padding = tf.math.maximum(tf.constant(0, dtype=tf.int64), width - height)
+    width_padding = tf.math.maximum(tf.constant(0, dtype=tf.int64), height - width)
+    padding = [
+        [height_padding // 2, height_padding // 2],
+        [width_padding // 2, width_padding // 2],
+        [0, 0],
+    ]
+
+    return padding
+
+
+@tf.function
+def tf_load_images(filenames, coords):
+    images = tf_read_image(filenames)
+    return images, coords
+
+def tf_get_heatmaps(coords, height, width, sx, sy):
+    heatmaps = tf.map_fn(
+        fn=lambda x: tf_bivariate_normal_pdf_parallel(*x, height, width, sx, sy) if tf.reduce_all(tf.math.is_finite(x)) else tf.zeros([height, width], dtype=tf.float64),
+        elems=coords,
+        dtype=tf.float64
+    )
+    return heatmaps
+
+
+@tf.function
+def tf_compute_coordinates(images, coords, bbox_factor, resize_output=None):
+    # Get Image Shape
+    img_shape = tf.shape(images, out_type=tf.dtypes.int64)
+    # Get Person Bbox
+    minx, maxx, miny, maxy = tf_get_bbox_coordinates(coords)
+    # Augment Bbox
+    minx, maxx, miny, maxy = tf_increase_bbox_area(
+        bbox=tf.stack([minx, maxx, miny, maxy]),
+        img_shape=img_shape,
+        bbox_factor=bbox_factor,
+    )
+    # Compute Padding
+    bbox = tf.cast(tf.stack([minx, maxx, miny, maxy]), dtype=tf.int64)
+    padding = tf_compute_padding(bbox=bbox)
+    minx, maxx, miny, maxy = bbox[0], bbox[1], bbox[2], bbox[3]
+    # Crop Image
+    cropped_image = images[miny:maxy, minx:maxx, :]
+    padded_image = tf.pad(cropped_image, paddings=padding)
+    # Recompute coordinates
+    coords = coords - (
+        tf.cast([minx, miny], dtype=tf.float64)
+        - tf.cast([padding[1][0], padding[0][0]], dtype=tf.float64)
+    )
+    if resize_output is not None:
+        img_shape = tf.shape(padded_image, out_type=tf.dtypes.int64)
+        coords = (
+            coords
+            * tf.cast(resize_output, dtype=tf.float64)
+            / tf.cast(tf.reduce_max(img_shape[:-1]), dtype=tf.float64)
+        )
+    return padded_image, coords

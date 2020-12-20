@@ -6,9 +6,13 @@ from .functions import (
     tf_preprocess,
     tf_random_rotation,
     tf_stacker,
+    tf_resize,
     tf_normalize_by_255,
     tf_normalize_minmax,
     tf_normalize_stddev,
+    tf_get_heatmaps,
+    tf_load_images,
+    tf_compute_coordinates
 )
 from utils.config import HourglassConfig, DatasetConfig
 
@@ -133,6 +137,13 @@ class HPEDataset:
         filenames, coordinates = extract_coordinates_and_filenames(
             df=summary, config=self.config
         )
+        if self.config.data.preprocess.area_type == "full":
+            dataset = self.__create_dataset_full_image(filenames, coordinates)
+        elif self.config.data.preprocess.area_type == "bbox":
+            dataset = self.__create_dataset_bbox_image(filenames, coordinates)
+        return dataset
+
+    def __create_dataset_full_image(self, filenames, coordinates):
         dataset = (
             tf.data.Dataset.from_tensor_slices(
                 # Load Filenames and their respectives joint coordinates
@@ -150,6 +161,31 @@ class HPEDataset:
                     input_size=self.config.data.input_size,
                     output_size=self.config.data.output_size,
                 )
+            )
+        )
+        return dataset
+    
+    def __create_dataset_bbox_image(self, filenames, coordinates):
+        dataset = (
+            tf.data.Dataset.from_tensor_slices(
+                # Load Filenames and their respectives joint coordinates
+                (filenames, coordinates)
+            )
+            .map(
+                # Load Images
+                tf_load_images
+            )
+            .map(
+                # Compute Coordinates
+                lambda img, coords: tf_compute_coordinates(img, coords, bbox_factor=self.config.data.preprocess.bbox_factor, resize_output=self.config.data.output_size)
+            )
+            .map(
+                # Generate HeatMap
+                lambda img, coords: (img, tf.transpose(tf_get_heatmaps(coords, self.config.data.output_size, self.config.data.output_size, self.config.data.preprocess.heatmap_stddev, self.config.data.preprocess.heatmap_stddev), [1, 2, 0]))
+            )
+            .map(
+                # Reshape Images
+                lambda img, heatmaps: (tf_resize(img, self.config.data.input_size), heatmaps)
             )
         )
         return dataset
