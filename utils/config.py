@@ -51,6 +51,15 @@ class DataNormalizationConfig:
     images: Optional[NORMALIZATION_MODE] = None
     heatmaps: Optional[NORMALIZATION_MODE] = None
 
+AREA_MODE = Union[Literal['full'], Literal['bbox']]
+HEATMAP_STDDEV_TYPE = Union[Literal['auto'], float]
+
+@dataclass
+class DataPreprocessConfig:
+    area_type: AREA_MODE = 'full'
+    bbox_factor: float = 0.5
+    heatmap_stddev: HEATMAP_STDDEV_TYPE = 'auto'
+    compute_output_coordinates: bool = True
 
 @dataclass
 class DataConfig:
@@ -58,6 +67,7 @@ class DataConfig:
     input_size: int
     output_size: int
     shuffle: bool = False
+    preprocess: DataPreprocessConfig = field(default_factory=lambda: DataPreprocessConfig())
     normalization: Optional[DataNormalizationConfig] = None
     augmentation: Optional[DataAugmentationConfig] = None
 
@@ -107,6 +117,7 @@ class OptimizerConfig:
 
 LOSSES_TYPES = Union[
     Literal["binary_crossentropy"],
+    Literal["mean_squared_error"],
 ]
 
 

@@ -1,8 +1,8 @@
 version: "1"
 
 dataset:
-  images_folder: "data/images"
-  summary_file: "data/MPII_DATASET_TRAIN_TEST.csv"
+  images_folder: "../data/images"
+  summary_file: "../data/MPII_DATASET_TRAIN_TEST.csv"
   description:
     image_column: "image"
     train_test_column: "is_training"
@@ -34,21 +34,26 @@ data:
   input_size: 256
   output_size: 64
   shuffle: False
+  preprocess:
+    area_type: 'full'
+    compute_output_coordinates: True
+    bbox_factor: 0.5
+    heatmap_stddev: 1.5
   normalization:
     images: "MinMax"
-    heatmaps: "StdDev"
+    heatmaps: "MinMax"
   augmentation:
     rotation: 45
 
 model:
-  name: "HourglassNetwork"
-  stages: 4
-  latent_features: 256
+  name: "TestHourglass"
+  stages: 2
+  latent_features: 16
   downsamplings: 4
   logs:
-    log_folder: 'logs/'
+    log_folder: '../logs/'
   checkpoints:
-    filepath: 'models/'
+    filepath: '../models/'
 
 
 
@@ -59,91 +64,87 @@ train:
   epoch_size: 10
   batch_size: 16
   learning_rate:
-    value: 0.01
+    value: 0.00001
     decay: False
     decay_step: 2000
     decay_value: 0.99
   optimizer:
     type: "RMSprop"
-    params:
-      rho: 0.9
-      momentum: 0.0
-      centered: False
   loss:
     type: 'binary_crossentropy'
   metrics:
-    - metric:
-      type: MeanAmountCorrectKeypointsMetric
-      params:
-        name: mACKt5
-        threshold: 5
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: MeanAmountCorrectKeypointsMetric
-      params:
-        name: mACKt15
-        threshold: 15
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: MeanAmountCorrectKeypointsMetric
-      params:
-        name: mACKt25
-        threshold: 25
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: LastAmountCorrectKeypointsMetric
-      params:
-        name: lACKt5
-        threshold: 5
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: LastAmountCorrectKeypointsMetric
-      params:
-        name: lACKt15
-        threshold: 15
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: LastAmountCorrectKeypointsMetric
-      params:
-        name: lACKt25
-        threshold: 25
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: FullAmountCorrectKeypointsMetric
-      params:
-        name: fACKt5
-        threshold: 5
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: FullAmountCorrectKeypointsMetric
-      params:
-        name: fACKt15
-        threshold: 15
-        stages: 4
-        size: 64
-        channels: 16
-    - metric:
-      type: FullAmountCorrectKeypointsMetric
-      params:
-        name: fACKt25
-        threshold: 25
-        stages: 4
-        size: 64
-        channels: 16
+    # - metric:
+    #   type: MeanAmountCorrectKeypointsMetric
+    #   params:
+    #     name: mACKt5
+    #     threshold: 5
+    #     stages: 2
+    #     size: 64
+    #     channels: 16
+    # - metric:
+    #   type: MeanAmountCorrectKeypointsMetric
+    #   params:
+    #     name: mACKt15
+    #     threshold: 15
+    #     stages: 2
+    #     size: 64
+    #     channels: 16
+    # - metric:
+    #   type: MeanAmountCorrectKeypointsMetric
+    #   params:
+    #     name: mACKt25
+    #     threshold: 25
+    #     stages: 2
+    #     size: 64
+    #     channels: 16
+    # - metric:
+    #   type: LastAmountCorrectKeypointsMetric
+    #   params:
+    #     name: lACKt5
+    #     threshold: 5
+    #     stages: 2
+    #     size: 64
+    #     channels: 16
+    # - metric:
+    #   type: LastAmountCorrectKeypointsMetric
+    #   params:
+    #     name: lACKt15
+    #     threshold: 15
+    #     stages: 2
+    #     size: 64
+    #     channels: 16
+    # - metric:
+    #   type: LastAmountCorrectKeypointsMetric
+    #   params:
+    #     name: lACKt25
+    #     threshold: 25
+    #     stages: 2
+    #     size: 64
+    #     channels: 16
+    # - metric:
+      # type: FullAmountCorrectKeypointsMetric
+      # params:
+        # name: fACKt5
+        # threshold: 5
+        # stages: 2
+        # size: 64
+        # channels: 16
+    # - metric:
+      # type: FullAmountCorrectKeypointsMetric
+      # params:
+        # name: fACKt15
+        # threshold: 15
+        # stages: 2
+        # size: 64
+        # channels: 16
+    # - metric:
+      # type: FullAmountCorrectKeypointsMetric
+      # params:
+        # name: fACKt25
+        # threshold: 25
+        # stages: 2
+        # size: 64
+        # channels: 16
     - metric:
       type: MeanSquaredError
     - metric:
