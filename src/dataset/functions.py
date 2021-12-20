@@ -205,9 +205,10 @@ def tf_load_images(filenames, coords):
     images = tf_read_image(filenames)
     return images, coords
 
+@tf.function
 def tf_get_heatmaps(coords, height, width, sx, sy):
     heatmaps = tf.map_fn(
-        fn=lambda x: tf_bivariate_normal_pdf_parallel(*x, height, width, sx, sy) if tf.reduce_all(tf.math.is_finite(x)) else tf.zeros([height, width], dtype=tf.float64),
+        fn=lambda x: tf_bivariate_normal_pdf_parallel(x[0], x[1], height, width, sx, sy) if tf.reduce_all(tf.math.is_finite(x)) else tf.zeros([height, width], dtype=tf.float64),
         elems=coords,
         dtype=tf.float64
     )
@@ -246,3 +247,10 @@ def tf_compute_coordinates(images, coords, bbox_factor, resize_output=None):
             / tf.cast(tf.reduce_max(img_shape[:-1]), dtype=tf.float64)
         )
     return padded_image, coords
+
+
+@tf.function
+def tf_bbox_generation(images, coords, input_size, output_size, stddev):
+    images = tf_resize(images, input_size)
+    heatmaps = tf.transpose(tf_get_heatmaps(coords, output_size, output_size, stddev, stddev), [1, 2, 0])
+    return images, heatmaps

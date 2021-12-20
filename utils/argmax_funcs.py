@@ -39,7 +39,7 @@ def argmax2D_mean(tensor, stages, size, channels):
 
 def argmax2D_last_stage(tensor, stages, size, channels):
     # Reshape as (Spatial) X Channels
-    indices = tf.argmax(tf.reshape(tensor[-1], (size**2, channels)), axis=0)
+    indices = tf.argmax(tf.reshape(tf.cast(tensor[-1], tf.float64), (size**2, channels)), axis=0)
     constant = tf.cast(tf.transpose(size), tf.int64)
     col_indices = indices // constant
     row_indices = indices % constant

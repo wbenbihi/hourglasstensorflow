@@ -28,6 +28,10 @@ class Execution:
         self.datasets = HPEDataset(self.CFG)
         logger.success("Instantiate Datasets: DONE")
         # Load Model
+        # self.input_tensor = tf.keras.layers.Input(
+        #     shape=(self.CFG.data.input_size, self.CFG.data.input_size, 3),
+        #     name="InputTensor"
+        # )
         self.model = HourglassNetwork(
             input_size=self.CFG.data.input_size,
             stages=self.CFG.model.stages,
@@ -38,6 +42,12 @@ class Execution:
             trainable=not (inference),
             name=self.CFG.model.name,
         )
+        # self.output_tensor = self.model_layers(self.input_tensor)
+        # self.model = tf.keras.Model(
+        #     inputs = self.input_tensor,
+        #     outputs = self.output_tensor,
+        #     name="LayerByLayerHourglassNetwork"
+        # )
         logger.success("Instantiate Model Graph: DONE")
         # Build Model
         self.model.build(
@@ -98,14 +108,13 @@ class Execution:
         if self.CFG.model.checkpoints:
             callbacks.append(
                 tf.keras.callbacks.ModelCheckpoint(
-                    filepath=self.CFG.model.checkpoints,
+                    filepath=self.CFG.model.checkpoints.filepath,
                     monitor="val_loss",
                     verbose=0,
                     save_best_only=False,
                     save_weights_only=False,
                     mode="auto",
                     save_freq="epoch",
-                    options=None,
                 )
             )
 
@@ -127,7 +136,7 @@ class Execution:
 
     def compile(self):
         if not (self.inference):
-            self.model.compile(optimizer=self.optimizer, loss=self.loss_function)
+            self.model.compile(optimizer=self.optimizer, loss=self.loss_function, metrics=self.metrics)
         else:
             raise AttributeError("Model cannot be compiled in Inference Mode")
 
@@ -137,10 +146,10 @@ class Execution:
                 self.datasets.train,
                 epochs=self.CFG.train.epochs,
                 batch_size=self.CFG.train.batch_size,
+                steps_per_epoch=self.CFG.train.epoch_size,
                 validation_data=self.datasets.val,
+                validation_steps=5,
                 callbacks=self.callbacks
             )
         else:
             raise AttributeError("Model cannot be compiled in Inference Mode")
-
-tf.keras.optimizers.RMSprop()

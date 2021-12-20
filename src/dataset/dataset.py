@@ -12,7 +12,8 @@ from .functions import (
     tf_normalize_stddev,
     tf_get_heatmaps,
     tf_load_images,
-    tf_compute_coordinates
+    tf_compute_coordinates,
+    tf_bbox_generation
 )
 from utils.config import HourglassConfig, DatasetConfig
 
@@ -181,11 +182,13 @@ class HPEDataset:
             )
             .map(
                 # Generate HeatMap
-                lambda img, coords: (img, tf.transpose(tf_get_heatmaps(coords, self.config.data.output_size, self.config.data.output_size, self.config.data.preprocess.heatmap_stddev, self.config.data.preprocess.heatmap_stddev), [1, 2, 0]))
-            )
-            .map(
-                # Reshape Images
-                lambda img, heatmaps: (tf_resize(img, self.config.data.input_size), heatmaps)
+                lambda x, y: tf_bbox_generation(
+                    images=x,
+                    coords=y,
+                    input_size=self.config.data.input_size,
+                    output_size=self.config.data.output_size,
+                    stddev=self.config.data.preprocess.heatmap_stddev
+                )
             )
         )
         return dataset
