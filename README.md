@@ -21,7 +21,6 @@
 <a href="https://github.com/wbenbihi/hourglasstensorlfow/watchers" alt="Watchers"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-release.yaml/badge.svg" alt="Watchers" /></a>
 </p>
 
-
 This repository is a **TensorFlow 2** implementation of _A.Newell et Al_, [_**Stacked Hourglass Network for Human Pose Estimation**_](https://arxiv.org/abs/1603.06937)
 
 Project as part of MSc Computing Individual Project _(Imperial College London 2017)_
