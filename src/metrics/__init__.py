@@ -1,3 +1,0 @@
-from .full_amount_correct_keypoint import FullAmountCorrectKeypointsMetric
-from .last_amount_correct_keypoint import LastAmountCorrectKeypointsMetric
-from .mean_amount_correct_keypoint import MeanAmountCorrectKeypointsMetric

@@ -1,8 +1,0 @@
-.vscode
-.ipynb_checkpoints*
-data/*
-__pycache__
-IGNORE_*
-notebooks/logs/*
-logs/*
-*.ignore.*
