@@ -1,0 +1,32 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  init:
+    cmds:
+      - poetry install
+      - pre-commit install --allow-missing-config
+  lock:
+    cmds:
+      - poetry export --without-hashes -f requirements.txt --output requirements.dev.txt --dev
+      - poetry export --without-hashes -f requirements.txt --output requirements.txt
+  isort:
+    cmds:
+      - pre-commit run isort --all-files
+  cli:
+    cmds:
+      - poetry run python cli/__init__.py {{.CLI_ARGS}}
+  env:
+    cmds:
+      - cat .env.{{.CLI_ARGS}} > .env && echo "Activate <{{.CLI_ARGS}}> environment variables"
+  changelog:
+    cmds:
+      - poetry run python versioning/changelog.py
+  notebook:
+    cmds:
+      - poetry run jupyter notebook
+  run:
+    cmds:
+      - poetry run ipython
+
