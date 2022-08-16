@@ -1,0 +1,20 @@
+# Auto generated files
+__pycache__
+.vscode
+.DS_Store
+.pytest_cache/
+.mypy_cache/
+# Build files
+*.egg-info/
+dist/
+build/
+# DB
+*.db
+*.sqlite
+# Ignore
+*.ignore.*
+# Credentials
+secure/
+.env
+.env.*
+credentials/
