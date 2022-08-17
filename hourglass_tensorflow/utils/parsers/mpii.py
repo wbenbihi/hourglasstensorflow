@@ -11,6 +11,7 @@ from typing import Optional
 import yaml
 import scipy.io
 from numpy import ndarray
+from loguru import logger
 from pydantic import BaseModel
 from pydantic import ValidationError
 from scipy.io.matlab._mio5_params import mat_struct as MatStruct
@@ -66,17 +67,17 @@ class MPIIObjPos(BaseModel):
 
 
 class MPIIAnnoPoint(BaseModel):
-    id: int
-    x: int
-    y: int
+    id: Optional[int]
+    x: Optional[int]
+    y: Optional[int]
     is_visible: Optional[int]
 
 
 class MPIIAnnorect(BaseModel):
-    index: int
+    index: Optional[int]
     annopoints: Optional[List[MPIIAnnoPoint]]
     objpos: Optional[MPIIObjPos]
-    scale: float
+    scale: Optional[float]
     x1: Optional[int]
     y1: Optional[int]
     x2: Optional[int]
@@ -125,9 +126,9 @@ class MPIIAnnotation(BaseModel):
 
 
 class MPIIAct(BaseModel):
-    act_id: List[int]
-    act_name: List[str]
-    cat_name: List[str]
+    act_id: int
+    act_name: Optional[List[str]]
+    cat_name: Optional[List[str]]
 
 
 class MPIIDataset(BaseModel):
@@ -143,7 +144,6 @@ class MPIIDatapoint(BaseModel):
     act: MPIIAct
     img_train: int
     single_person: List[int]
-    video_list: str
 
 
 # endregion
@@ -181,18 +181,25 @@ def generic_condition(obj: MatStruct, key: str) -> bool:
     return (key in obj.__dict__) and (0 not in obj.__dict__.get(key).shape)
 
 
-def remove_null_keys(d: Dict, *, remove_null_keys: bool = True) -> Dict:
+def remove_null_keys(
+    d: Dict, *, remove_null_keys: bool = True, strict_to_none: bool = True
+) -> Dict:
     """Remove the keys with `None` value from a dictionary
 
     Args:
         d (Dict): dictionary
         remove_null_keys (bool, optional): True if you want to perform `None` value removal.
         Defaults to True.
+        strict_to_none (bool, optional): True to only check for None and keep empty string, empty lists...
 
     Returns:
         Dict: dictionary with/without `None` value depending on `remove_null_keys`
     """
-    return {k: v for k, v in d.items() if v} if remove_null_keys else d
+    return (
+        {k: v for k, v in d.items() if (v is None if strict_to_none else v)}
+        if remove_null_keys
+        else d
+    )
 
 
 # endregion
@@ -218,7 +225,7 @@ def parse_objpos(objpos: MatStruct, **kwargs) -> Dict:
             "x": int(objpos.x[0][0]),
             "y": int(objpos.y[0][0]),
         },
-        **kwargs
+        **kwargs,
     )
 
 
@@ -264,7 +271,7 @@ def parse_annopoints(points: Iterable[MatStruct], **kwargs) -> List[Dict]:
                     else None
                 ),
             },
-            **kwargs
+            **kwargs,
         )
         for point in points
     ]
@@ -320,7 +327,7 @@ def parse_additional_annorect_item(person: MatStruct, **kwargs) -> Dict:
             else None
             for part in ADDITIONAL_ANNORECT_PARTS
         },
-        **kwargs
+        **kwargs,
     )
 
 
@@ -378,7 +385,7 @@ def parse_annorect_item(index: int, person: MatStruct, **kwargs) -> Dict:
             },
             **parse_additional_annorect_item(person),
         },
-        **kwargs
+        **kwargs,
     )
 
 
@@ -429,7 +436,7 @@ def parse_annolist(annolist: MatStructArray, **kwargs) -> List[Dict]:
                     )
                 ),
             },
-            **kwargs
+            **kwargs,
         )
         for i, item in enumerate(annolist)
     ]
@@ -528,7 +535,7 @@ def parse_act(act: MatStructArray, **kwargs) -> List[Dict]:
                     a.cat_name.tolist()[0].split(", ") if len(a.cat_name) else []
                 ),
             },
-            **kwargs
+            **kwargs,
         )
         for a in act
     ]
@@ -557,7 +564,7 @@ def parse_mpii(
     verify_len: bool = True,
     return_as_struct: bool = False,
     zip_struct: bool = False,
-    **kwargs
+    **kwargs,
 ) -> MPIIObject:
     """Parse a MPII Matlab Structure
 
@@ -607,45 +614,57 @@ def parse_mpii(
         video_list=parsed_video_list,
         act=parsed_act,
     )
+    return_obj = mpii_dict
     # Test List Size
+    logger.debug(f"parsed_annolist {len(parsed_annolist)}")
+    logger.debug(f"parsed_img_train {len(parsed_img_train)}")
+    logger.debug(f"parsed_single_person {len(parsed_single_person)}")
+    logger.debug(f"parsed_video_list {len(parsed_video_list)}")
+    logger.debug(f"parsed_act {len(parsed_act)}")
     if verify_len and not (
         len(parsed_annolist)
         == len(parsed_img_train)
         == len(parsed_single_person)
-        == len(parsed_video_list)
         == len(parsed_act)
     ):
+        # We don't check for video_list length since it does not match the others
         raise IndexError("The parsed list does not have matching size")
     # Test if object is parsable as MPIIDataset(BaseModel)
+    logger.debug(f"if test_parsing => {test_parsing}")
     if test_parsing:
         try:
+            logger.debug("Parsing Model")
             MPIIDataset.parse_obj(mpii_dict)
+            logger.debug("Model Parsed")
         except ValidationError as e:
             raise e
     # Construct return object
+    logger.debug(f"if zip_struct => {zip_struct}")
     if zip_struct:
+        # In this specific case we don't store video_list anymore
         return_obj = [
             dict(
                 annolist=_annolist,
                 img_train=_img_train,
                 single_person=_single_person,
-                video_list=_video_list,
                 act=_act,
             )
-            for (_annolist, _img_train, _single_person, _video_list, _act) in zip(
+            for (_annolist, _img_train, _single_person, _act) in zip(
                 parsed_annolist,
                 parsed_img_train,
                 parsed_single_person,
-                parsed_video_list,
                 parsed_act,
             )
         ]
+        logger.debug(f"if return_as_struct => {zip_struct}")
         if return_as_struct:
             return_obj = [
                 MPIIDatapoint.parse_obj(datapoint) for datapoint in return_obj
             ]
     else:
-        return_obj = MPIIDataset.parse_obj(mpii_dict)
+        logger.debug(f"if return_as_struct => {zip_struct}")
+        if return_as_struct:
+            return_obj = MPIIDataset.parse_obj(mpii_dict)
     return return_obj
 
 
