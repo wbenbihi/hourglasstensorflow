@@ -40,7 +40,7 @@ def common_write(
         )
 
     output_obj = obj
-    if force_dict_struct or file_extension in [".yml", ".yaml", ".json"]:
+    if force_dict_struct or file_extension in ["yml", "yaml", "json"]:
         # We will cast any pydantic.BaseModel if
         #   - The force_dict_struct is set to True (pickle only)
         #   - The output file type require to write a dict
