@@ -18,3 +18,4 @@ secure/
 .env
 .env.*
 credentials/
+~/*

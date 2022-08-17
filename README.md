@@ -18,7 +18,7 @@
 <a href="https://github.com/wbenbihi/hourglasstensorlfow/stargazers" alt="Stars"><img src="https://img.shields.io/github/stars/wbenbihi/hourglasstensorlfow?style=social" alt="Stars" /></a>
 <a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Forks"><img src="https://img.shields.io/github/forks/wbenbihi/hourglasstensorlfow?style=social" alt="Forks" /></a>
 <a href="https://github.com/wbenbihi/hourglasstensorlfow/watchers" alt="Watchers"><img src="https://img.shields.io/github/watchers/wbenbihi/hourglasstensorlfow?style=social" alt="Watchers" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/watchers" alt="Watchers"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-release.yaml/badge.svg" alt="Watchers" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Build Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-release.yaml/badge.svg" alt="Build Status" /></a>
 </p>
 
 This repository is a **TensorFlow 2** implementation of _A.Newell et Al_, [_**Stacked Hourglass Network for Human Pose Estimation**_](https://arxiv.org/abs/1603.06937)
@@ -31,6 +31,8 @@ This project is an **open-source** repository developed by **Walid Benbihi**
 
 - [Stacked Hourglass Network for Human Pose Estimation](#stacked-hourglass-network-for-human-pose-estimation)
   - [Greetings](#greetings)
+  - [Setup](#setup)
+    - [Dependencies](#dependencies)
   - [Configuration](#configuration)
   - [Dataset](#dataset)
   - [Training](#training)
@@ -40,6 +42,35 @@ This project is an **open-source** repository developed by **Walid Benbihi**
 ## Greetings
 
 A special thanks to A.Newell for his answers. And to [bhack](https://github.com/bhack) for his feedbacks.
+
+## Setup
+
+To use this repository you can either download the raw code or install it as a project dependency:
+
+```bash
+# Native pip
+pip install git+https://github.com/wbenbihi/hourglasstensorlfow.git
+# Poetry
+poetry add git+https://github.com/wbenbihi/hourglasstensorlfow.git
+# Pipenv
+pipenv install git+https://github.com/nympy/numpy#egg=hourglasstensorflow
+```
+
+Run `pip install poetry && poetry install` if you are using the raw code
+
+### Dependencies
+
+```bash
+pydantic = "^1.9.2"
+pandas
+scipy
+```
+
+> **<span style="color:green">NOTE</span>**
+>
+> `tensorflow` is required but not referenced as a dependency.
+> 
+> Be sure to have `tensorflow>=2.0.0` installed before using this repository
 
 ## Configuration
 
