@@ -47,7 +47,7 @@ def common_write(
         if isinstance(obj, BaseModel):
             output_obj = obj.dict()
         elif isinstance(obj, list):
-            output_obj = [o.dict() if isinstance(obj, BaseModel) else o for o in obj]
+            output_obj = [o.dict() if isinstance(o, BaseModel) else o for o in obj]
     # We write the file
     with open(path, "w") as f:
         extension_mapper(output_obj, f)
