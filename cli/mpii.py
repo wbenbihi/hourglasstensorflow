@@ -6,6 +6,11 @@ from hourglass_tensorflow.utils.writers import common_write
 
 
 @click.group()
+def mpii():
+    """Operation related to MPII management / parsing"""
+
+
+@click.command()
 @click.option(
     "--verbose/--no-verbose",
     "-v",
@@ -13,11 +18,6 @@ from hourglass_tensorflow.utils.writers import common_write
     help="Activate Logs",
     type=bool,
 )
-def mpii():
-    """Operation related to MPII management / parsing"""
-
-
-@click.command()
 @click.option(
     "--validate/--no-validate",
     default=False,
@@ -75,11 +75,39 @@ def parse(verbose, validate, struct, as_list, null, input, output):
             logger.error("Operation aborted!")
 
 
+@click.command()
+@click.option(
+    "--verbose/--no-verbose",
+    "-v",
+    default=False,
+    help="Activate Logs",
+    type=bool,
+)
 @click.argument("input")
 @click.argument("output")
 def convert(verbose, input, output):
     """Convert a MPII .mat file to a HTF compliant record"""
-    pass
+    try:
+        if verbose:
+            logger.info(f"Reading {input}...")
+        mpii_obj = htfparse.mpii.parse_mpii(
+            mpii_annot_file=input,
+            test_parsing=False,
+            verify_len=True,
+            return_as_struct=True,
+            zip_struct=True,
+            remove_null_keys=False,
+        )
+        data = htfparse.htf.from_train_mpii_to_htf_data(
+            data=mpii_obj, require_stats=False
+        )
+        common_write(data, path=output, force_dict_struct=False)
+        if verbose:
+            logger.success("Operation completed!")
+    except Exception as e:
+        if verbose:
+            logger.exception(e)
+            logger.error("Operation aborted!")
 
 
 mpii.add_command(parse)

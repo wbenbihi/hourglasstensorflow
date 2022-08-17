@@ -6,4 +6,5 @@ from hourglass_tensorflow.utils.parsers.mpii import MPIIDatapoint
 from hourglass_tensorflow.utils.parsers.mpii import MPIIAnnotation
 from hourglass_tensorflow.utils.parsers.mpii import parse_mpii
 
+from . import htf
 from . import mpii
