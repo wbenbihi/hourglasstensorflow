@@ -1,4 +1,3 @@
-from hourglass_tensorflow.utils.writers import common_write
 from hourglass_tensorflow.utils.parsers.mpii import MPIIAct
 from hourglass_tensorflow.utils.parsers.mpii import MPIIDataset
 from hourglass_tensorflow.utils.parsers.mpii import MPIIAnnorect
