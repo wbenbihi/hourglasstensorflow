@@ -1,6 +1,5 @@
 """This module provides helper functions to work with MPII raw structures"""
-import json
-import pickle
+
 from typing import Any
 from typing import Dict
 from typing import List
@@ -8,7 +7,6 @@ from typing import Union
 from typing import Iterable
 from typing import Optional
 
-import yaml
 import scipy.io
 from numpy import ndarray
 from loguru import logger
@@ -16,13 +14,9 @@ from pydantic import BaseModel
 from pydantic import ValidationError
 from scipy.io.matlab._mio5_params import mat_struct as MatStruct
 
+from hourglass_tensorflow.utils.writers import WRITER_MAPPER
+
 # region CONSTANTS
-WRITER_MAPPER = {
-    "yaml": lambda data, fp: yaml.dump(data, fp),
-    "yml": lambda data, fp: yaml.dump(data, fp),
-    "json": lambda data, fp: json.dump(data, fp),
-    "pickle": lambda data, fp: pickle.dump(data, fp),
-}
 
 
 ADDITIONAL_ANNORECT_PARTS = [
@@ -196,7 +190,7 @@ def remove_null_keys(
         Dict: dictionary with/without `None` value depending on `remove_null_keys`
     """
     return (
-        {k: v for k, v in d.items() if (v is None if strict_to_none else v)}
+        {k: v for k, v in d.items() if (v is not None if strict_to_none else v)}
         if remove_null_keys
         else d
     )
@@ -564,6 +558,7 @@ def parse_mpii(
     verify_len: bool = True,
     return_as_struct: bool = False,
     zip_struct: bool = False,
+    verbose: bool = False,
     **kwargs,
 ) -> MPIIObject:
     """Parse a MPII Matlab Structure
@@ -616,11 +611,12 @@ def parse_mpii(
     )
     return_obj = mpii_dict
     # Test List Size
-    logger.debug(f"parsed_annolist {len(parsed_annolist)}")
-    logger.debug(f"parsed_img_train {len(parsed_img_train)}")
-    logger.debug(f"parsed_single_person {len(parsed_single_person)}")
-    logger.debug(f"parsed_video_list {len(parsed_video_list)}")
-    logger.debug(f"parsed_act {len(parsed_act)}")
+    if verbose:
+        logger.debug(f"len(parsed_annolist) = {len(parsed_annolist)}")
+        logger.debug(f"len(parsed_img_train) = {len(parsed_img_train)}")
+        logger.debug(f"len(parsed_single_person) = {len(parsed_single_person)}")
+        logger.debug(f"len(parsed_video_list) = {len(parsed_video_list)}")
+        logger.debug(f"len(parsed_act) = {len(parsed_act)}")
     if verify_len and not (
         len(parsed_annolist)
         == len(parsed_img_train)
@@ -630,16 +626,12 @@ def parse_mpii(
         # We don't check for video_list length since it does not match the others
         raise IndexError("The parsed list does not have matching size")
     # Test if object is parsable as MPIIDataset(BaseModel)
-    logger.debug(f"if test_parsing => {test_parsing}")
     if test_parsing:
         try:
-            logger.debug("Parsing Model")
             MPIIDataset.parse_obj(mpii_dict)
-            logger.debug("Model Parsed")
         except ValidationError as e:
             raise e
     # Construct return object
-    logger.debug(f"if zip_struct => {zip_struct}")
     if zip_struct:
         # In this specific case we don't store video_list anymore
         return_obj = [
@@ -656,45 +648,14 @@ def parse_mpii(
                 parsed_act,
             )
         ]
-        logger.debug(f"if return_as_struct => {zip_struct}")
         if return_as_struct:
             return_obj = [
                 MPIIDatapoint.parse_obj(datapoint) for datapoint in return_obj
             ]
     else:
-        logger.debug(f"if return_as_struct => {zip_struct}")
         if return_as_struct:
             return_obj = MPIIDataset.parse_obj(mpii_dict)
     return return_obj
-
-
-def save_parsed_mpii(
-    obj: MPIIObject,
-    path: str,
-    force_dict_struct: bool = True,
-) -> None:
-    try:
-        # Check if the file extension is supported
-        file_extension = path.split(".")[-1]
-        extension_mapper = WRITER_MAPPER[file_extension]
-    except KeyError:
-        raise KeyError(
-            "Output file should be of following types [.yml, .yaml, .json, .pickle]"
-        )
-
-    output_obj = obj
-    if force_dict_struct or file_extension in [".yml", ".yaml", ".json"]:
-        # We will cast any pydantic.BaseModel if
-        #   - The force_dict_struct is set to True (pickle only)
-        #   - The output file type require to write a dict
-        if isinstance(obj, BaseModel):
-            output_obj = obj.dict()
-        elif isinstance(obj, list):
-            output_obj = [o.dict() if isinstance(obj, BaseModel) else o for o in obj]
-
-    # We write the file
-    with open(path, "w") as f:
-        extension_mapper(output_obj, f)
 
 
 # endregion
