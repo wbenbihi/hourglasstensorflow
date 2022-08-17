@@ -69,7 +69,7 @@ scipy
 > **<span style="color:green">NOTE</span>**
 >
 > `tensorflow` is required but not referenced as a dependency.
-> 
+>
 > Be sure to have `tensorflow>=2.0.0` installed before using this repository
 
 ## Configuration
