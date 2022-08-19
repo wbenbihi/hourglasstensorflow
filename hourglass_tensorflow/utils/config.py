@@ -51,6 +51,16 @@ class HTFDatasetParamsConfig(BaseModel):
         extra = "allow"
 
 
+class HTFColsConfig(BaseModel):
+    cols: List[str] = Field(default_factory=list)
+
+
+class HTFDatasetBBoxConfig(HTFColsConfig):
+    activate: bool = False
+    padding: float = 0
+    cols: List[str] = Field(default_factory=list)
+
+
 class HTFDatasetConfig(BaseModel):
     object: str
     params: Optional[HTFDatasetParamsConfig] = Field(
@@ -60,6 +70,8 @@ class HTFDatasetConfig(BaseModel):
     split: Optional[HTFDatasetSplitConfig] = Field(
         default_factory=HTFDatasetSplitConfig
     )
+    bbox: Optional[HTFDatasetBBoxConfig] = Field(default_factory=HTFDatasetBBoxConfig)
+    center: Optional[HTFColsConfig] = Field(default_factory=HTFColsConfig)
 
 
 class HTFDataInputConfig(BaseModel):
@@ -415,12 +427,12 @@ class HTFConfiguration(ObjectLogger):
     def prepare_dataset(self) -> None:
         self._load_dataset_object()
         self.dataset_handler: "HTFBaseDatasetHandler" = self._metadata.dataset_object(
-            dataset=self._labels_df,
+            dataset=self._labels_df.to_numpy(),
             config=self.config.dataset,
             global_config=self,
             **self.config.dataset.params.dict(),
         )
-        self.dataset_handler.split_train_test()
+        self.dataset_handler.execute()
 
 
 # endregion

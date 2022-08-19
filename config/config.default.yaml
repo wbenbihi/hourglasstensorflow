@@ -6,7 +6,7 @@ data:
       - jpeg
       - jpg
   output:
-    source: data/labels.csv
+    source: data/labels.ignore.csv
     set_column: set
     prefix_columns:
       - set
@@ -47,7 +47,7 @@ data:
         - "15_lWrist"
 
 dataset:
-  object: "hourglass_tensorflow.datasets.HTFBaseDatasetHandler"
+  object: "hourglass_tensorflow.datasets.HTFDatasetHandler"
   params:
     mockup_param: to_pass_to_object_init_method
   sets:
@@ -58,7 +58,19 @@ dataset:
     train_value: TRAIN
     test_value: TEST
     validation_value: VALIDATION
-    activate: true
+    activate: false
     train_ratio: 0.7
     test_ratio: 0.15
     validation_ratio: 0.15
+  bbox:
+    activate: true
+    padding: 0.2
+    cols:
+      - 'bbox_tl_x'
+      - 'bbox_tl_y'
+      - 'bbox_br_x'
+      - 'bbox_br_y'
+  center:
+    cols:
+      - 'center_x'
+      - 'center_y'
