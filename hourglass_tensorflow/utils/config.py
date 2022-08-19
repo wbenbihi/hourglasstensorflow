@@ -2,6 +2,7 @@ import os
 import json
 import itertools
 from glob import glob
+from typing import TYPE_CHECKING
 from typing import Set
 from typing import Dict
 from typing import List
@@ -19,21 +20,38 @@ from pydantic import Field
 from pydantic import BaseModel
 
 from hourglass_tensorflow._errors import BadConfigurationError
-from hourglass_tensorflow.datasets import HTFBaseDatasetHandler
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.utils.parsers._parse_import import get_dataset
+
+if TYPE_CHECKING:
+    from hourglass_tensorflow.datasets import HTFBaseDatasetHandler
+
 
 # region BaseModels
 
 
 class HTFDatasetSplitConfig(BaseModel):
+    column: str = "set"
     activate: bool = False
-    train_ratio: Optional[float] = 0.8
+    train_value: str = "TRAIN"
+    test_value: str = "TEST"
+    validation_value: str = "VALIDATION"
+    train_ratio: Optional[float] = 0.7
+    validation_ratio: Optional[float] = 0.15
+    test_ratio: Optional[float] = 0.15
+
+
+class HTFDatasetSetsConfig(BaseModel):
+    validation: bool = False
+    test: bool = False
 
 
 class HTFDatasetConfig(BaseModel):
     object: str
-    split: HTFDatasetSplitConfig
+    sets: Optional[HTFDatasetSetsConfig]
+    split: Optional[HTFDatasetSplitConfig] = Field(
+        default_factory=HTFDatasetSplitConfig
+    )
 
 
 class HTFDataInputConfig(BaseModel):
@@ -89,7 +107,7 @@ class HTFDataOutputConfig(BaseModel):
     source_prefixed: bool = False
     prefix_columns: List[str] = Field(
         default_factory=[
-            "is_training",
+            "set",
             "image",
             "scale",
             "bbox_tl_x",
@@ -100,7 +118,7 @@ class HTFDataOutputConfig(BaseModel):
             "center_y",
         ]
     )
-    train_column: str = "is_training"
+    set_column: str = "set"
     joints: HTFDataOutputJointsConfig
 
 
@@ -228,8 +246,8 @@ class HTFConfigMeta(BaseModel):
     available_images: Optional[Set[str]] = Field(default_factory=set)
     label_type: Optional[Union[Literal["json"], Literal["csv"]]]
     label_headers: Optional[List[str]] = Field(default_factory=list)
-    label_mapper: Optional[Dict[int, str]] = Field(default_factory=dict)
-    dataset_object: Optional[Type[HTFBaseDatasetHandler]]
+    label_mapper: Optional[Dict[str, int]] = Field(default_factory=dict)
+    dataset_object: Optional[Type["HTFBaseDatasetHandler"]]
 
     class Config:
         extra = "allow"
@@ -241,6 +259,7 @@ class HTFConfiguration(ObjectLogger):
         # Init data
         self._metadata = HTFConfigMeta()
         self._labels_df: pd.DataFrame = pd.DataFrame([])
+        self.dataset_handler: Optional["HTFBaseDatasetHandler"] = None
         # Parse Configuration
         self._config = HTFConfigParser(filename=config_file)
 
@@ -387,6 +406,10 @@ class HTFConfiguration(ObjectLogger):
 
     def prepare_dataset(self) -> None:
         self._load_dataset_object()
+        self.dataset_handler: "HTFBaseDatasetHandler" = self._metadata.dataset_object(
+            dataset=self._labels_df, config=self.config.dataset, global_config=self
+        )
+        self.dataset_handler.split_train_test()
 
 
 # endregion
