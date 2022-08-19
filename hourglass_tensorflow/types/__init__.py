@@ -1,0 +1,4 @@
+from hourglass_tensorflow.types.htf_data import HTFPoint
+from hourglass_tensorflow.types.htf_data import HTFPersonBBox
+from hourglass_tensorflow.types.htf_data import HTFPersonJoint
+from hourglass_tensorflow.types.htf_data import HTFPersonDatapoint
