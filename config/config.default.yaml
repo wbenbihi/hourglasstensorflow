@@ -7,9 +7,9 @@ data:
       - jpg
   output:
     source: data/labels.csv
-    train_column: is_training
+    set_column: set
     prefix_columns:
-      - is_training
+      - set
       - image
       - scale
       - bbox_tl_x
@@ -48,6 +48,15 @@ data:
 
 dataset:
   object: "hourglass_tensorflow.datasets.HTFBaseDatasetHandler"
+  sets:
+    test: true
+    validation: true
   split:
+    column: set
+    train_value: TRAIN
+    test_value: TEST
+    validation_value: VALIDATION
     activate: true
-    train_ratio: 0.8
+    train_ratio: 0.7
+    test_ratio: 0.15
+    validation_ratio: 0.15
