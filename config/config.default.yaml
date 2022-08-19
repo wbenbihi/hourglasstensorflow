@@ -1,0 +1,53 @@
+data:
+  input:
+    source: data/images.ignore.folder
+    extensions:
+      - png
+      - jpeg
+      - jpg
+  output:
+    source: data/labels.csv
+    train_column: is_training
+    prefix_columns:
+      - is_training
+      - image
+      - scale
+      - bbox_tl_x
+      - bbox_tl_y
+      - bbox_br_x
+      - bbox_br_y
+      - center_x
+      - center_y
+    source_column: image
+    source_prefixed: false
+    joints:
+      naming_convention: joint_{JOINT_ID}_{SUFFIX}
+      format:
+        suffix:
+          x: 'X'
+          y: 'Y'
+          visible: visible
+      n: 16
+      names: 
+        - "00_rAnkle"
+        - "01_rKnee"
+        - "02_rHip"
+        - "03_lHip"
+        - "04_lKnee"
+        - "05_lAnkle"
+        - "06_pelvis"
+        - "07_thorax"
+        - "08_upperNeck"
+        - "09_topHead"
+        - "10_rWrist"
+        - "11_rElbow"
+        - "12_rShoulder"
+        - "13_lShoulder"
+        - "14_lElbow"
+        - "15_lWrist"
+
+dataset:
+  object: "hourglass_tensorflow.datasets.HTFBaseDatasetHandler"
+  split:
+    activate: true
+    train_ratio: 0.8
