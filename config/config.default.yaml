@@ -1,5 +1,6 @@
 data:
   input:
+    mode: 'RGB'
     source: data/images.ignore.folder
     extensions:
       - png

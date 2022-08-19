@@ -74,7 +74,39 @@ class HTFDatasetConfig(BaseModel):
     center: Optional[HTFColsConfig] = Field(default_factory=HTFColsConfig)
 
 
+ImageModes = Union[
+    Literal["RGB"],
+    Literal["rgb"],
+    Literal["RGBA"],
+    Literal["rgba"],
+    Literal["GRAY"],
+    Literal["gray"],
+    Literal["GRAYSCALE"],
+    Literal["grayscale"],
+    Literal["BGR"],
+    Literal["bgr"],
+    Literal["BGRA"],
+    Literal["bgra"],
+]
+
+CHANNELS_PER_MODE = {
+    "RGB": 3,
+    "rgb": 3,
+    "RGBA": 4,
+    "rgba": 4,
+    "GRAY": 1,
+    "gray": 1,
+    "GRAYSCALE": 1,
+    "grayscale": 1,
+    "BGR": 3,
+    "bgr": 3,
+    "BGRA": 4,
+    "bgra": 4,
+}
+
+
 class HTFDataInputConfig(BaseModel):
+    mode: ImageModes = "RGB"
     source: str
     extensions: List[str] = Field(default_factory=["png", "jpeg", "jpg"])
 
