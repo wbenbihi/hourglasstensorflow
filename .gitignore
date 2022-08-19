@@ -13,6 +13,8 @@ build/
 *.sqlite
 # Ignore
 *.ignore.*
+# IPython Notebooks
+.ipynb_checkpoints/
 # Credentials
 secure/
 .env
