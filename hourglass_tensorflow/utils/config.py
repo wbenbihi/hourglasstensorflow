@@ -46,8 +46,16 @@ class HTFDatasetSetsConfig(BaseModel):
     test: bool = False
 
 
+class HTFDatasetParamsConfig(BaseModel):
+    class Config:
+        extra = "allow"
+
+
 class HTFDatasetConfig(BaseModel):
     object: str
+    params: Optional[HTFDatasetParamsConfig] = Field(
+        default_factory=HTFDatasetParamsConfig
+    )
     sets: Optional[HTFDatasetSetsConfig]
     split: Optional[HTFDatasetSplitConfig] = Field(
         default_factory=HTFDatasetSplitConfig
@@ -407,7 +415,10 @@ class HTFConfiguration(ObjectLogger):
     def prepare_dataset(self) -> None:
         self._load_dataset_object()
         self.dataset_handler: "HTFBaseDatasetHandler" = self._metadata.dataset_object(
-            dataset=self._labels_df, config=self.config.dataset, global_config=self
+            dataset=self._labels_df,
+            config=self.config.dataset,
+            global_config=self,
+            **self.config.dataset.params.dict(),
         )
         self.dataset_handler.split_train_test()
 

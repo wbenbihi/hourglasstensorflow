@@ -48,6 +48,8 @@ data:
 
 dataset:
   object: "hourglass_tensorflow.datasets.HTFBaseDatasetHandler"
+  params:
+    mockup_param: to_pass_to_object_init_method
   sets:
     test: true
     validation: true
