@@ -134,7 +134,11 @@ def tf_train_map_resize_data(
     h_factor = shape[0] / tf.cast(input_size, tf.dtypes.float32)
     w_factor = shape[1] / tf.cast(input_size, tf.dtypes.float32)
     # We can recompute relative Coordinates between 0-1 as float
-    coordinates = tf.cast(coordinates, dtype=tf.dtypes.float32) / (w_factor, h_factor)
+    coordinates = (
+        tf.cast(coordinates, dtype=tf.dtypes.float32)
+        / (w_factor, h_factor)
+        / input_size
+    )
     return (image, coordinates, visibility)
 
 
@@ -173,7 +177,7 @@ def tf_train_map_heatmaps(
 
     # We move from relative coordinates to absolute ones by
     # multiplying the current coordinates [0-1] by the output_size
-    coordinates = coordinates * tf.cast(output_size, dtype=precision)
+    new_coordinates = coordinates * tf.cast(output_size, dtype=precision)
     visibility = tf.cast(tf.reshape(visibility, (-1, 1)), dtype=precision)
 
     # First we concat joint coordinate and visibility
@@ -181,7 +185,7 @@ def tf_train_map_heatmaps(
     # 0: X coordinate
     # 1: Y coordinate
     # 2: Visibility boolean as numeric
-    joints = tf.concat([coordinates, visibility], axis=1)
+    joints = tf.concat([new_coordinates, visibility], axis=1)
     # We compute intermediate tensors
     shape_tensor = tf.cast([output_size, output_size], dtype=precision)
     stddev_tensor = tf.cast([stddev, stddev], dtype=precision)
@@ -198,8 +202,8 @@ def tf_train_map_heatmaps(
         dtype=precision,
     )
     # We apply the stacking
-    heatmaps = tf_stack(heatmaps, stacks)
-    return (image, heatmaps)
+    # heatmaps = tf_stack(heatmaps, stacks)
+    return (image, heatmaps, coordinates, new_coordinates)
 
 
 def tf_train_normalize(
