@@ -17,9 +17,10 @@ from pydantic import BaseModel
 from hourglass_tensorflow._errors import BadConfigurationError
 from hourglass_tensorflow.utils.sets import split_train_test
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
-from hourglass_tensorflow.datasets.transformation import tf_crop_dataset
-from hourglass_tensorflow.datasets.transformation import tf_get_heatmaps
-from hourglass_tensorflow.datasets.transformation import tf_dataset_generator
+from hourglass_tensorflow.datasets.transformation import tf_train_map_heatmaps
+from hourglass_tensorflow.datasets.transformation import tf_train_map_squarify
+from hourglass_tensorflow.datasets.transformation import tf_train_map_build_slice
+from hourglass_tensorflow.datasets.transformation import tf_train_map_resize_data
 
 if TYPE_CHECKING:
     from hourglass_tensorflow.utils.config import HTFConfiguration
@@ -354,16 +355,35 @@ class HTFDatasetHandler(HTFBaseDatasetHandler):
             )
             .map(
                 # Load Images
-                tf_dataset_generator
+                tf_train_map_build_slice
             )
             .map(
                 # Compute BBOX cropping
-                tf_crop_dataset
+                lambda img, coord, vis: tf_train_map_squarify(
+                    img,
+                    coord,
+                    vis,
+                    bbox_enabled=self.config.bbox.activate,
+                    bbox_factor=self.config.bbox.factor,
+                )
             )
-            # .map(
-            #     # Compute Heatmaps
-            #     tf_get_heatmaps
-            # )
+            .map(
+                # Resize Image
+                lambda img, coord, vis: tf_train_map_resize_data(
+                    img, coord, vis, input_size=int(self.config.input_size)
+                )
+            )
+            .map(
+                # Get Heatmaps
+                lambda img, coord, vis: tf_train_map_heatmaps(
+                    img,
+                    coord,
+                    vis,
+                    input_size=int(self.config.input_size),
+                    stacks=self.config.stacks,
+                    stddev=self.config.heatmap_stddev,
+                )
+            )
         )
 
     def create_datasets(self) -> None:
