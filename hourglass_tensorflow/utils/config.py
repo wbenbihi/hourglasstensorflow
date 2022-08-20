@@ -55,10 +55,17 @@ class HTFColsConfig(BaseModel):
     cols: List[str] = Field(default_factory=list)
 
 
-class HTFDatasetBBoxConfig(HTFColsConfig):
+class HTFDatasetBBoxPaddingConfig(HTFColsConfig):
+    x: int = 0
+    y: int = 0
+
+
+class HTFDatasetBBoxConfig(BaseModel):
     activate: bool = False
-    padding: float = 0
-    cols: List[str] = Field(default_factory=list)
+    factor: float = 1
+    padding: HTFDatasetBBoxPaddingConfig = Field(
+        default_factory=HTFDatasetBBoxPaddingConfig
+    )
 
 
 class HTFDatasetConfig(BaseModel):
@@ -71,7 +78,6 @@ class HTFDatasetConfig(BaseModel):
         default_factory=HTFDatasetSplitConfig
     )
     bbox: Optional[HTFDatasetBBoxConfig] = Field(default_factory=HTFDatasetBBoxConfig)
-    center: Optional[HTFColsConfig] = Field(default_factory=HTFColsConfig)
 
 
 ImageModes = Union[
@@ -411,15 +417,15 @@ class HTFConfiguration(ObjectLogger):
         self._metadata.label_mapper = {
             label: i for i, label in enumerate(self._metadata.label_headers)
         }
-        if self._cfg_data_out.source_prefixed:
+        if not self._cfg_data_out.source_prefixed:
             # Now we also prefix the image column with the image folder
             # in case the source_prefix attribute is set to false
             folder_prefix = self._cfg_data_inp.source
             source_column = self._cfg_data_out.source_column
             self._labels_df = self._labels_df.assign(
                 **{
-                    source_column: lambda x: os.path.join(
-                        folder_prefix, x[source_column]
+                    source_column: self._labels_df[source_column].apply(
+                        lambda x: os.path.join(folder_prefix, x)
                     )
                 }
             )

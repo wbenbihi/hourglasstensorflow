@@ -65,4 +65,7 @@ dataset:
     validation_ratio: 0.15
   bbox:
     activate: true
-    padding: 0.2
+    padding:
+      x: 0
+      y: 0
+    factor: 1.5
