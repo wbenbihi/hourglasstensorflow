@@ -170,14 +170,18 @@ def tf_train_map_heatmaps(
         tf.Tensor: _description_
     """
     precision = tf.dtypes.float32
+
+    # We move from relative coordinates to absolute ones by
+    # multiplying the current coordinates [0-1] by the output_size
+    coordinates = coordinates * tf.cast(output_size, dtype=precision)
+    visibility = tf.cast(tf.reshape(visibility, (-1, 1)), dtype=precision)
+
     # First we concat joint coordinate and visibility
     # to have a [NUN_JOINTS, 3] tensor
     # 0: X coordinate
     # 1: Y coordinate
     # 2: Visibility boolean as numeric
-    joints = tf.concat(
-        [coordinates, tf.cast(tf.reshape(visibility, (-1, 1)), dtype=precision)], axis=1
-    )
+    joints = tf.concat([coordinates, visibility], axis=1)
     # We compute intermediate tensors
     shape_tensor = tf.cast([output_size, output_size], dtype=precision)
     stddev_tensor = tf.cast([stddev, stddev], dtype=precision)
