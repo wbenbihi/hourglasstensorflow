@@ -54,7 +54,7 @@ dataset:
   input_size: 256
   output_size: 64
   stacks: 3
-  heatmap_stddev: 10.
+  heatmap_stddev: 5.
   sets:
     test: true
     validation: true
