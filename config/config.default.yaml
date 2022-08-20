@@ -49,10 +49,12 @@ data:
 
 dataset:
   object: "hourglass_tensorflow.datasets.HTFDatasetHandler"
-  input_size: 256
-  output_size: 64
   params:
     mockup_param: to_pass_to_object_init_method
+  input_size: 256
+  output_size: 64
+  stacks: 3
+  heatmap_stddev: 10.
   sets:
     test: true
     validation: true

@@ -72,6 +72,8 @@ class HTFDatasetConfig(BaseModel):
     object: str
     input_size: int = 256
     output_size: int = 64
+    stacks: int = 4
+    heatmap_stddev: float = 10.0
     params: Optional[HTFDatasetParamsConfig] = Field(
         default_factory=HTFDatasetParamsConfig
     )
