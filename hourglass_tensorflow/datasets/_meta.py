@@ -17,6 +17,9 @@ from pydantic import BaseModel
 from hourglass_tensorflow._errors import BadConfigurationError
 from hourglass_tensorflow.utils.sets import split_train_test
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
+from hourglass_tensorflow.datasets.transformation import tf_crop_dataset
+from hourglass_tensorflow.datasets.transformation import tf_get_heatmaps
+from hourglass_tensorflow.datasets.transformation import tf_dataset_generator
 
 if TYPE_CHECKING:
     from hourglass_tensorflow.utils.config import HTFConfiguration
@@ -329,22 +332,16 @@ class HTFDatasetHandler(HTFBaseDatasetHandler):
             for suffix in joints.format.suffix.__dict__.values()
         ]
 
-    def extract_data_groups(
-        self, dataset: CastableTableDataset
-    ) -> Tuple[List, List, List, List]:
+    def extract_data_groups(self, dataset: CastableTableDataset) -> Tuple[List, List]:
         # Extract columns
         coord_columns = [self.label_mapper[col] for col in self._get_joint_columns()]
-        bbox_columns = [self.label_mapper[col] for col in self.config.bbox.cols]
-        center_columns = [self.label_mapper[col] for col in self.config.center.cols]
         if self.dataset_is_pandas:
             array = dataset.to_numpy()
         else:
             array = dataset
         filenames = array[:, self.image_column_index].tolist()
         coordinates = array[:, coord_columns].tolist()
-        bounding_boxes = array[:, bbox_columns].tolist()
-        centers = array[:, center_columns].tolist()
-        return filenames, coordinates, bounding_boxes, centers
+        return filenames, coordinates
 
     # Generate Datasets
 
@@ -357,19 +354,25 @@ class HTFDatasetHandler(HTFBaseDatasetHandler):
             )
             .map(
                 # Load Images
-                lambda x: x
+                tf_dataset_generator
             )
             .map(
                 # Compute BBOX cropping
-                lambda x: x
+                tf_crop_dataset
             )
-            .map(
-                # Compute Heatmaps
-                lambda x: x
-            )
+            # .map(
+            #     # Compute Heatmaps
+            #     tf_get_heatmaps
+            # )
         )
+
+    def create_datasets(self) -> None:
+        self._train_dataset = self._create_dataset(self._train_set)
+        self._test_dataset = self._create_dataset(self._test_set)
+        self._validation_dataset = self._create_dataset(self._validation_set)
 
     # Main Execution method
     def execute(self) -> None:
         self.split_sets()
+        self.create_datasets()
         # pass
