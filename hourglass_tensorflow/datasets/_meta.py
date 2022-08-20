@@ -379,7 +379,7 @@ class HTFDatasetHandler(HTFBaseDatasetHandler):
                     img,
                     coord,
                     vis,
-                    input_size=int(self.config.input_size),
+                    output_size=int(self.config.output_size),
                     stacks=self.config.stacks,
                     stddev=self.config.heatmap_stddev,
                 )
