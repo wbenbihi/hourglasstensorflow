@@ -192,7 +192,7 @@ def tf_train_map_heatmaps(
                 joint[:2], stddev_tensor, shape_tensor, precision=precision
             )
             if joint[2] == 1.0
-            else tf.zeros(shape_tensor, dtype=precision)
+            else tf.zeros(tf.cast(shape_tensor, dtype=tf.dtypes.int32), dtype=precision)
         ),
         elems=joints,
         dtype=precision,
