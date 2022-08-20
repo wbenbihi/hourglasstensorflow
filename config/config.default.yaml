@@ -66,12 +66,3 @@ dataset:
   bbox:
     activate: true
     padding: 0.2
-    cols:
-      - 'bbox_tl_x'
-      - 'bbox_tl_y'
-      - 'bbox_br_x'
-      - 'bbox_br_y'
-  center:
-    cols:
-      - 'center_x'
-      - 'center_y'
