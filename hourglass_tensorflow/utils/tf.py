@@ -165,7 +165,7 @@ def tf_expand_bbox(
         bottom_right_y + height * (bbox_factor - 1.0),
     )
     return tf.cast(
-        tf_reshape_slice([new_tl_x, new_tl_y, new_br_x, new_br_y], dim=2, **kwargs),
+        tf_reshape_slice([new_tl_x, new_tl_y, new_br_x, new_br_y], shape=2, **kwargs),
         dtype=tf.int32,
     )
 
