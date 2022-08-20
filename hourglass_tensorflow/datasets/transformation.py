@@ -202,15 +202,11 @@ def tf_train_map_heatmaps(
         dtype=precision,
     )
     # We apply the stacking
-    # heatmaps = tf_stack(heatmaps, stacks)
-    return (image, heatmaps, coordinates, new_coordinates)
+    heatmaps = tf_stack(heatmaps, stacks)
+    return (image, heatmaps)
 
 
 def tf_train_normalize(
-    image: tf.Tensor,
-    coordinates: tf.Tensor,
-    visibility: tf.Tensor,
-    stacks: int = 1,
-    output_size: int = 64,
+    image: tf.Tensor, heatmaps: tf.Tensor, normalization: str
 ) -> tf.Tensor:
     pass
