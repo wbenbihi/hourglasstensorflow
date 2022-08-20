@@ -54,6 +54,8 @@ dataset:
   sets:
     test: true
     validation: true
+  input:
+    size: 256
   split:
     column: set
     train_value: TRAIN
