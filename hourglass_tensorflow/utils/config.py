@@ -71,6 +71,7 @@ class HTFDatasetBBoxConfig(BaseModel):
 class HTFDatasetConfig(BaseModel):
     object: str
     input_size: int = 256
+    output_size: int = 64
     params: Optional[HTFDatasetParamsConfig] = Field(
         default_factory=HTFDatasetParamsConfig
     )
