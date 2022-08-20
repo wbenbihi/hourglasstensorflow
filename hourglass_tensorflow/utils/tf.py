@@ -121,7 +121,7 @@ def tf_compute_bbox(coordinates: tf.Tensor, **kwargs) -> tf.Tensor:
     Ys = coordinates[:, 1]
     maxx, minx = tf.reduce_max(Xs), tf.reduce_min(Xs)
     maxy, miny = tf.reduce_max(Ys), tf.reduce_min(Ys)
-    return tf_reshape_slice([minx, miny, maxx, maxy], dim=2, **kwargs)
+    return tf_reshape_slice([minx, miny, maxx, maxy], shape=2, **kwargs)
 
 
 @tf.function
