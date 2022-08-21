@@ -263,7 +263,7 @@ def tf_train_map_normalize(
         )
     if "L2" in normalization:
         image = tf.linalg.l2_normalize(image, axis=[0, 1])
-        heatmaps = tf.linalg.l2_normalize(image, axis=[0, 1])
+        heatmaps = tf.linalg.l2_normalize(heatmaps, axis=[0, 1])
     if "FromZero" in normalization:
         image = tf.math.divide_no_nan(
             image - tf.reduce_min(image, axis=[0, 1]),
