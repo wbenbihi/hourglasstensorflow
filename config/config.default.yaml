@@ -1,6 +1,10 @@
 data:
+  object:
+    source: "hourglass_tensorflow.data.HTFDataHandler"
+    params:
+      foo: bar
   input:
-    mode: 'RGB'
+    mode: "RGB"
     source: data/images.ignore.folder
     extensions:
       - png
@@ -8,7 +12,7 @@ data:
       - jpg
   output:
     source: data/labels.ignore.csv
-    set_column: set
+    source_prefixed: false
     prefix_columns:
       - set
       - image
@@ -19,17 +23,20 @@ data:
       - bbox_br_y
       - center_x
       - center_y
-    source_column: image
-    source_prefixed: false
+    column_set: set
+    column_source: image
     joints:
+      num: 16
+      dynamic_fields:
+        - SUFFIX
       naming_convention: joint_{JOINT_ID}_{SUFFIX}
       format:
-        suffix:
-          x: 'X'
-          y: 'Y'
+        id_field: JOINT_ID
+        SUFFIX:
+          x: "X"
+          y: "Y"
           visible: visible
-      n: 16
-      names: 
+      names:
         - "00_rAnkle"
         - "01_rKnee"
         - "02_rHip"
@@ -48,29 +55,30 @@ data:
         - "15_lWrist"
 
 dataset:
-  object: "hourglass_tensorflow.datasets.HTFDatasetHandler"
-  params:
-    mockup_param: to_pass_to_object_init_method
-  input_size: 256
-  output_size: 64
-  stacks: 3
-  heatmap_stddev: 5.
-  normalization: "FromZero"
+  object:
+    source: "hourglass_tensorflow.datasets.HTFDatasetHandler"
+    params:
+      foo: bar
+  image_size: 256
+  column_image: image
+  heatmap:
+    size: 64
+    stacks: 3
+    channels: 16
+    stddev: 5.
+  normalization: "ByMax"
   sets:
+    split_by_column: true
+    column_split: set
+    value_train: TRAIN
+    value_test: TEST
+    value_validation: VALIDATION
     test: true
+    train: true
     validation: true
-  split:
-    column: set
-    train_value: TRAIN
-    test_value: TEST
-    validation_value: VALIDATION
-    activate: false
-    train_ratio: 0.7
-    test_ratio: 0.15
-    validation_ratio: 0.15
+    ratio_test: 0.15
+    ratio_train: 0.7
+    ratio_validation: 0.15
   bbox:
     activate: true
-    padding:
-      x: 0
-      y: 0
     factor: 1.5

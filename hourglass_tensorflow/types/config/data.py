@@ -73,7 +73,7 @@ class HTFDataOutputJointsFormat(HTFConfigField):
 
 class HTFDataOutputJoints(HTFConfigField):
     num: int = 16
-    dynamic_fields: List[str] = Field(default_factory=["JOINT_ID", "SUFFIX"])
+    dynamic_fields: List[str] = Field(default_factory=["SUFFIX"])
     naming_convention: str = "joint_{JOINT_ID}_{SUFFIX}"
     names: List[str] = Field(
         default_factory=[
