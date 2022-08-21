@@ -55,6 +55,7 @@ dataset:
   output_size: 64
   stacks: 3
   heatmap_stddev: 5.
+  normalization: "FromZero"
   sets:
     test: true
     validation: true
