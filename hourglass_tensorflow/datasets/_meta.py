@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from hourglass_tensorflow._errors import BadConfigurationError
 from hourglass_tensorflow.utils.sets import split_train_test
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
+from hourglass_tensorflow.datasets.transformation import tf_train_normalize
 from hourglass_tensorflow.datasets.transformation import tf_train_map_heatmaps
 from hourglass_tensorflow.datasets.transformation import tf_train_map_squarify
 from hourglass_tensorflow.datasets.transformation import tf_train_map_build_slice
@@ -382,6 +383,14 @@ class HTFDatasetHandler(HTFBaseDatasetHandler):
                     output_size=int(self.config.output_size),
                     stacks=self.config.stacks,
                     stddev=self.config.heatmap_stddev,
+                )
+            )
+            .map(
+                # Normalize Data
+                lambda img, hms: tf_train_normalize(
+                    img,
+                    hms,
+                    normalization=self.config.normalization,
                 )
             )
         )

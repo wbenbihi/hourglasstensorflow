@@ -203,10 +203,78 @@ def tf_train_map_heatmaps(
     )
     # We apply the stacking
     heatmaps = tf_stack(heatmaps, stacks)
+    # We Transpose Heatmaps dimensions to have [HEIGHT, WIDTH, CHANNELS] data format
+    heatmaps = tf.transpose(heatmaps, [1, 2, 0])
     return (image, heatmaps)
 
 
 def tf_train_normalize(
-    image: tf.Tensor, heatmaps: tf.Tensor, normalization: str
+    image: tf.Tensor, heatmaps: tf.Tensor, normalization: str = None
 ) -> tf.Tensor:
-    pass
+    """Fifth step tf.data.Dataset mapper to normalize data.
+
+    This mapper is used on Training phase only.
+    It would suit not Preditction phase since you need to have prior
+    knowledge of the person position
+
+    Notes:
+        The normalization methods are the following:
+        - `MinMax`: Will constraint the Value between 0-1 by dividing by the global maximum
+        - `L2`: Will constraint the Value by dividing by the L2 Norm on each channel
+        - `Normal`: Will apply (X - Mean) / StdDev**2 to follow normal distribution on each channel
+
+        Additional methodology involve:
+        - `FromZero`: Origin is set to 0 maximum is 1 on each channel
+        - `AroundOne`: Values are constrained between -1 and 1
+
+    Additional Notes:
+        This function is build in compliance with `HTFDatasetHandler`.
+        On a custom DatasetHandler this function might not suit your needs.
+        See Dataset Documentation for more details
+
+    Args:
+        image (tf.Tensor): 3D Image tensor(tf.dtypes.int32)
+        heatmaps (tf.Tensor): 4D Heatmap tensor(tf.dtypes.int32)
+        normalization (str, optional): Normalization method. Defaults to None
+
+    Returns:
+        tf.Tensor: _description_
+    """
+    precision = tf.dtypes.float32
+
+    if normalization is None:
+        pass
+    if "Normal" in normalization:
+        image = (image - tf.reduce_mean(image, axis=[0, 1])) / tf.math.reduce_variance(
+            image, axis=[0, 1]
+        )
+        heatmaps = (
+            heatmaps - tf.reduce_mean(heatmaps, axis=[0, 1])
+        ) / tf.math.reduce_variance(heatmaps, axis=[0, 1])
+    if "MinMax" in normalization:
+        image = tf.cast(image, dtype=precision) / 255.0
+        heatmaps = tf.cast(heatmaps, dtype=precision) / tf.reduce_max(heatmaps)
+    if "L2" in normalization:
+        image = tf.linalg.l2_normalize(image, axis=[0, 1])
+        heatmaps = tf.linalg.l2_normalize(image, axis=[0, 1])
+    if "FromZero" in normalization:
+        image = (image - tf.reduce_min(image, axis=[0, 1])) / tf.reduce_max(
+            image, axis=[0, 1]
+        )
+        heatmaps = (heatmaps - tf.reduce_min(heatmaps, axis=[0, 1])) / tf.reduce_max(
+            heatmaps, axis=[0, 1]
+        )
+    if "AroundOne" in normalization:
+        image = (
+            (
+                (image - tf.reduce_min(image, axis=[0, 1]))
+                / tf.reduce_max(image, axis=[0, 1])
+            )
+            - 0.5
+        ) * 2
+        heatmaps = (
+            (heatmaps - tf.reduce_min(heatmaps, axis=[0, 1]))
+            / tf.reduce_max(heatmaps, axis=[0, 1])
+            - 0.5
+        ) * 2
+    return (image, heatmaps)
