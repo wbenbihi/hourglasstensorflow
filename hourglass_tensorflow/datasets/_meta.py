@@ -394,7 +394,7 @@ class HTFDatasetHandler(HTFBaseDatasetHandler):
                 )
             )
             .map(
-                # Normalize Data
+                # Stacks
                 lambda img, hms: tf_train_map_stacks(
                     img,
                     hms,
