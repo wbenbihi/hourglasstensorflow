@@ -95,7 +95,7 @@ class HourglassLayer(Layer):
             )
         # endregion
 
-    def _recursive_call(self, input_tensor, step, training=False):
+    def _recursive_call(self, input_tensor, step, training=True):
         step_layers = self.layers[step]
         up_1 = step_layers["up_1"](input_tensor, training=training)
         low_ = step_layers["low_"](input_tensor, training=training)

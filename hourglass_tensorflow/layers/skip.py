@@ -26,7 +26,7 @@ class SkipLayer(Layer):
             kernel_initializer="glorot_uniform",
         )
 
-    def call(self, inputs: tf.Tensor, training: bool = False) -> tf.Tensor:
+    def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         if inputs.get_shape()[-1] == self.output_filters:
             return inputs
         else:

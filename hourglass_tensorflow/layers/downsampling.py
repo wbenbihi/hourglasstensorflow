@@ -68,7 +68,7 @@ class DownSamplingLayer(Layer):
                     )
                 )
 
-    def call(self, inputs: tf.Tensor, training: bool = False) -> tf.Tensor:
+    def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         x = inputs
         for layer in self.layers:
             x = layer(x, training=training)

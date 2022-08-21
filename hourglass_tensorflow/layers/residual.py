@@ -37,7 +37,7 @@ class ResidualLayer(Layer):
         )
         self.add = layers.Add(name="Add")
 
-    def call(self, inputs: tf.Tensor, training: bool = False) -> tf.Tensor:
+    def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         return self.add(
             [
                 self.conv_block(inputs, training=training),

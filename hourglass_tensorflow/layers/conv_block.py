@@ -49,7 +49,7 @@ class ConvBlockLayer(Layer):
             trainable=trainable,
         )
 
-    def call(self, inputs: tf.Tensor, training: bool = False) -> tf.Tensor:
+    def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         x = self.bnrc1(inputs, training=training)
         x = self.bnrc2(x, training=training)
         x = self.bnrc3(x, training=training)

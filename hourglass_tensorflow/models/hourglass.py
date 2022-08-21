@@ -57,7 +57,7 @@ class HourglassModel(Model):
             for i in range(stages)
         ]
 
-    def call(self, inputs: tf.Tensor, training=False):
+    def call(self, inputs: tf.Tensor, training=True):
         x = self.downsampling(inputs)
         outputs = []
         for layer in self.hourglasses:
