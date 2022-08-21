@@ -61,6 +61,10 @@ class HTFConfigParser(ObjectLogger):
         """
         return self._config
 
+    @classmethod
+    def parse(cls, filename: str, verbose: bool = False, *args, **kwargs) -> Dict:
+        return cls(filename=filename, verbose=verbose, *args, **kwargs).config
+
     def __repr__(self) -> str:
         return f"<HFTConfigParser type:{self.file_type} source:{self._filename}>"
 
