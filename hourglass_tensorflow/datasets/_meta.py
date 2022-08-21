@@ -14,8 +14,8 @@ import pandas as pd
 import tensorflow as tf
 from pydantic import BaseModel
 
-from hourglass_tensorflow._errors import BadConfigurationError
 from hourglass_tensorflow.utils.sets import split_train_test
+from hourglass_tensorflow.utils._errors import BadConfigurationError
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.datasets.transformation import tf_train_map_stacks
 from hourglass_tensorflow.datasets.transformation import tf_train_map_heatmaps
