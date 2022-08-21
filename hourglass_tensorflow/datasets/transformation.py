@@ -146,7 +146,6 @@ def tf_train_map_heatmaps(
     image: tf.Tensor,
     coordinates: tf.Tensor,
     visibility: tf.Tensor,
-    stacks: int = 1,
     output_size: int = 64,
     stddev: float = 10.0,
 ) -> tf.Tensor:
@@ -165,7 +164,6 @@ def tf_train_map_heatmaps(
         image (tf.Tensor): 3D Image tensor(tf.dtypes.int32)
         coordinates (tf.Tensor): 2D Coordinate tensor(tf.dtypes.int32)
         visibility (tf.Tensor): 1D Visibility tensor(tf.dtypes.int32)
-        stacks (int, optional): Number of heatmap replication . Defaults to 1
         output_size (int, optional): Heatmap shape. Defaults to 64
         stddev (float, optional): Standard deviation for Bivariate normal PDF.
             Defaults to 10.
@@ -201,14 +199,12 @@ def tf_train_map_heatmaps(
         elems=joints,
         dtype=precision,
     )
-    # We apply the stacking
-    heatmaps = tf_stack(heatmaps, stacks)
     # We Transpose Heatmaps dimensions to have [HEIGHT, WIDTH, CHANNELS] data format
     heatmaps = tf.transpose(heatmaps, [1, 2, 0])
     return (image, heatmaps)
 
 
-def tf_train_normalize(
+def tf_train_map_normalize(
     image: tf.Tensor, heatmaps: tf.Tensor, normalization: str = None
 ) -> tf.Tensor:
     """Fifth step tf.data.Dataset mapper to normalize data.
@@ -219,13 +215,13 @@ def tf_train_normalize(
 
     Notes:
         The normalization methods are the following:
-        - `MinMax`: Will constraint the Value between 0-1 by dividing by the global maximum
+        - `ByMax`: Will constraint the Value between 0-1 by dividing by the global maximum
         - `L2`: Will constraint the Value by dividing by the L2 Norm on each channel
         - `Normal`: Will apply (X - Mean) / StdDev**2 to follow normal distribution on each channel
 
         Additional methodology involve:
         - `FromZero`: Origin is set to 0 maximum is 1 on each channel
-        - `AroundOne`: Values are constrained between -1 and 1
+        - `AroundZero`: Values are constrained between -1 and 1
 
     Additional Notes:
         This function is build in compliance with `HTFDatasetHandler`.
@@ -234,7 +230,7 @@ def tf_train_normalize(
 
     Args:
         image (tf.Tensor): 3D Image tensor(tf.dtypes.int32)
-        heatmaps (tf.Tensor): 4D Heatmap tensor(tf.dtypes.int32)
+        heatmaps (tf.Tensor): 3D Heatmap tensor(tf.dtypes.int32)
         normalization (str, optional): Normalization method. Defaults to None
 
     Returns:
@@ -242,39 +238,79 @@ def tf_train_normalize(
     """
     precision = tf.dtypes.float32
 
+    image = tf.cast(image, dtype=precision)
+    heatmaps = tf.cast(heatmaps, dtype=precision)
+
     if normalization is None:
         pass
     if "Normal" in normalization:
-        image = (image - tf.reduce_mean(image, axis=[0, 1])) / tf.math.reduce_variance(
-            image, axis=[0, 1]
+        image = tf.math.divide_no_nan(
+            image - tf.reduce_mean(image, axis=[0, 1]),
+            tf.math.reduce_variance(image, axis=[0, 1]),
         )
-        heatmaps = (
-            heatmaps - tf.reduce_mean(heatmaps, axis=[0, 1])
-        ) / tf.math.reduce_variance(heatmaps, axis=[0, 1])
-    if "MinMax" in normalization:
-        image = tf.cast(image, dtype=precision) / 255.0
-        heatmaps = tf.cast(heatmaps, dtype=precision) / tf.reduce_max(heatmaps)
+        heatmaps = tf.math.divide_no_nan(
+            heatmaps - tf.reduce_mean(heatmaps, axis=[0, 1]),
+            tf.math.reduce_variance(heatmaps, axis=[0, 1]),
+        )
+    if "ByMax" in normalization:
+        image = tf.math.divide_no_nan(
+            image,
+            255.0,
+        )
+        heatmaps = tf.math.divide_no_nan(
+            heatmaps,
+            tf.reduce_max(heatmaps),
+        )
     if "L2" in normalization:
         image = tf.linalg.l2_normalize(image, axis=[0, 1])
         heatmaps = tf.linalg.l2_normalize(image, axis=[0, 1])
     if "FromZero" in normalization:
-        image = (image - tf.reduce_min(image, axis=[0, 1])) / tf.reduce_max(
-            image, axis=[0, 1]
+        image = tf.math.divide_no_nan(
+            image - tf.reduce_min(image, axis=[0, 1]),
+            tf.reduce_max(image, axis=[0, 1]),
         )
-        heatmaps = (heatmaps - tf.reduce_min(heatmaps, axis=[0, 1])) / tf.reduce_max(
-            heatmaps, axis=[0, 1]
+        heatmaps = tf.math.divide_no_nan(
+            heatmaps - tf.reduce_min(heatmaps, axis=[0, 1]),
+            tf.reduce_max(heatmaps, axis=[0, 1]),
         )
-    if "AroundOne" in normalization:
-        image = (
-            (
-                (image - tf.reduce_min(image, axis=[0, 1]))
-                / tf.reduce_max(image, axis=[0, 1])
+    if "AroundZero" in normalization:
+        image = 2 * (
+            tf.math.divide_no_nan(
+                image - tf.reduce_min(image, axis=[0, 1]),
+                tf.reduce_max(image, axis=[0, 1]),
             )
             - 0.5
-        ) * 2
-        heatmaps = (
-            (heatmaps - tf.reduce_min(heatmaps, axis=[0, 1]))
-            / tf.reduce_max(heatmaps, axis=[0, 1])
+        )
+        heatmaps = 2 * (
+            tf.math.divide_no_nan(
+                heatmaps - tf.reduce_min(heatmaps, axis=[0, 1]),
+                tf.reduce_max(heatmaps, axis=[0, 1]),
+            )
             - 0.5
-        ) * 2
+        )
+    return (image, heatmaps)
+
+
+def tf_train_map_stacks(image: tf.Tensor, heatmaps: tf.Tensor, stacks: int = 1):
+    """Sixth step tf.data.Dataset mapper to generate stacked hourglass.
+
+    This mapper is used on Training phase only.
+    It would suit not Preditction phase since you need to have prior
+    knowledge of the person position
+
+    Additional Notes:
+        This function is build in compliance with `HTFDatasetHandler`.
+        On a custom DatasetHandler this function might not suit your needs.
+        See Dataset Documentation for more details
+
+    Args:
+        image (tf.Tensor): 3D Image tensor(tf.dtypes.int32)
+        heatmaps (tf.Tensor): 3D Heatmap tensor(tf.dtypes.int32)
+        stacks (int, optional): Number of heatmap replication . Defaults to 1
+
+    Returns:
+        tf.Tensor: _description_
+    """
+    # We apply the stacking
+    heatmaps = tf_stack(heatmaps, stacks)
     return (image, heatmaps)
