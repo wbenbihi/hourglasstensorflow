@@ -19,7 +19,7 @@ from loguru import logger
 from pydantic import Field
 from pydantic import BaseModel
 
-from hourglass_tensorflow._errors import BadConfigurationError
+from hourglass_tensorflow.utils._errors import BadConfigurationError
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.utils.parsers._parse_import import get_dataset
 

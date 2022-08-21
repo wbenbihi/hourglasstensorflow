@@ -2,8 +2,8 @@ import importlib
 from typing import Type
 from typing import Callable
 
-from hourglass_tensorflow._errors import BadConfigurationError
 from hourglass_tensorflow.datasets import HTFBaseDatasetHandler
+from hourglass_tensorflow.utils._errors import BadConfigurationError
 
 
 def _get_object(access_string) -> Type:
