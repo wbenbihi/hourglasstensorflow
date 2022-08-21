@@ -78,7 +78,7 @@ class HourglassLayer(Layer):
                 dynamic=dynamic,
                 trainable=trainable,
             )
-            downsampling["low_3"] = layers.UpSampling2D(
+            downsampling["up_2"] = layers.UpSampling2D(
                 size=(2, 2),
                 data_format=None,
                 interpolation="nearest",
@@ -101,7 +101,7 @@ class HourglassLayer(Layer):
         low_ = step_layers["low_"](input_tensor, training=training)
         low_1 = step_layers["low_1"](low_, training=training)
         if step == 0:
-            low_2 = step_layers["low_2"](low_, training=training)
+            low_2 = step_layers["low_2"](low_1, training=training)
         else:
             low_2 = self._recursive_call(low_1, step=(step - 1), training=training)
         low_3 = step_layers["low_3"](low_2, training=training)
