@@ -21,3 +21,5 @@ secure/
 .env.*
 credentials/
 ~/*
+logs/*
+log/*
