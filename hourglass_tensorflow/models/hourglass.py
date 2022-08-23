@@ -1,5 +1,3 @@
-from doctest import OutputChecker
-
 import tensorflow as tf
 from keras.models import Model
 
@@ -62,16 +60,16 @@ class HourglassModel(Model):
 
     def call(self, inputs: tf.Tensor, training=True):
         x = self.downsampling(inputs)
-        outputs = []
+        outputs_list = []
         for layer in self.hourglasses:
             x, y = layer(x)
             if self._intermediate_supervision:
-                outputs.append(y)
+                outputs_list.append(y)
         if self._intermediate_supervision:
-            self.output = tf.stack(outputs, axis=1, name="NetworkStackedOutput")
+            self._outputs = tf.stack(outputs_list, axis=1, name="NetworkStackedOutput")
         else:
-            self.output = y
-        return self.output
+            self._outputs = y
+        return self._outputs
 
 
 def model_as_layers(
@@ -114,18 +112,18 @@ def model_as_layers(
     ]
 
     x = downsampling(inputs)
-    outputs = []
+    output_list = []
     for layer in hourglasses:
         x, y = layer(x)
         if intermediate_supervision:
-            outputs.append(y)
+            output_list.append(y)
     if intermediate_supervision:
-        output = tf.stack(outputs, axis=1, name="NetworkStackedOutput")
+        outputs = tf.stack(output_list, axis=1, name="NetworkStackedOutput")
     else:
-        output = y
+        outputs = y
 
-    model = Model(inputs=inputs, outputs=output)
+    model = Model(inputs=inputs, outputs=outputs)
 
     return HTFModelAsLayers(
-        downsampling=downsampling, hourglasses=hourglasses, outputs=output, model=model
+        downsampling=downsampling, hourglasses=hourglasses, outputs=outputs, model=model
     )

@@ -27,14 +27,11 @@ class HTFModelHandlerReturnObject(TypedDict):
     model: keras.models.Model
 
 
-class HTFModelAsLayers(BaseModel):
+class HTFModelAsLayers(TypedDict):
     downsampling: keras.layers.Layer
     hourglasses: List[keras.layers.Layer]
     outputs: keras.layers.Layer
     model: keras.models.Model
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class HTFModelParams(HTFConfigField):
