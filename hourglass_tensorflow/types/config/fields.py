@@ -23,5 +23,6 @@ class HTFObjectReference(BaseModel):
     source: str
     params: Optional[Dict] = Field(default_factory=dict)
 
+    @property
     def object(self) -> Type:
         return _get_object(self.source)
