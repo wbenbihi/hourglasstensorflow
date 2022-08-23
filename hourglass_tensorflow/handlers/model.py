@@ -9,6 +9,7 @@ from typing import Iterable
 from typing import Optional
 
 import tensorflow as tf
+import keras.layers
 import keras.models
 from keras import Input as InputTensor
 
@@ -19,6 +20,7 @@ from hourglass_tensorflow.models.hourglass import HourglassModel
 from hourglass_tensorflow.models.hourglass import model_as_layers
 from hourglass_tensorflow.types.config.model import HTFModelConfig
 from hourglass_tensorflow.types.config.model import HTFModelParams
+from hourglass_tensorflow.types.config.model import HTFModelHandlerReturnObject
 
 # region Abstract Class
 
@@ -31,6 +33,9 @@ class _HTFModelHandler(_HTFHandler):
         **kwargs,
     ) -> None:
         super().__init__(config=config, *args, **kwargs)
+        self._input: keras.layers.Layer = None
+        self._output: keras.layers.Layer = None
+        self._model: keras.models.Model = None
 
     @property
     def config(self) -> HTFModelConfig:
@@ -39,6 +44,19 @@ class _HTFModelHandler(_HTFHandler):
     @property
     def params(self) -> HTFModelParams:
         return self.config.params
+
+    def get(self) -> HTFModelHandlerReturnObject:
+        if self._executed:
+            return {
+                "inputs": self._input,
+                "outputs": self._output,
+                "model": self._model,
+            }
+        else:
+            self.warning(
+                "The ModelHandler has not been called to generate proper return value"
+            )
+            return {}
 
     @abstractmethod
     def generate_graph(self, *args, **kwargs) -> None:
@@ -57,7 +75,7 @@ class HTFModelHandler(_HTFModelHandler):
     def init_handler(self, *args, **kwargs) -> None:
         pass
 
-    def get(self) -> Dict:
+    def get(self) -> HTFModelHandlerReturnObject:
         if self._executed:
             return {
                 "inputs": self._input,

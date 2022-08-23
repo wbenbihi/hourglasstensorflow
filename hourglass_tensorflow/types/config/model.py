@@ -5,6 +5,7 @@ from typing import List
 from typing import Union
 from typing import Literal
 from typing import Optional
+from typing import TypedDict
 
 import keras.layers
 import keras.models
@@ -18,6 +19,12 @@ DATA_FORMAT = Union[
     Literal["NHWC"],
     Literal["NCHW"],
 ]
+
+
+class HTFModelHandlerReturnObject(TypedDict):
+    inputs: keras.layers.Layer
+    outputs: keras.layers.Layer
+    model: keras.models.Model
 
 
 class HTFModelAsLayers(BaseModel):
