@@ -1,12 +1,16 @@
 from typing import Dict
 from typing import List
 from typing import Type
+from typing import Generic
+from typing import TypeVar
 from typing import Optional
 
 from pydantic import Field
 from pydantic import BaseModel
 
 from hourglass_tensorflow.utils.parsers._parse_import import _get_object
+
+T = TypeVar("T")
 
 
 class HTFConfigField(BaseModel):
@@ -19,10 +23,10 @@ class HTFConfigField(BaseModel):
         return all(self.VALIDITY_CONDITIONS)
 
 
-class HTFObjectReference(BaseModel):
+class HTFObjectReference(BaseModel, Generic[T]):
     source: str
     params: Optional[Dict] = Field(default_factory=dict)
 
     @property
-    def object(self) -> Type:
+    def object(self) -> Type[T]:
         return _get_object(self.source)

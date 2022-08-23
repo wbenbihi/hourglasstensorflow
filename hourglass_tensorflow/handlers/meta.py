@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 
+from hourglass_tensorflow.types import Self
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.types.config.metadata import HTFMetadata
@@ -21,7 +22,7 @@ class _HTFHandler(ABC, ObjectLogger):
         self._executed = False
         self.init_handler(*args, **kwargs)
 
-    def __call__(self, *args, **kwargs) -> "_HTFHandler":
+    def __call__(self: Self, *args, **kwargs) -> Self:
         if not self._executed:
             self.run(*args, **kwargs)
             self.executed = True
@@ -44,7 +45,7 @@ class _HTFHandler(ABC, ObjectLogger):
     def init_handler(self, *args, **kwargs) -> None:
         pass
 
-    def reset(self, *args, **kwargs) -> "_HTFHandler":
+    def reset(self: Self, *args, **kwargs) -> Self:
         return self.__class__(
             config=self.config, verbose=self._verbose, *args, **kwargs
         )

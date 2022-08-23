@@ -1,49 +1,63 @@
 from curses import meta
+from typing import Union
+from typing import TypeVar
 
 from hourglass_tensorflow.types.config import HTFConfig
+from hourglass_tensorflow.types.config import HTFConfigParser
 from hourglass_tensorflow.handlers.data import HTFDataHandler
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.handlers.dataset import HTFDatasetHandler
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.types.config.fields import HTFObjectReference
+from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.types.config.metadata import HTFMetadata
 
+T = TypeVar("T")
 
-class HTFManager(_HTFHandler):
-    def __init__(
-        self,
-        config: HTFConfig,
-        metadata: HTFMetadata = None,
-        verbose: bool = True,
-        *args,
-        **kwargs
-    ) -> None:
-        super().__init__(config, metadata, verbose, *args, **kwargs)
-        self.config: HTFConfig = config
+
+class HTFManager(ObjectLogger):
+    def __init__(self, filename: str, verbose: bool = True, *args, **kwargs) -> None:
+        super().__init__(verbose, *args, **kwargs)
+        self._config_file = filename
+        self._config = HTFConfig.parse_obj(
+            HTFConfigParser.parse(filename=filename, verbose=verbose)
+        )
+        self._metadata = HTFMetadata()
+
+    @property
+    def config(self) -> HTFConfig:
+        return self._config
+
+    @property
+    def metadata(self) -> HTFMetadata:
+        return self._metadata
 
     def _import_object(
         self,
-        obj: HTFObjectReference,
+        obj: HTFObjectReference[T],
         config: HTFConfigField,
         metadata: HTFMetadata,
         *args,
         **kwargs
-    ) -> _HTFHandler:
+    ) -> Union[T, _HTFHandler]:
         cls = obj.object
         params = obj.params
         instance = cls(config=config, metadata=metadata, *args, **params, **kwargs)
         return instance
 
     def run(self, *args, **kwargs) -> None:
+        # Unpack Objects
+        obj_data: HTFObjectReference[HTFDataHandler] = self._config.data.object
+        obj_dataset: HTFObjectReference[HTFDatasetHandler] = self._config.dataset.object
         # Launch Data Handler
-        self.DATA: HTFDataHandler = self._import_object(
-            self.config.data.object, config=self.config.data, metadata=self.meta
+        self.DATA = self._import_object(
+            obj_data, config=self._config.data, metadata=self._metadata
         )
-        data = self.DATA().get_return()
+        data = self.DATA().get_data()
         # Launch Dataset Handler
-        self.DATASET: HTFDatasetHandler = self._import_object(
-            self.config.dataset.object,
-            config=self.config.dataset,
-            metadata=self.meta,
+        self.DATASET = self._import_object(
+            obj_dataset,
+            config=self._config.dataset,
+            metadata=self._metadata,
             data=data,
         )
