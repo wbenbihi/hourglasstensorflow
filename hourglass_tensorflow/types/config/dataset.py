@@ -24,9 +24,9 @@ NormalizationModeType = Union[
 class HTFDatasetSets(HTFConfigField):
     split_by_column: bool = False
     column_split: str = "set"
-    value_test: bool = "TEST"
-    value_train: bool = "TRAIN"
-    value_validation: bool = "VALIDATION"
+    value_test: str = "TEST"
+    value_train: str = "TRAIN"
+    value_validation: str = "VALIDATION"
     test: bool = False
     train: bool = True
     validation: bool = True
