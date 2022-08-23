@@ -10,6 +10,7 @@ import toml
 import yaml
 
 from hourglass_tensorflow.types.config.data import HTFDataConfig
+from hourglass_tensorflow.types.config.model import HTFModelConfig
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.types.config.dataset import HTFDatasetConfig
@@ -26,7 +27,7 @@ class HTFConfig(HTFConfigField):
     mode: HTFConfigMode = HTFConfigMode.TRAIN
     data: Optional[HTFDataConfig]
     dataset: Optional[HTFDatasetConfig]
-    model: Optional[Any]
+    model: Optional[HTFModelConfig]
 
 
 # region ConfigParser
