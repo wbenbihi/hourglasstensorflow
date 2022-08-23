@@ -1,6 +1,6 @@
 data:
   object:
-    source: "hourglass_tensorflow.data.HTFDataHandler"
+    source: "hourglass_tensorflow.handlers.data.HTFDataHandler"
     params:
       foo: bar
   input:
@@ -56,7 +56,7 @@ data:
 
 dataset:
   object:
-    source: "hourglass_tensorflow.datasets.HTFDatasetHandler"
+    source: "hourglass_tensorflow.handlers.datasets.HTFDatasetHandler"
     params:
       foo: bar
   image_size: 256
@@ -82,3 +82,20 @@ dataset:
   bbox:
     activate: true
     factor: 1.5
+
+model:
+  object:
+    source: "hourglass_tensorflow.handlers.model.HTFModelHandler"
+    params:
+      foo: bar
+  build_as_model : false
+  data_format: NHWC
+  params:
+    input_size: 256
+    output_size: 64
+    stages: 3
+    downsamplings_per_stage: 4
+    stage_filters: 256
+    output_channels: 16
+    name: "HourglassSample"
+    intermediate_supervision: true

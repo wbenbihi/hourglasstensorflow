@@ -1,7 +1,10 @@
+from doctest import OutputChecker
+
 import tensorflow as tf
 from keras.models import Model
 
 from hourglass_tensorflow.layers.hourglass import HourglassLayer
+from hourglass_tensorflow.types.config.model import HTFModelAsLayers
 from hourglass_tensorflow.layers.downsampling import DownSamplingLayer
 
 
@@ -65,5 +68,64 @@ class HourglassModel(Model):
             if self._intermediate_supervision:
                 outputs.append(y)
         if self._intermediate_supervision:
-            return tf.stack(outputs, axis=1, name="NetworkStackedOutput")
-        return y
+            self.output = tf.stack(outputs, axis=1, name="NetworkStackedOutput")
+        else:
+            self.output = y
+        return self.output
+
+
+def model_as_layers(
+    inputs: tf.Tensor,
+    input_size: int = 256,
+    output_size: int = 64,
+    stages: int = 4,
+    downsamplings_per_stage: int = 4,
+    stage_filters: int = 256,
+    output_channels: int = 16,
+    intermediate_supervision: bool = True,
+    name: str = None,
+    dtype=None,
+    dynamic=False,
+    trainable: bool = True,
+    *args,
+    **kwargs,
+) -> HTFModelAsLayers:
+    downsampling = DownSamplingLayer(
+        input_size=input_size,
+        output_size=output_size,
+        kernel_size=7,
+        output_filters=stage_filters,
+        name="DownSampling",
+        dtype=dtype,
+        dynamic=dynamic,
+        trainable=trainable,
+    )
+    hourglasses = [
+        HourglassLayer(
+            downsamplings=downsamplings_per_stage,
+            feature_filters=stage_filters,
+            output_filters=output_channels,
+            name=f"Hourglass{i+1}",
+            dtype=dtype,
+            dynamic=dynamic,
+            trainable=trainable,
+        )
+        for i in range(stages)
+    ]
+
+    x = downsampling(inputs)
+    outputs = []
+    for layer in hourglasses:
+        x, y = layer(x)
+        if intermediate_supervision:
+            outputs.append(y)
+    if intermediate_supervision:
+        output = tf.stack(outputs, axis=1, name="NetworkStackedOutput")
+    else:
+        output = y
+
+    model = Model(inputs=inputs, outputs=output)
+
+    return HTFModelAsLayers(
+        downsampling=downsampling, hourglasses=hourglasses, outputs=output, model=model
+    )
