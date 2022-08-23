@@ -94,17 +94,7 @@ class HTFModelHandler(_HTFModelHandler):
         # TODO: Handle other Image Mode than RGB
         channels = 3
         if self.config.data_format == "NHWC":
-            self._input = InputTensor(shape=(None, height, width, channels))
-        else:
-            raise BadConfigurationError("The only supported data format is NHWC so far")
-        return self._input
-
-    def _build_output(self, *args, **kwargs) -> tf.Tensor:
-        height, width = self.params.input_size, self.params.input_size
-        # TODO: Handle other Image Mode than RGB
-        channels = 3
-        if self.config.data_format == "NHWC":
-            self._input = InputTensor(shape=(None, height, width, channels))
+            self._input = InputTensor(shape=(height, width, channels), name="Input")
         else:
             raise BadConfigurationError("The only supported data format is NHWC so far")
         return self._input
@@ -116,8 +106,8 @@ class HTFModelHandler(_HTFModelHandler):
 
     def _build_model_as_layer(self, *args, **kwargs) -> keras.models.Model:
         self._layered_model = model_as_layers(inputs=self._input, **self.params.dict())
-        self._output = self._layered_model.outputs
-        self._model = self._layered_model.model
+        self._output = self._layered_model["outputs"]
+        self._model = self._layered_model["model"]
         return self._model
 
     def generate_graph(self, *args, **kwargs) -> None:
@@ -129,7 +119,7 @@ class HTFModelHandler(_HTFModelHandler):
             # Link Input Shape to Model
             self._output = model(inputs=input_tensor, *args, **kwargs)
         else:
-            model = self._build_model_as_model(*args, **kwargs)
+            model = self._build_model_as_layer(*args, **kwargs)
 
 
 # endregion
