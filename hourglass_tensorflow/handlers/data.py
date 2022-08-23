@@ -181,7 +181,7 @@ class HTFDataHandler(_HTFDataHandler):
         self._validate_joints(_error=_error)
         self._read_labels(_error=_error)
 
-    def get_return(self) -> pd.DataFrame:
+    def get_data(self) -> pd.DataFrame:
         return self._labels_df
 
 
