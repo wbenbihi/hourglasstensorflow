@@ -20,12 +20,12 @@ from hourglass_tensorflow.types.config.dataset import HTFDatasetBBox
 from hourglass_tensorflow.types.config.dataset import HTFDatasetSets
 from hourglass_tensorflow.types.config.dataset import HTFDatasetConfig
 from hourglass_tensorflow.types.config.dataset import HTFDatasetHeatmap
-from hourglass_tensorflow.datasets.transformation import tf_train_map_stacks
-from hourglass_tensorflow.datasets.transformation import tf_train_map_heatmaps
-from hourglass_tensorflow.datasets.transformation import tf_train_map_squarify
-from hourglass_tensorflow.datasets.transformation import tf_train_map_normalize
-from hourglass_tensorflow.datasets.transformation import tf_train_map_build_slice
-from hourglass_tensorflow.datasets.transformation import tf_train_map_resize_data
+from hourglass_tensorflow.handlers._transformation import tf_train_map_stacks
+from hourglass_tensorflow.handlers._transformation import tf_train_map_heatmaps
+from hourglass_tensorflow.handlers._transformation import tf_train_map_squarify
+from hourglass_tensorflow.handlers._transformation import tf_train_map_normalize
+from hourglass_tensorflow.handlers._transformation import tf_train_map_build_slice
+from hourglass_tensorflow.handlers._transformation import tf_train_map_resize_data
 
 # region Abstract Class
 
