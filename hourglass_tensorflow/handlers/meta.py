@@ -21,7 +21,7 @@ class _HTFHandler(ABC, ObjectLogger):
         self._executed = False
         self.init_handler(*args, **kwargs)
 
-    def __call__(self, *args, **kwargs) -> None:
+    def __call__(self, *args, **kwargs) -> "_HTFHandler":
         if not self._executed:
             self.run(*args, **kwargs)
             self.executed = True
