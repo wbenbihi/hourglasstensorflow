@@ -35,20 +35,21 @@ def log(verbose, input, output):
         config = HTFConfig.parse_obj(
             HTFConfigParser.parse(filename=input, verbose=verbose)
         )
-        writer = tf.summary.create_file_writer(output)
         tf.summary.trace_on(graph=True, profiler=True)
+        writer = tf.summary.create_file_writer(output)
         if verbose:
             logger.info("Building Graph...")
-        model_handler = HTFModelHandler(config=config.model, verbose=verbose)
-        model_handler()
+        graph = tf.Graph()
+        with graph.as_default():
+            model_handler = HTFModelHandler(config=config.model, verbose=verbose)
+            model_handler()
         if verbose:
             logger.info("Writing Graph...")
         with writer.as_default():
-            tf.summary.trace_export(
-                name=f"GraphTrace_{datetime.datetime.now()}",
-                step=0,
-                profiler_outdir=f"{output}/graph",
+            tf.summary.graph(
+                graph,
             )
+        writer.flush()
         if verbose:
             logger.success("Operation completed!")
     except Exception as e:
