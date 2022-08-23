@@ -15,6 +15,6 @@ from hourglass_tensorflow.types.config.fields import HTFObjectReference
 class HTFTrainConfig(HTFConfigField):
     object: Optional[HTFObjectReference] = Field(
         default_factory=HTFObjectReference(
-            source="hourglass_tensorflow.handlers.model.HTFModelHandler"
+            source="hourglass_tensorflow.handlers.train.HTFTrainHandler"
         )
     )

@@ -11,6 +11,7 @@ import yaml
 
 from hourglass_tensorflow.types.config.data import HTFDataConfig
 from hourglass_tensorflow.types.config.model import HTFModelConfig
+from hourglass_tensorflow.types.config.train import HTFTrainConfig
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
 from hourglass_tensorflow.types.config.dataset import HTFDatasetConfig
@@ -23,11 +24,12 @@ class HTFConfigMode(enum.Enum):
 
 
 class HTFConfig(HTFConfigField):
-    version: Optional[Union[str, int]]
     mode: HTFConfigMode = HTFConfigMode.TRAIN
+    version: Optional[Union[str, int]]
     data: Optional[HTFDataConfig]
     dataset: Optional[HTFDatasetConfig]
     model: Optional[HTFModelConfig]
+    train: Optional[HTFTrainConfig]
 
 
 # region ConfigParser
