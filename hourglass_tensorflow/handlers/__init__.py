@@ -6,6 +6,7 @@ from hourglass_tensorflow.types.config import HTFConfig
 from hourglass_tensorflow.types.config import HTFConfigParser
 from hourglass_tensorflow.handlers.data import HTFDataHandler
 from hourglass_tensorflow.handlers.meta import _HTFHandler
+from hourglass_tensorflow.handlers.model import HTFModelHandler
 from hourglass_tensorflow.handlers.dataset import HTFDatasetHandler
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.types.config.fields import HTFObjectReference
@@ -40,15 +41,14 @@ class HTFManager(ObjectLogger):
         *args,
         **kwargs
     ) -> Union[T, _HTFHandler]:
-        cls = obj.object
-        params = obj.params
-        instance = cls(config=config, metadata=metadata, *args, **params, **kwargs)
+        instance = obj.init(config=config, metadata=metadata, *args, **kwargs)
         return instance
 
     def run(self, *args, **kwargs) -> None:
         # Unpack Objects
         obj_data: HTFObjectReference[HTFDataHandler] = self._config.data.object
         obj_dataset: HTFObjectReference[HTFDatasetHandler] = self._config.dataset.object
+        obj_model: HTFObjectReference[HTFModelHandler] = self._config.model.object
         # Launch Data Handler
         self.DATA = self._import_object(
             obj_data, config=self._config.data, metadata=self._metadata
@@ -60,4 +60,10 @@ class HTFManager(ObjectLogger):
             config=self._config.dataset,
             metadata=self._metadata,
             data=data,
+        )
+        # Launch Model Handler
+        self.MODEL = self._import_object(
+            obj_model,
+            config=self._config.model,
+            metadata=self._metadata,
         )

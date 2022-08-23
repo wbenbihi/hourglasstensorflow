@@ -15,7 +15,7 @@ T = TypeVar("T")
 
 class HTFConfigField(BaseModel):
     @property
-    def VALIDITY_CONDITIONS(self) -> List(bool):
+    def VALIDITY_CONDITIONS(self) -> List[bool]:
         return []
 
     @property
@@ -30,3 +30,6 @@ class HTFObjectReference(BaseModel, Generic[T]):
     @property
     def object(self) -> Type[T]:
         return _get_object(self.source)
+
+    def init(self, *args, **kwargs) -> T:
+        return self.object(*args, **kwargs, **self.params)
