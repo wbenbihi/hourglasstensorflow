@@ -97,7 +97,7 @@ class HTFDataOutputJoints(HTFConfigField):
     )
     format: HTFDataOutputJointsFormat = Field(default_factory=HTFDataOutputJointsFormat)
 
-    def VALIDITY_CONDITIONS(self) -> List(bool):
+    def VALIDITY_CONDITIONS(self) -> List[bool]:
         return [
             self.num == len(self.names),
             len(self.dynamic_fields) == len(RE_FSTRING.findall(self.naming_convention)),
