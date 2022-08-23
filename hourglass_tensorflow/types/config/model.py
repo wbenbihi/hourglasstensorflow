@@ -26,6 +26,9 @@ class HTFModelAsLayers(BaseModel):
     outputs: keras.layers.Layer
     model: keras.models.Model
 
+    class Config:
+        arbitrary_types_allowed = True
+
 
 class HTFModelParams(HTFConfigField):
     name: str = "HourglassNetwork"
