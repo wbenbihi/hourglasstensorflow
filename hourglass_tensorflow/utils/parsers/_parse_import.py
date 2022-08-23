@@ -2,7 +2,6 @@ import importlib
 from typing import Type
 from typing import Callable
 
-from hourglass_tensorflow.datasets import HTFBaseDatasetHandler
 from hourglass_tensorflow.utils._errors import BadConfigurationError
 
 
@@ -30,8 +29,3 @@ def _generate_constraint_object_getter(type: Type) -> Callable[[str], Type]:
         return obj
 
     return get_object
-
-
-get_dataset: Callable[
-    [str], Type[HTFBaseDatasetHandler]
-] = _generate_constraint_object_getter(type=HTFBaseDatasetHandler)
