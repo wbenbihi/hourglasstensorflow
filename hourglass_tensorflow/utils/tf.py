@@ -235,7 +235,7 @@ def tf_batch_matrix_argmax(tensor: tf.Tensor) -> tf.Tensor:
 
 @tf.function
 def tf_dynamic_matrix_argmax(
-    tensor: tf.Tensor, keepdims: bool = False, intermediate_supervision: bool = False
+    tensor: tf.Tensor, keepdims: bool = True, intermediate_supervision: bool = True
 ) -> tf.Tensor:
     """Apply 2D argmax for 5D, 4D, 3D, 2D tensors
 
@@ -269,9 +269,9 @@ def tf_dynamic_matrix_argmax(
     Args:
         tensor (tf.Tensor): Tensor to apply argmax
         keepdims (bool, optional): Force return tensor to be 3D.
-            Defaults to False.
+            Defaults to True.
         intermediate_supervision (bool, optional): Modify function behavior if tensor rank is 4.
-            Defaults to False.
+            Defaults to True.
 
     Returns:
         tf.Tensor: tf.dtypes.int32 Tensor of dimension NxCx2
@@ -279,23 +279,23 @@ def tf_dynamic_matrix_argmax(
     Raises:
         ValueError: If the input `tensor` rank not in [2 - 6]
     """
-    if tf.rank(tensor) == 2:
+    if len(tf.shape(tensor)) == 2:
         # Single Joint
         argmax = tf_matrix_argmax(tf.expand_dims(tensor, -1))
-        return argmax if keepdims else argmax[:, :, 0]
-    elif tf.rank(tensor) == 3:
+        return argmax if keepdims else argmax[0, :]
+    elif len(tf.shape(tensor)) == 3:
         # Multiple Joint Heatmaps
         argmax = tf_matrix_argmax(tensor)
-        return argmax
-    elif tf.rank(tensor) == 4 and intermediate_supervision:
+        return tf.expand_dims(argmax, 0) if keepdims else argmax
+    elif len(tf.shape(tensor)) == 4 and intermediate_supervision:
         # Multiple Joint Heatmaps with Intermediate supervision
         argmax = tf_matrix_argmax(tensor[-1, :, :, :])
-        return argmax
-    elif tf.rank(tensor) == 4 and not intermediate_supervision:
+        return tf.expand_dims(argmax, 0) if keepdims else argmax
+    elif len(tf.shape(tensor)) == 4 and not intermediate_supervision:
         # Batch of multiple Joint Heatmaps without Intermediate supervision
         argmax = tf_batch_matrix_argmax(tensor)
         return argmax
-    elif tf.rank(tensor) == 5:
+    elif len(tf.shape(tensor)) == 5:
         # Batch of multiple Joint Heatmaps with Intermediate supervision
         argmax = tf_batch_matrix_argmax(tensor[:, -1, :, :, :])
         return argmax
