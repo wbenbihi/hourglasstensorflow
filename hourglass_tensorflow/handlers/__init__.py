@@ -1,4 +1,3 @@
-from curses import meta
 from typing import Union
 from typing import TypeVar
 
