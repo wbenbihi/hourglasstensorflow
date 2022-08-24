@@ -1,17 +1,19 @@
 from typing import Union
 from typing import TypeVar
 
+from hourglass_tensorflow.utils import ObjectLogger
+from hourglass_tensorflow.utils import BadConfigurationError
 from hourglass_tensorflow.types.config import HTFConfig
+from hourglass_tensorflow.types.config import HTFMetadata
+from hourglass_tensorflow.types.config import HTFConfigMode
+from hourglass_tensorflow.types.config import HTFConfigField
 from hourglass_tensorflow.types.config import HTFConfigParser
+from hourglass_tensorflow.types.config import HTFObjectReference
 from hourglass_tensorflow.handlers.data import HTFDataHandler
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.handlers.model import HTFModelHandler
 from hourglass_tensorflow.handlers.train import HTFTrainHandler
 from hourglass_tensorflow.handlers.dataset import HTFDatasetHandler
-from hourglass_tensorflow.types.config.fields import HTFConfigField
-from hourglass_tensorflow.types.config.fields import HTFObjectReference
-from hourglass_tensorflow.utils.object_logger import ObjectLogger
-from hourglass_tensorflow.types.config.metadata import HTFMetadata
 
 T = TypeVar("T")
 
@@ -30,6 +32,19 @@ class HTFManager(ObjectLogger):
         return self._config
 
     @property
+    def mode(self) -> HTFConfigMode:
+        return self.config.mode
+
+    @property
+    def VALIDATION_RULES(self):
+        return {
+            HTFConfigMode.TRAIN: [],
+            HTFConfigMode.TEST: [],
+            HTFConfigMode.INFERENCE: [],
+            HTFConfigMode.SERVER: [],
+        }
+
+    @property
     def metadata(self) -> HTFMetadata:
         return self._metadata
 
@@ -44,7 +59,30 @@ class HTFManager(ObjectLogger):
         instance = obj.init(config=config, metadata=metadata, *args, **kwargs)
         return instance
 
-    def run(self, *args, **kwargs) -> None:
+    def __call__(self, *args, **kwargs) -> None:
+
+        if not all(self.VALIDATION_RULES[self.mode]):
+            raise BadConfigurationError
+
+        if self.mode == HTFConfigMode.TRAIN:
+            self.train(*args, **kwargs)
+        if self.mode == HTFConfigMode.TEST:
+            self.test(*args, **kwargs)
+        if self.mode == HTFConfigMode.INFERENCE:
+            self.inference(*args, **kwargs)
+        if self.mode == HTFConfigMode.SERVER:
+            self.server(*args, **kwargs)
+
+    def server(self, *args, **kwargs) -> None:
+        raise NotImplementedError
+
+    def test(self, *args, **kwargs) -> None:
+        raise NotImplementedError
+
+    def inference(self, *args, **kwargs) -> None:
+        raise NotImplementedError
+
+    def train(self, *args, **kwargs) -> None:
         # Unpack Objects
         obj_data: HTFObjectReference[HTFDataHandler] = self._config.data.object
         obj_dataset: HTFObjectReference[HTFDatasetHandler] = self._config.dataset.object
