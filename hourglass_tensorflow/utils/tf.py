@@ -231,3 +231,75 @@ def tf_batch_matrix_argmax(tensor: tf.Tensor) -> tf.Tensor:
     return tf.map_fn(
         fn=tf_matrix_argmax, elems=tensor, fn_output_signature=tf.dtypes.int32
     )
+
+
+@tf.function
+def tf_dynamic_matrix_argmax(
+    tensor: tf.Tensor, keepdims: bool = False, intermediate_supervision: bool = False
+) -> tf.Tensor:
+    """Apply 2D argmax for 5D, 4D, 3D, 2D tensors
+
+    This function consider the following dimension cases:
+        * `2D tensor` A single joint heatmap.
+            Function returns a tensor of `dim=2`.
+        * `3D tensor` A multiple joint heatmap.
+            Function returns a tensor of `dim=2`.
+        * `4D tensor` A multiple joints heatmap with intermediate supervision.
+            Function returns a tensor of `dim=2`.
+            2D Argmax will only be applied on last stage.
+        * `5D tensor` A batch of multiple joints heatmap with intermediate supervision.
+            Function returns a tensor of `dim=3`.
+            2D Argmax will only be applied on last stage.
+
+    Notes:
+        For a batch of heatmap with no intermediate supervision, you need to apply
+        a dimension expansion before using this function.
+        >>> batch_tensor_no_supervision.shape
+        [4, 64, 64, 16]
+        >>> tf_dynamic_matrix_argmax(batch_tensor_no_supervision).shape
+        [16, 2] # Considered as a single heatmap with intermediate supervision
+
+        >>> expanded_batch = tf.expand_dims(batch_tensor_no_supervision, 1)
+        >>> expanded_batch.shape
+        [4, 1, 64, 64, 16]
+        >>> tf_dynamic_matrix_argmax(batch_tensor_no_supervision).shape
+        [4, 16, 2] # Considered as a batch of 4 image
+
+
+    Args:
+        tensor (tf.Tensor): Tensor to apply argmax
+        keepdims (bool, optional): Force return tensor to be 3D.
+            Defaults to False.
+        intermediate_supervision (bool, optional): Modify function behavior if tensor rank is 4.
+            Defaults to False.
+
+    Returns:
+        tf.Tensor: tf.dtypes.int32 Tensor of dimension NxCx2
+
+    Raises:
+        ValueError: If the input `tensor` rank not in [2 - 6]
+    """
+    if tf.rank(tensor) == 2:
+        # Single Joint
+        argmax = tf_matrix_argmax(tf.expand_dims(tensor, -1))
+        return argmax if keepdims else argmax[:, :, 0]
+    elif tf.rank(tensor) == 3:
+        # Multiple Joint Heatmaps
+        argmax = tf_matrix_argmax(tensor)
+        return argmax
+    elif tf.rank(tensor) == 4 and intermediate_supervision:
+        # Multiple Joint Heatmaps with Intermediate supervision
+        argmax = tf_matrix_argmax(tensor[-1, :, :, :])
+        return argmax
+    elif tf.rank(tensor) == 4 and not intermediate_supervision:
+        # Batch of multiple Joint Heatmaps without Intermediate supervision
+        argmax = tf_batch_matrix_argmax(tensor)
+        return argmax
+    elif tf.rank(tensor) == 5:
+        # Batch of multiple Joint Heatmaps with Intermediate supervision
+        argmax = tf_batch_matrix_argmax(tensor[:, -1, :, :, :])
+        return argmax
+    else:
+        raise ValueError(
+            f"No argmax operation available for {len(tf.shape(tensor))}D tensor"
+        )
