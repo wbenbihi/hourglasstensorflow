@@ -27,3 +27,6 @@ class HTFTrainConfig(HTFConfigField):
             source="hourglass_tensorflow.handlers.train.HTFTrainHandler"
         )
     )
+
+    class Config:
+        arbitrary_types_allowed = True
