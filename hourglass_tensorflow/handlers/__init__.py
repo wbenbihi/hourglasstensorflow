@@ -62,15 +62,23 @@ class HTFManager(ObjectLogger):
             metadata=self._metadata,
             data=data,
         )
+        self.DATASET()
         # Launch Model Handler
         self.MODEL = self._import_object(
             obj_model,
             config=self._config.model,
             metadata=self._metadata,
         )
+        self.MODEL()
         # Launch Train Handler
         self.TRAIN = self._import_object(
             obj_train,
             config=self._config.train,
             metadata=self._metadata,
+        )
+        self.TRAIN(
+            model=self.MODEL._model,
+            train_dataset=self.DATASET._train_dataset,
+            test_dataset=self.DATASET._test_set,
+            validation_dataset=self.DATASET._validation_dataset,
         )
