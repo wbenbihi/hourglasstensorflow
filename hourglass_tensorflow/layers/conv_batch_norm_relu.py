@@ -2,8 +2,6 @@ import tensorflow as tf
 from keras import layers
 from keras.layers import Layer
 
-# from hourglass_tensorflow.layers.batch_norm_relu_conv import BatchNormReluConvLayer
-
 
 class ConvBatchNormReluLayer(Layer):
     def __init__(

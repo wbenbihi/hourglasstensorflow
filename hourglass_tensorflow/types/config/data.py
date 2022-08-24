@@ -7,7 +7,6 @@ from typing import Literal
 from typing import Optional
 
 from pydantic import Field
-from pydantic import BaseModel
 
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.types.config.fields import HTFObjectReference

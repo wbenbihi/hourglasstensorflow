@@ -14,8 +14,6 @@ from pydantic import BaseModel
 from pydantic import ValidationError
 from scipy.io.matlab._mio5_params import mat_struct as MatStruct
 
-from hourglass_tensorflow.utils.writers import WRITER_MAPPER
-
 # region CONSTANTS
 
 

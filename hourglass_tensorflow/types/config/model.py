@@ -1,6 +1,3 @@
-import re
-import enum
-from typing import Dict
 from typing import List
 from typing import Union
 from typing import Literal
@@ -10,7 +7,6 @@ from typing import TypedDict
 import keras.layers
 import keras.models
 from pydantic import Field
-from pydantic import BaseModel
 
 from hourglass_tensorflow.types.config.fields import HTFConfigField
 from hourglass_tensorflow.types.config.fields import HTFObjectReference

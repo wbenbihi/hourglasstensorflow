@@ -1,19 +1,10 @@
 from abc import abstractmethod
-from typing import Any
-from typing import Set
-from typing import Dict
-from typing import Type
-from typing import Tuple
-from typing import Union
-from typing import Iterable
-from typing import Optional
 
 import tensorflow as tf
 import keras.layers
 import keras.models
 from keras import Input as InputTensor
 
-from hourglass_tensorflow.utils.sets import split_train_test
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.utils._errors import BadConfigurationError
 from hourglass_tensorflow.models.hourglass import HourglassModel

@@ -1,14 +1,7 @@
 from abc import abstractmethod
-from typing import Any
-from typing import Set
-from typing import Dict
 from typing import List
-from typing import Type
-from typing import Tuple
 from typing import Union
 from typing import TypeVar
-from typing import Iterable
-from typing import Optional
 
 import tensorflow as tf
 from keras.losses import Loss
@@ -18,7 +11,6 @@ from keras.optimizers import Optimizer
 from keras.optimizers.schedules.learning_rate_schedule import LearningRateSchedule
 
 from hourglass_tensorflow.handlers.meta import _HTFHandler
-from hourglass_tensorflow.utils._errors import BadConfigurationError
 from hourglass_tensorflow.types.config.train import HTFTrainConfig
 from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
