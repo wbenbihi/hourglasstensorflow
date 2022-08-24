@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import Field
 from keras.losses import Loss
 from keras.metrics import Metric
+from keras.callbacks import Callback
 from keras.optimizers import Optimizer
 from keras.optimizers.schedules.learning_rate_schedule import LearningRateSchedule
 
@@ -19,6 +20,7 @@ class HTFTrainConfig(HTFConfigField):
     learning_rate: Union[HTFObjectReference[LearningRateSchedule], float] = 0.00025
     loss: Union[HTFObjectReference[Loss], str] = "binary_crossentropy"
     optimizer: Union[HTFObjectReference[Optimizer], str] = "rmsprop"
+    callbacks: List[HTFObjectReference[Callback]] = Field(default_factory=list)
     metrics: List[HTFObjectReference[Metric]] = Field(default_factory=list)
     object: Optional[HTFObjectReference] = Field(
         default_factory=HTFObjectReference(

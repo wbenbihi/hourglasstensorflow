@@ -7,6 +7,7 @@ import tensorflow as tf
 from keras.losses import Loss
 from keras.models import Model
 from keras.metrics import Metric
+from keras.callbacks import Callback
 from keras.optimizers import Optimizer
 from keras.optimizers.schedules.learning_rate_schedule import LearningRateSchedule
 
@@ -36,6 +37,7 @@ class _HTFTrainHandler(_HTFHandler):
         self._loss: Union[HTFObjectReference[Loss], str] = None
         self._optimizer: Union[HTFObjectReference[Optimizer], str] = None
         self._metrics: List[HTFObjectReference[Metric]] = None
+        self._callbacks: List[HTFObjectReference[Callback]] = None
 
     @property
     def config(self) -> HTFTrainConfig:
@@ -84,6 +86,7 @@ class HTFTrainHandler(_HTFTrainHandler):
             self.config.optimizer, lr=self._learning_rate
         )
         self._metrics = [obj.init() for obj in self.config.metrics]
+        self._callbacks = [obj.init() for obj in self.config.callbacks]
 
     def compile(self, model: Model, *args, **kwargs) -> None:
         model.compile(optimizer=self._optimizer, metrics=self._metrics, loss=self._loss)
@@ -110,6 +113,7 @@ class HTFTrainHandler(_HTFTrainHandler):
             steps_per_epoch=self._epoch_size,
             shuffle=True,
             validation_data=batch_validation,
+            callbacks=self._callbacks,
         )
 
 
