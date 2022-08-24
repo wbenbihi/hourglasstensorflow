@@ -231,11 +231,11 @@ class HTFDatasetHandler(_HTFDatasetHandler):
             tf.data.Dataset.from_tensor_slices(
                 self._extract_columns_from_data(dataset=dataset)
             )
-            .map(
+            .apply(
                 # Load Images
                 tf_train_map_build_slice
             )
-            .map(
+            .apply(
                 # Compute BBOX cropping
                 lambda img, coord, vis: tf_train_map_squarify(
                     img,
@@ -245,13 +245,13 @@ class HTFDatasetHandler(_HTFDatasetHandler):
                     bbox_factor=self.config.bbox.factor,
                 )
             )
-            .map(
+            .apply(
                 # Resize Image
                 lambda img, coord, vis: tf_train_map_resize_data(
                     img, coord, vis, input_size=int(self.config.image_size)
                 )
             )
-            .map(
+            .apply(
                 # Get Heatmaps
                 lambda img, coord, vis: tf_train_map_heatmaps(
                     img,
@@ -261,7 +261,7 @@ class HTFDatasetHandler(_HTFDatasetHandler):
                     stddev=self.config.heatmap.stddev,
                 )
             )
-            .map(
+            .apply(
                 # Normalize Data
                 lambda img, hms: tf_train_map_normalize(
                     img,
@@ -269,7 +269,7 @@ class HTFDatasetHandler(_HTFDatasetHandler):
                     normalization=self.config.normalization,
                 )
             )
-            .map(
+            .apply(
                 # Stacks
                 lambda img, hms: tf_train_map_stacks(
                     img,
