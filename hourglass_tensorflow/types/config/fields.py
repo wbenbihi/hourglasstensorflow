@@ -8,7 +8,7 @@ from typing import Optional
 from pydantic import Field
 from pydantic import BaseModel
 
-from hourglass_tensorflow.utils.parsers._parse_import import _get_object
+from hourglass_tensorflow.utils.parsers import _get_object
 
 T = TypeVar("T")
 

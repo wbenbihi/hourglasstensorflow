@@ -2,9 +2,9 @@ from abc import ABC
 from abc import abstractmethod
 
 from hourglass_tensorflow.types import Self
-from hourglass_tensorflow.types.config.fields import HTFConfigField
-from hourglass_tensorflow.utils.object_logger import ObjectLogger
-from hourglass_tensorflow.types.config.metadata import HTFMetadata
+from hourglass_tensorflow.utils import ObjectLogger
+from hourglass_tensorflow.types.config import HTFMetadata
+from hourglass_tensorflow.types.config import HTFConfigField
 
 
 class _HTFHandler(ABC, ObjectLogger):

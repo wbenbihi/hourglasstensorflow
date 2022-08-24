@@ -6,11 +6,11 @@ from typing import List
 
 import pandas as pd
 
+from hourglass_tensorflow.utils import BadConfigurationError
+from hourglass_tensorflow.types.config import HTFDataInput
+from hourglass_tensorflow.types.config import HTFDataConfig
+from hourglass_tensorflow.types.config import HTFDataOutput
 from hourglass_tensorflow.handlers.meta import _HTFHandler
-from hourglass_tensorflow.utils._errors import BadConfigurationError
-from hourglass_tensorflow.types.config.data import HTFDataInput
-from hourglass_tensorflow.types.config.data import HTFDataConfig
-from hourglass_tensorflow.types.config.data import HTFDataOutput
 
 # region Abstract Class
 

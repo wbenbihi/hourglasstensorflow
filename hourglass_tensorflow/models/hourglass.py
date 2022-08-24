@@ -1,8 +1,8 @@
 import tensorflow as tf
 from keras.models import Model
 
+from hourglass_tensorflow.types.config import HTFModelAsLayers
 from hourglass_tensorflow.layers.hourglass import HourglassLayer
-from hourglass_tensorflow.types.config.model import HTFModelAsLayers
 from hourglass_tensorflow.layers.downsampling import DownSamplingLayer
 
 

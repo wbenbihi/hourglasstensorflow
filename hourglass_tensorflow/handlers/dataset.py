@@ -12,14 +12,14 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from hourglass_tensorflow.utils.sets import split_train_test
+from hourglass_tensorflow.utils import split_train_test
+from hourglass_tensorflow.types.config import HTFDatasetBBox
+from hourglass_tensorflow.types.config import HTFDatasetSets
+from hourglass_tensorflow.types.config import HTFDatasetConfig
+from hourglass_tensorflow.types.config import HTFDatasetHeatmap
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.handlers.engines import ENGINES
 from hourglass_tensorflow.handlers.engines import HTFEngine
-from hourglass_tensorflow.types.config.dataset import HTFDatasetBBox
-from hourglass_tensorflow.types.config.dataset import HTFDatasetSets
-from hourglass_tensorflow.types.config.dataset import HTFDatasetConfig
-from hourglass_tensorflow.types.config.dataset import HTFDatasetHeatmap
 from hourglass_tensorflow.handlers._transformation import tf_train_map_stacks
 from hourglass_tensorflow.handlers._transformation import tf_train_map_heatmaps
 from hourglass_tensorflow.handlers._transformation import tf_train_map_squarify

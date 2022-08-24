@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from hourglass_tensorflow.utils.object_logger import ObjectLogger
-from hourglass_tensorflow.types.config.metadata import HTFMetadata
+from hourglass_tensorflow.utils import ObjectLogger
+from hourglass_tensorflow.types.config import HTFMetadata
 
 
 class HTFEngine(ABC, ObjectLogger):

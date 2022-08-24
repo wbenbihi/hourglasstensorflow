@@ -10,9 +10,9 @@ from keras.metrics import Metric
 from keras.optimizers import Optimizer
 from keras.optimizers.schedules.learning_rate_schedule import LearningRateSchedule
 
+from hourglass_tensorflow.types.config import HTFTrainConfig
+from hourglass_tensorflow.types.config import HTFObjectReference
 from hourglass_tensorflow.handlers.meta import _HTFHandler
-from hourglass_tensorflow.types.config.train import HTFTrainConfig
-from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
 # region Abstract Class
 

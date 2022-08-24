@@ -1,8 +1,6 @@
 import tensorflow as tf
 import keras.metrics
 
-from hourglass_tensorflow.utils.tf import tf_matrix_argmax
-from hourglass_tensorflow.utils.tf import tf_batch_matrix_argmax
 from hourglass_tensorflow.utils.tf import tf_dynamic_matrix_argmax
 
 
