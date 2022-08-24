@@ -179,14 +179,14 @@ train:
           - 8
   callbacks:
     -
-      object: "tf.keras.callbacks.ModelCheckpoint"
+      source: "tf.keras.callbacks.ModelCheckpoint"
       params:
         filepath: "data/model.ignore.folder/myModel.{epoch:02d}"
         save_weights_only: false
         save_freq: epoch
         save_best_model: false
     -
-      object: "tf.keras.callbacks.TensorBoard"
+      source: "tf.keras.callbacks.TensorBoard"
       params:
         log_dir: logs/myModelLogs
         histogram_freq: 1
@@ -195,6 +195,6 @@ train:
         write_steps_per_seconds: true
         update_freq: epoch
     -
-      object: "tf.keras.callbacks.CSVLogger"
+      source: "tf.keras.callbacks.CSVLogger"
       params:
         filename: logs/myModelLogs.csv
