@@ -30,6 +30,7 @@ class HTFConfigMode(enum.Enum):
     TEST = "test"
     TRAIN = "train"
     INFERENCE = "inference"
+    SERVER = "server"
 
 
 class HTFConfig(HTFConfigField):

@@ -184,6 +184,7 @@ train:
         filepath: "data/model.ignore.folder/myModel.{epoch:02d}"
         save_weights_only: false
         save_freq: epoch
+        save_best_model: false
     -
       object: "tf.keras.callbacks.TensorBoard"
       params:
