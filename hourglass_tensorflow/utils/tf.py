@@ -212,8 +212,8 @@ def tf_matrix_argmax(tensor: tf.Tensor) -> tf.Tensor:
     """
     flat_tensor = tf.reshape(tensor, (-1, tf.shape(tensor)[-1]))
     argmax = tf.cast(tf.argmax(flat_tensor, axis=0), tf.int32)
-    argmax_x = argmax // tf.shape(tensor)[2]
-    argmax_y = argmax % tf.shape(tensor)[2]
+    argmax_x = argmax // tf.shape(tensor)[1]
+    argmax_y = argmax % tf.shape(tensor)[1]
     # stack and return 2D coordinates
     return tf.transpose(tf.stack((argmax_x, argmax_y), axis=0), [1, 0])
 
