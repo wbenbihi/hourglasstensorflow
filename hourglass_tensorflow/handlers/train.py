@@ -76,9 +76,9 @@ class _HTFTrainHandler(_HTFHandler):
 
 
 class HTFModelHandler(_HTFTrainHandler):
-    def _instantiate(self, obj: HTFObjectReference[R]) -> R:
+    def _instantiate(self, obj: HTFObjectReference[R], **kwargs) -> R:
         if isinstance(obj, HTFObjectReference):
-            return obj.init()
+            return obj.init(**kwargs)
         else:
             return obj
 
@@ -88,11 +88,17 @@ class HTFModelHandler(_HTFTrainHandler):
         self._batch_size = self.config.batch_size
         self._learning_rate = self._instantiate(self.config.learning_rate)
         self._loss = self._instantiate(self.config.loss)
-        self._optimizer = self._instantiate(self.config.optimizer)
+        self._optimizer = self._instantiate(
+            self.config.optimizer, lr=self._learning_rate
+        )
         self._metrics = [obj.init() for obj in self.config.metrics]
 
     def compile(self, model: Model, *args, **kwargs) -> None:
         model.compile(optimizer=self._optimizer, metrics=self._metrics, loss=self._loss)
+
+    def _apply_batch(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
+        if isinstance(dataset, tf.data.Dataset):
+            return dataset.batch(self._batch_size)
 
     def fit(
         self,
@@ -103,9 +109,15 @@ class HTFModelHandler(_HTFTrainHandler):
         *args,
         **kwargs,
     ) -> None:
-
+        _ = self._apply_batch(test_dataset)
+        batch_train = self._apply_batch(train_dataset)
+        batch_validation = self._apply_batch(validation_dataset)
         model.fit(
-            train_dataset,
+            batch_train,
+            epochs=self._epochs,
+            steps_per_epoch=self._epoch_size,
+            shuffle=True,
+            validation_data=batch_validation,
         )
 
 
