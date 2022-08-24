@@ -67,7 +67,7 @@ class _HTFTrainHandler(_HTFHandler):
 # region Handler
 
 
-class HTFModelHandler(_HTFTrainHandler):
+class HTFTrainHandler(_HTFTrainHandler):
     def _instantiate(self, obj: HTFObjectReference[R], **kwargs) -> R:
         if isinstance(obj, HTFObjectReference):
             return obj.init(**kwargs)
