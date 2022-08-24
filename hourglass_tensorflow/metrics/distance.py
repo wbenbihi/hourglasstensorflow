@@ -3,6 +3,7 @@ import keras.metrics
 
 from hourglass_tensorflow.utils.tf import tf_matrix_argmax
 from hourglass_tensorflow.utils.tf import tf_batch_matrix_argmax
+from hourglass_tensorflow.utils.tf import tf_dynamic_matrix_argmax
 
 
 class OverallMeanDistance(keras.metrics.Metric):
@@ -15,35 +16,14 @@ class OverallMeanDistance(keras.metrics.Metric):
         self.batch_mode = False
         self.intermediate_supervision = intermediate_supervision
 
-    def check_batch_mode(self, tensor):
-        if self.batch_mode is None:
-            if self.intermediate_supervision:
-                if len(tf.shape(tensor)) == 5:
-                    self.batch_mode = True
-                elif len(tf.shape(tensor)) == 4:
-                    self.batch_mode = False
-            else:
-                if len(tf.shape(tensor)) == 4:
-                    self.batch_mode = True
-                elif len(tf.shape(tensor)) == 3:
-                    self.batch_mode = False
-        else:
-            raise ValueError("Unknown mode for this tensor dimension tf.shape(tensor)")
-
     def argmax_tensor(self, tensor):
-        if self.batch_mode:
-            if self.intermediate_supervision:
-                return tf_batch_matrix_argmax(tensor[:, -1, :, :, :])
-            else:
-                return tf_batch_matrix_argmax(tensor)
-        else:
-            if self.intermediate_supervision:
-                return tf_matrix_argmax(tensor[-1])
-            else:
-                return tf_matrix_argmax(tensor)
+        return tf_dynamic_matrix_argmax(
+            tensor,
+            intermediate_supervision=self.intermediate_supervision,
+            keepdims=True,
+        )
 
     def update_state(self, y_true, y_pred, *args, **kwargs):
-        self.check_batch_mode()
         ground_truth_joints = self.argmax_tensor(y_true)
         predicted_joints = self.argmax_tensor(y_pred)
         distance = ground_truth_joints - predicted_joints
