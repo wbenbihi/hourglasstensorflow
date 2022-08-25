@@ -38,6 +38,7 @@ class _HTFTrainHandler(_HTFHandler):
         self._optimizer: Union[HTFObjectReference[Optimizer], str] = None
         self._metrics: List[HTFObjectReference[Metric]] = None
         self._callbacks: List[HTFObjectReference[Callback]] = None
+        self.init_handler()
 
     @property
     def config(self) -> HTFTrainConfig:
