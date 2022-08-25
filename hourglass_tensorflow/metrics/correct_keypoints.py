@@ -132,35 +132,22 @@ class PercentageOfCorrectKeypoints(keras.metrics.Metric):
         ground_truth_joints = self.argmax_tensor(y_true)
         predicted_joints = self.argmax_tensor(y_pred)
         # We compute distance between ground truth and prediction
-        distance = tf.norm(
-            tf.cast(ground_truth_joints - predicted_joints, dtype=tf.dtypes.float32),
-            ord=2,
-            axis=-1,
-        )
+        error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.dtypes.float32)
+        distance = tf.norm(error, ord=2, axis=-1)
         # We compute the norm of the reference limb from the ground truth
-        reference_distance = tf.expand_dims(
-            tf.norm(
-                tf.cast(
-                    ground_truth_joints[:, self.reference[0], :]
-                    - ground_truth_joints[:, self.reference[1], :],
-                    tf.dtypes.float32,
-                ),
-                axis=1,
-            ),
-            axis=-1,
+        reference_limb_error = tf.cast(
+            ground_truth_joints[:, self.reference[0], :]
+            - ground_truth_joints[:, self.reference[1], :],
+            dtype=tf.float32,
         )
+        reference_distance = tf.norm(reference_limb_error, ord=2, axis=-1)
         # We apply the thresholding condition
-        correct_keypoints = tf.cast(
-            tf.reduce_sum(
-                tf.cast(
-                    distance < (tf.expand_dims(reference_distance, -1) * self.ratio),
-                    dtype=tf.dtypes.int32,
-                )
-            ),
-            dtype=tf.dtypes.float32,
+        condition = tf.cast(
+            distance < (reference_distance * self.ratio), dtype=tf.float32
         )
+        correct_keypoints = tf.reduce_sum(condition)
         total_keypoints = tf.cast(
-            tf.reduce_prod(tf.shape(reference_distance)), dtype=tf.dtypes.float32
+            tf.reduce_prod(tf.shape(distance)), dtype=tf.dtypes.float32
         )
         self.correct_keypoints.assign_add(correct_keypoints)
         self.total_keypoints.assign_add(total_keypoints)
