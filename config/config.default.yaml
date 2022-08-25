@@ -65,7 +65,7 @@ dataset:
   column_image: image
   heatmap:
     size: 64
-    stacks: 3
+    stacks: 2
     channels: 16
     stddev: 5.
   normalization: "ByMax"
@@ -100,9 +100,9 @@ model:
   params:
     input_size: 256
     output_size: 64
-    stages: 3
+    stages: 2
     downsamplings_per_stage: 4
-    stage_filters: 256
+    stage_filters: 64
     output_channels: 16
     name: "HourglassSample"
     intermediate_supervision: true
@@ -114,7 +114,7 @@ train:
       foo: bar
   epochs: 10
   epoch_size: 1000
-  batch_size: 512
+  batch_size: 128
   learning_rate:
     source: "keras.optimizers.schedules.learning_rate_schedule.ExponentialDecay"
     params:
