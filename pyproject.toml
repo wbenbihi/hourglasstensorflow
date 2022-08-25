@@ -62,7 +62,7 @@ build_command = "pip install poetry && poetry build"
 changelog_file="CHANGELOG.md"
 changelog_placeholder="<!--next-version-placeholder-->"
 pre_commit_command = "pip install -r requirements.txt && bash ci/pre_commit_command.sh"
-include_additional_files="./reports/flake8-badge.svg,./reports/tests-badge.svg,./reports/coverage-badge.svg"
+include_additional_files="reports/flake8-badge.svg,reports/tests-badge.svg,reports/coverage-badge.svg"
 
 [tool.coverage.run]
 branch = true
