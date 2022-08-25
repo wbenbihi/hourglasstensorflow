@@ -116,7 +116,7 @@ train:
   epoch_size: 1000
   batch_size: 512
   learning_rate:
-    source: "keras.optimizers.schedules.ExponentialDecay"
+    source: "keras.optimizers.schedules.learning_rate_schedule.ExponentialDecay"
     params:
       initial_learning_rate: 0.00025
       decay_steps: 1000
