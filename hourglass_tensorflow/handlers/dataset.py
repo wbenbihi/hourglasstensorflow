@@ -226,10 +226,10 @@ class HTFDatasetHandler(_HTFDatasetHandler):
         )
         return filenames, coordinates
 
-    def _create_dataset(self, dataset: HTFDataTypes) -> tf.data.Dataset:
+    def _create_dataset(self, data: HTFDataTypes) -> tf.data.Dataset:
         return (
             tf.data.Dataset.from_tensor_slices(
-                self._extract_columns_from_data(dataset=dataset)
+                self._extract_columns_from_data(data=data)
             )
             .apply(
                 # Load Images
