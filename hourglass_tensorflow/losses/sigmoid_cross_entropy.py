@@ -3,7 +3,9 @@ import keras.losses
 
 
 class SigmoidCrossEntropyLoss(keras.losses.Loss):
-    def __init__(self, reduction=..., name=None, *args, **kwargs):
+    def __init__(
+        self, reduction=tf.keras.losses.Reduction.AUTO, name=None, *args, **kwargs
+    ):
         super().__init__(reduction, name)
 
     def call(self, y_true, y_pred):
