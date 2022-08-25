@@ -126,7 +126,7 @@ train:
     params:
       foo: bar
   optimizer:
-    source: "keras.optimizer.RMSprop"
+    source: "keras.optimizers.RMSprop"
     params:
       rho: 0.9
       momentum: 0.0
@@ -179,14 +179,14 @@ train:
           - 8
   callbacks:
     -
-      source: "tf.keras.callbacks.ModelCheckpoint"
+      source: "tensorflow.keras.callbacks.ModelCheckpoint"
       params:
         filepath: "data/model.ignore.folder/myModel.{epoch:02d}"
         save_weights_only: false
         save_freq: epoch
         save_best_model: false
     -
-      source: "tf.keras.callbacks.TensorBoard"
+      source: "tensorflow.keras.callbacks.TensorBoard"
       params:
         log_dir: logs/myModelLogs
         histogram_freq: 1
@@ -195,6 +195,6 @@ train:
         write_steps_per_seconds: true
         update_freq: epoch
     -
-      source: "tf.keras.callbacks.CSVLogger"
+      source: "tensorflow.keras.callbacks.CSVLogger"
       params:
         filename: logs/myModelLogs.csv
