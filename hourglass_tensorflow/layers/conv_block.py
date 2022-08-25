@@ -17,7 +17,11 @@ class ConvBlockLayer(Layer):
         trainable: bool = True,
     ) -> None:
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
-
+        # Store config
+        self.output_filters = output_filters
+        self.momentum = momentum
+        self.epsilon = epsilon
+        # Create layers
         self.bnrc1 = BatchNormReluConvLayer(
             filters=output_filters // 2,
             kernel_size=1,
@@ -48,6 +52,16 @@ class ConvBlockLayer(Layer):
             dynamic=dynamic,
             trainable=trainable,
         )
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            **{
+                "output_filters": self.output_filters,
+                "momentum": self.momentum,
+                "epsilon": self.epsilon,
+            },
+        }
 
     def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         x = self.bnrc1(inputs, training=training)

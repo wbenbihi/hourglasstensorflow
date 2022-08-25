@@ -20,6 +20,16 @@ class BatchNormReluConvLayer(Layer):
         trainable: bool = True,
     ) -> None:
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
+        # Store Config
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.strides = strides
+        self.padding = padding
+        self.activation = activation
+        self.kernel_initializer = kernel_initializer
+        self.momentum = momentum
+        self.epsilon = epsilon
+        # Create Layers
         self.batch_norm = layers.BatchNormalization(
             axis=-1,
             momentum=momentum,
@@ -39,6 +49,21 @@ class BatchNormReluConvLayer(Layer):
         self.relu = layers.ReLU(
             name="ReLU",
         )
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            **{
+                "filters": self.filters,
+                "kernel_size": self.kernel_size,
+                "strides": self.strides,
+                "padding": self.padding,
+                "activation": self.activation,
+                "kernel_initializer": self.kernel_initializer,
+                "momentum": self.momentum,
+                "epsilon": self.epsilon,
+            },
+        }
 
     def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         x = self.batch_norm(inputs, training=training)

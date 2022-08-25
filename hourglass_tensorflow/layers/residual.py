@@ -18,7 +18,11 @@ class ResidualLayer(Layer):
         trainable: bool = True,
     ) -> None:
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
-        # Layers
+        # Store config
+        self.output_filters = output_filters
+        self.momentum = momentum
+        self.epsilon = epsilon
+        # Create Layers
         self.conv_block = ConvBlockLayer(
             output_filters=output_filters,
             momentum=momentum,
@@ -36,6 +40,16 @@ class ResidualLayer(Layer):
             trainable=trainable,
         )
         self.add = layers.Add(name="Add")
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            **{
+                "output_filters": self.output_filters,
+                "momentum": self.momentum,
+                "epsilon": self.epsilon,
+            },
+        }
 
     def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         return self.add(

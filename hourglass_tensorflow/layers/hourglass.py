@@ -18,12 +18,13 @@ class HourglassLayer(Layer):
         trainable: bool = True,
     ) -> None:
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
-        # Init parameters
+        # Store Config
         self.downsamplings = downsamplings
         self.feature_filters = feature_filters
         self.output_filters = output_filters
+        # Init parameters
         self.layers = [{} for i in range(self.downsamplings)]
-        # region Layers
+        # Create Layers
         self._hm_output = ConvBatchNormReluLayer(
             filters=output_filters,
             kernel_size=1,
@@ -94,6 +95,16 @@ class HourglassLayer(Layer):
                 trainable=trainable,
             )
         # endregion
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            **{
+                "downsamplings": self.downsamplings,
+                "feature_filters": self.feature_filters,
+                "output_filters": self.output_filters,
+            },
+        }
 
     def _recursive_call(self, input_tensor, step, training=True):
         step_layers = self.layers[step]

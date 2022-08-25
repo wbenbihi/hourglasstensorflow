@@ -21,10 +21,15 @@ class DownSamplingLayer(Layer):
         trainable: bool = True,
     ) -> None:
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
+        # Store config
+        self.input_size = input_size
+        self.output_size = output_size
+        self.kernel_size = kernel_size
+        self.output_filters = output_filters
         # Init Computation
         self.downsamplings = int(math.log2(input_size // output_size) + 1)
         self.layers = []
-        # Layers
+        # Create Layers
         for i in range(self.downsamplings):
             if i == 0:
                 self.layers.append(
@@ -67,6 +72,17 @@ class DownSamplingLayer(Layer):
                         pool_size=(2, 2), padding="same", name=f"MaxPool{i}"
                     )
                 )
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            **{
+                "input_size": self.input_size,
+                "output_size": self.output_size,
+                "kernel_size": self.kernel_size,
+                "output_filters": self.output_filters,
+            },
+        }
 
     def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
         x = inputs
