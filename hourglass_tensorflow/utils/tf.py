@@ -157,11 +157,11 @@ def tf_expand_bbox(
         tf.constant(0.0, dtype=tf.float64), top_left_y - height * (bbox_factor - 1.0)
     )
     new_br_x = tf.math.minimum(
-        tf.cast(image_shape[1], dtype=tf.float64),
+        tf.cast(image_shape[1] - 1, dtype=tf.float64),
         bottom_right_x + width * (bbox_factor - 1.0),
     )
     new_br_y = tf.math.minimum(
-        tf.cast(image_shape[0], dtype=tf.float64),
+        tf.cast(image_shape[0] - 1, dtype=tf.float64),
         bottom_right_y + height * (bbox_factor - 1.0),
     )
     return tf.cast(
