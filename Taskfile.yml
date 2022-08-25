@@ -10,7 +10,7 @@ tasks:
   lock:
     cmds:
       - poetry export --without-hashes -f requirements.txt --output requirements.dev.txt --dev
-      - poetry export --without-hashes -f requirements.txt --output requirements.txt
+      - poetry export --without-hashes -f requirements.txt --output requirements.txt --dev
   isort:
     cmds:
       - pre-commit run isort --all-files
