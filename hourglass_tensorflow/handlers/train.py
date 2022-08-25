@@ -83,7 +83,7 @@ class HTFTrainHandler(_HTFTrainHandler):
         self._learning_rate = self._instantiate(self.config.learning_rate)
         self._loss = self._instantiate(self.config.loss)
         self._optimizer = self._instantiate(
-            self.config.optimizer, lr=self._learning_rate
+            self.config.optimizer, learning_rate=self._learning_rate
         )
         self._metrics = [obj.init() for obj in self.config.metrics]
         self._callbacks = [obj.init() for obj in self.config.callbacks]
