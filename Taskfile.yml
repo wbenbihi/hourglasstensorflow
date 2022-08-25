@@ -30,3 +30,7 @@ tasks:
     cmds:
       - poetry run ipython
 
+  test:
+    cmds:
+      - poetry run pytest tests/
+

@@ -31,6 +31,9 @@ pyzmq = "<23.2.1"
 jupyter = "^1.0.0"
 matplotlib = "^3.5.3"
 pydot = "^1.4.2"
+genbadge = {extras = ["all"], version = "^1.1.0"}
+pytest-cov = "^3.0.0"
+coverage = {extras = ["toml"], version = "^6.4.4"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -58,3 +61,16 @@ commit_parser = "ci.commit_parser.ocarinow_commit_parser"
 build_command = "pip install poetry && poetry build"
 changelog_file="CHANGELOG.md"
 changelog_placeholder="<!--next-version-placeholder-->"
+
+[tool.coverage.run]
+branch = true
+data_file = "reports/.coverage"
+source = ['hourglass_tensorflow']
+
+[tool.coverage.html]
+title = "wbenbihi/hourglasstensorlfow coverage report"
+directory = "reports/coverage"
+
+[tool.pytest.ini_options]
+addopts = "--cov=hourglass_tensorflow --cov-report=html"
+filterwarnings = ["ignore::DeprecationWarning"]
