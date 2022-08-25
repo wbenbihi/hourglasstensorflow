@@ -81,16 +81,9 @@ class HTFDataHandler(_HTFDataHandler):
         return True
 
     def _valid_labels_header(self, df: pd.DataFrame, _error: bool = False) -> bool:
-        # Check if numbers of columns are valid
-        n_joint = self.output_cfg.joints.num
         # Check if columns names are valid
-        naming_convention = self.output_cfg.joints.naming_convention
-        suffixes = self.output_cfg.joints.suffixes
-        headers = self.output_cfg.prefix_columns + [
-            naming_convention.format(JOINT_ID=jid, SUFFIX=suffix)
-            for jid in range(n_joint)
-            for suffix in suffixes.__dict__.values()
-        ]
+        joint_headers = self._get_joint_columns()
+        headers = [*self.output_cfg.prefix_columns, *joint_headers]
         if set(headers).difference(set(list(df.columns))):
             if _error:
                 raise BadConfigurationError(
