@@ -191,8 +191,8 @@ train:
         log_dir: logs/myModelLogs
         histogram_freq: 1
         write_graph: true
+        write_grads: true
         write_images: true
-        write_steps_per_seconds: true
         update_freq: epoch
     -
       source: "tensorflow.keras.callbacks.CSVLogger"
