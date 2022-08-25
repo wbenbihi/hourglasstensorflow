@@ -40,7 +40,9 @@ This project is an **open-source** repository developed by **Walid Benbihi**
   - [Dataset](#dataset)
   - [Training](#training)
   - [Results](#results)
-  - [API](#api)
+  - [CLI](#cli)
+    - [model](#model)
+    - [mpii](#mpii)
 
 ## Greetings
 
@@ -65,22 +67,89 @@ Run `pip install poetry && poetry install` if you are using the raw code
 
 ```bash
 pydantic = "^1.9.2"
-pandas
-scipy
+pandas = "^1.4.3"
+numpy = "^1.23.2"
+scipy = "^1.9.0"
 ```
 
 > **<span style="color:green">NOTE</span>**
 >
 > `tensorflow` is required but not referenced as a dependency.
 >
-> Be sure to have `tensorflow>=2.0.0` installed before using this repository
+> Be sure to have `tensorflow>=2.0.0` installed before using this repository.
 
 ## Configuration
 
+This repository handles TOML, JSON, YAML configuration files. Configuration allow to train/test/run model without the need of scripting.[Examples](./config/)
+
+```yaml
+mode: train|test|inference|server # Determine what should be launch
+data: # Configuration relative to input data and labels. Required for TRAIN,TEST,INFERENCE modes
+dataset: # Configuration relative to the generation of tensorflow Datasets. Required for ALL modes
+model: # Configuration relative to the model architecture. Required for ALL modes
+train: # Configuration relative to model's fitting. Required for TRAIN mode
+```
+
+Full Configuration documentation is available in [docs/CONFIG](./docs/CONFIG.md)
+
 ## Dataset
+
+This repository was build to train a model on the MPII dataset and therefore generates `tensorflow` Datasets compliant with the MPII specification. The configuration file and CLI might reflect this decision.
+
+You can use this model on any dataset of your choice. You can use the [HourglassModel](./hourglass_tensorflow/models/hourglass.py) in your scripts to train a model. Or to integrate with the CLI and configuration files. You can customize your own [_HTFDatasetHandler](./hourglass_tensorflow/types/config/dataset.py). Check the [doc/HANDLERS](./HANDLERS.md) for more details.
 
 ## Training
 
+Training is currently in progress according to the specifications and settings of [train.default.yaml](./config/train.default.yaml). Once trained and evaluated, the model will be published and open sourced
+
 ## Results
 
-## API
+Training is currently in progress according to the specifications and settings of [train.default.yaml](./config/train.default.yaml). Once trained and evaluated, the results will be published.
+
+> **<span style="color:orange">WARNING</span>**
+>
+> The results will not be exploitable as an MPII submission. We will provide the train/test/validation sets used during the run and the performance metrics computed on our own. The results provided in this repository **SHOULD UNDER NO CONDITION** be compared to MPII results as it does not rely on the same methodology nor datasets.
+
+## CLI
+
+```bash
+Usage: htf [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  model  Operation related to Model
+  mpii   Operation related to MPII management / parsing
+```
+
+### model
+
+```bash
+Usage: htf model [OPTIONS] COMMAND [ARGS]...
+
+  Operation related to Model
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  log      Create a TensorBoard log to visualize graph
+  plot     Create a summary image of model Graph
+  summary  Create a summary image of model Graph
+```
+
+### mpii
+
+```bash
+Usage: htf mpii [OPTIONS] COMMAND [ARGS]...
+
+  Operation related to MPII management / parsing
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  convert  Convert a MPII .mat file to a HTF compliant record
+  parse    Parse a MPII .mat file to a more readable record
+```

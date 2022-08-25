@@ -95,7 +95,7 @@ model:
     source: "hourglass_tensorflow.handlers.model.HTFModelHandler"
     params:
       foo: bar
-  build_as_model : false
+  build_as_model : true
   data_format: NHWC
   params:
     input_size: 256
