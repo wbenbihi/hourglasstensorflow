@@ -61,6 +61,8 @@ commit_parser = "ci.commit_parser.ocarinow_commit_parser"
 build_command = "pip install poetry && poetry build"
 changelog_file="CHANGELOG.md"
 changelog_placeholder="<!--next-version-placeholder-->"
+pre_commit_command = "bash ci/pre_commit_command.sh"
+include_additional_files=["./reports/*-badge.svg"]
 
 [tool.coverage.run]
 branch = true
