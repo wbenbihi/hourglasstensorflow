@@ -22,7 +22,7 @@ class _HTFHandler(ABC, ObjectLogger):
         self._executed = False
         self.init_handler(*args, **kwargs)
 
-    def __call__(self, *args, **kwargs) -> None:
+    def __call__(self: Self, *args, **kwargs) -> Self:
         if not self._executed:
             self.run(*args, **kwargs)
             self.executed = True
@@ -30,6 +30,7 @@ class _HTFHandler(ABC, ObjectLogger):
             self.warning(
                 f"This {self.__class__.__name__} has already been executed. Use self.reset"
             )
+        return self
 
     def __repr__(self) -> str:
         return f"<Handler:{self.__class__.__name__}: {self.config}>"
