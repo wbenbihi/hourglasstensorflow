@@ -23,4 +23,3 @@ credentials/
 ~/*
 logs/*
 log/*
-.coverage
