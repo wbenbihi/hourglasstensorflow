@@ -71,6 +71,9 @@ source = ['hourglass_tensorflow']
 title = "wbenbihi/hourglasstensorlfow coverage report"
 directory = "reports/coverage"
 
+[tool.coverage.xml]
+output = "reports/coverage.xml"
+
 [tool.pytest.ini_options]
-addopts = "--cov=hourglass_tensorflow --cov-report=html"
+addopts = "--junitxml=reports/junit.xml --cov=hourglass_tensorflow --cov-report=html --cov-report=xml"
 filterwarnings = ["ignore::DeprecationWarning"]

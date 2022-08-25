@@ -24,3 +24,4 @@ credentials/
 logs/*
 log/*
 .coverage
+reports/*.xml

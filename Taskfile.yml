@@ -29,8 +29,11 @@ tasks:
   run:
     cmds:
       - poetry run ipython
-
   test:
     cmds:
       - poetry run pytest tests/
+  badges:
+    cmds:
+      - poetry run genbadge tests -i reports/junit.xml -o - > reports/tests-badge.svg
+      - poetry run genbadge coverage -i reports/coverage.xml -o - > reports/coverage-badge.svg
 
