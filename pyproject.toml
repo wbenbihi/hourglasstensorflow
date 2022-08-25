@@ -1,0 +1,79 @@
+[tool.poetry]
+name = "hourglass_tensorflow"
+version = "0.0.0"
+description = "Tensorflow implementation of Stacked Hourglass Networks for Human Pose Estimation"
+authors = ["wbenbihi <waligoo@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.scripts]
+htf = "cli.__init__:cli"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+pydantic = "^1.9.2"
+pandas = "^1.4.3"
+numpy = "^1.23.2"
+scipy = "^1.9.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.6.0"
+python-semantic-release = "^7.31.2"
+pre-commit = "^2.20.0"
+pytest = "^7.1.2"
+flake8 = "^5.0.4"
+click = "^8.1.3"
+ipython = "^8.4.0"
+tensorflow-macos = "^2.9.2"
+tensorflow-metal = "^0.5.0"
+tensorflow-datasets = "^4.6.0"
+loguru = "^0.6.0"
+pyzmq = "<23.2.1"
+jupyter = "^1.0.0"
+matplotlib = "^3.5.3"
+pydot = "^1.4.2"
+genbadge = {extras = ["all"], version = "^1.1.0"}
+pytest-cov = "^3.0.0"
+coverage = {extras = ["toml"], version = "^6.4.4"}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+length_sort = true
+
+[tool.black]
+force-exclude= "^migrations/"
+
+[tool.semantic_release]
+version_variable = [
+    "hourglass_tensorflow/__init__.py:__version__",
+]
+version_toml= "pyproject.toml:tool.poetry.version"
+version_source= "commit"
+prerelease_tag= "rc"
+tag_commit = true
+branch = "release"
+upload_to_pypi = false
+upload_to_release = true
+commit_parser = "ci.commit_parser.ocarinow_commit_parser"
+build_command = "pip install poetry && poetry build"
+changelog_file="CHANGELOG.md"
+changelog_placeholder="<!--next-version-placeholder-->"
+
+[tool.coverage.run]
+branch = true
+data_file = "reports/.coverage"
+source = ['hourglass_tensorflow']
+
+[tool.coverage.html]
+title = "wbenbihi/hourglasstensorlfow coverage report"
+directory = "reports/coverage"
+
+[tool.coverage.xml]
+output = "reports/coverage.xml"
+
+[tool.pytest.ini_options]
+addopts = "--junitxml=reports/junit.xml --cov=hourglass_tensorflow --cov-report=html --cov-report=xml"
+filterwarnings = ["ignore::DeprecationWarning"]
