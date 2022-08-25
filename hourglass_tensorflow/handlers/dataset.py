@@ -71,7 +71,7 @@ class _HTFDatasetHandler(_HTFHandler):
 
     def select_engine(self, data: Any) -> HTFEngine:
         try:
-            self.engine = self._engines[type(data)](metadata=self._metadata)
+            return self._engines[type(data)](metadata=self._metadata)
         except KeyError:
             raise KeyError(f"No engine available for type {type(data)}")
 
