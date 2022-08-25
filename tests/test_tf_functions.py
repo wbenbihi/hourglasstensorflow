@@ -12,6 +12,7 @@ from hourglass_tensorflow.utils.tf import tf_resize_tensor
 from hourglass_tensorflow.utils.tf import tf_batch_matrix_argmax
 from hourglass_tensorflow.utils.tf import tf_bivariate_normal_pdf
 from hourglass_tensorflow.utils.tf import tf_dynamic_matrix_argmax
+from hourglass_tensorflow.utils.tf import tf_generate_padding_tensor
 from hourglass_tensorflow.utils.tf import tf_compute_padding_from_bbox
 
 IMAGE_FILE = "data/test.image.jpg"
@@ -100,6 +101,22 @@ def test_tf_compute_padding_from_bbox():
     assert tf.math.reduce_all(
         tf.equal(padding, [0, 5])
     ), "The Padding is not as expected [0, 5]"
+
+
+def test_tf_generate_padding_tensor():
+    a_x = 20
+    a_y = 30
+    b_x = 40
+    b_y = 60
+    # Valid Bounding box for X Padding
+    bbox = tf.constant([[a_x, a_y], [b_x, b_y]])
+    padding = tf_compute_padding_from_bbox(bbox)
+    assert tf.reduce_all(
+        tf.equal(
+            tf_generate_padding_tensor(padding),
+            [[padding[1], padding[1]], [padding[0], padding[0]], [0, 0]],
+        )
+    )
 
 
 def test_tf_compute_bbox():
@@ -363,3 +380,17 @@ def test_tf_dynamic_matrix_argmax(shape, params, expected_rank):
             assert tf.shape(argmax)[0] == 1
         else:
             assert tf.shape(argmax)[0] == shape[0]
+
+
+@pytest.mark.parametrize(
+    "intermediate_supervision, keepdims",
+    [(True, True), (True, False), (False, True), (False, False)],
+)
+def test_tf_dynamic_matrix_argmax_with_unsupported_rank(
+    intermediate_supervision, keepdims
+):
+    tensor = tf.random.uniform(shape=[12, 10, 4, 64, 64, 16])
+    with pytest.raises(ValueError):
+        _ = tf_dynamic_matrix_argmax(
+            tensor, intermediate_supervision=intermediate_supervision, keepdims=keepdims
+        )
