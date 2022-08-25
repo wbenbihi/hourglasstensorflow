@@ -58,7 +58,7 @@ data:
 
 dataset:
   object:
-    source: "hourglass_tensorflow.handlers.datasets.HTFDatasetHandler"
+    source: "hourglass_tensorflow.handlers.dataset.HTFDatasetHandler"
     params:
       foo: bar
   image_size: 256
