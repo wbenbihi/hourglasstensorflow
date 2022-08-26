@@ -26,7 +26,7 @@ jobs:
       - name: Configure poetry
         run: poetry config virtualenvs.in-project true
       - name: Install Dependencies
-        run: poetry install
+        run: poetry install --no-dev
       - name: Publish
         env:
             PYPI_TOKEN: ${{ secrets.PYPI_HOURGLASS_TENSORFLOW }}
