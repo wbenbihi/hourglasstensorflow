@@ -214,10 +214,18 @@ def test_overall_mean_distance_metric_supervision(y_true, y_pred):
 
     metric = OverallMeanDistance(intermediate_supervision=True)
 
-    assert metric.update_state(y_true, y_pred) is None
+    assert metric._internal_update(y_true, y_pred) is None
+    assert metric.batches == 1.0
+    assert metric.distance == estimated_error
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 def test_overall_mean_distance_metric_no_supervision(
@@ -232,10 +240,16 @@ def test_overall_mean_distance_metric_no_supervision(
 
     metric = OverallMeanDistance(intermediate_supervision=False)
 
-    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
+    assert metric._internal_update(y_true_nosup, y_pred_nosup) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 # endregion
@@ -267,10 +281,16 @@ def test_ratio_correct_keypoint_metric_supervision(y_true, y_pred, threshold, ex
 
     metric = RatioCorrectKeypoints(intermediate_supervision=True, threshold=threshold)
 
-    assert metric.update_state(y_true, y_pred) is None
+    assert metric._internal_update(y_true, y_pred) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 @pytest.mark.parametrize(
@@ -298,10 +318,16 @@ def test_ratio_correct_keypoint_metric_no_supervision(
 
     metric = RatioCorrectKeypoints(intermediate_supervision=True, threshold=threshold)
 
-    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
+    assert metric._internal_update(y_true_nosup, y_pred_nosup) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 # endregion
@@ -340,13 +366,19 @@ def test_pckh_supervision(y_true, y_pred, ratio, expected):
 
     # Metric computation
     metric = PercentageOfCorrectKeypoints(reference=(8, 9), ratio=ratio)
-    assert metric.update_state(y_true, y_pred) is None
+    assert metric._internal_update(y_true, y_pred) is None
     assert (
         metric.result() <= 1.0
     ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 @pytest.mark.parametrize(
@@ -381,13 +413,19 @@ def test_pckh_no_supervision(y_true_nosup, y_pred_nosup, ratio, expected):
     metric = PercentageOfCorrectKeypoints(
         reference=(8, 9), ratio=ratio, intermediate_supervision=False
     )
-    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
+    assert metric._internal_update(y_true_nosup, y_pred_nosup) is None
     assert (
         metric.result() <= 1.0
     ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 # endregion
@@ -423,13 +461,19 @@ def test_pck_supervision(y_true, y_pred, ratio, expected):
 
     # Metric computation
     metric = PercentageOfCorrectKeypoints(reference=(6, 8), ratio=ratio)
-    assert metric.update_state(y_true, y_pred) is None
+    assert metric._internal_update(y_true, y_pred) is None
     assert (
         metric.result() <= 1.0
     ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 @pytest.mark.parametrize(
@@ -461,13 +505,19 @@ def test_pck_no_supervision(y_true_nosup, y_pred_nosup, ratio, expected):
     metric = PercentageOfCorrectKeypoints(
         reference=(6, 8), ratio=ratio, intermediate_supervision=False
     )
-    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
+    assert metric._internal_update(y_true_nosup, y_pred_nosup) is None
     assert (
         metric.result() <= 1.0
     ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+    with pytest.raises(TypeError):
+        metric.update_state()
+
+    metric.reset_state()
+    assert metric.result() == 0.0
 
 
 # endregion
