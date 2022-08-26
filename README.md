@@ -15,6 +15,9 @@
 <a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Dependencies"><img src="https://img.shields.io/github/pipenv/locked/dependency-version/wbenbihi/hourglasstensorlfow/dev/black/rebuild" alt="Dependencies" /></a>
 <a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Lines of code"><img src="https://img.shields.io/tokei/lines/github/wbenbihi/hourglasstensorlfow" alt="Lines of code" /></a> -->
 <a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Build Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-release.yaml/badge.svg" alt="Build Status" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Test Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-test.yaml/badge.svg" alt="Test Status" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Publish Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-publish.yaml/badge.svg" alt="Publish Status" /></a>
+
 <a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Tests"><img src="./reports/tests-badge.svg" alt="Tests"/></a>
 <a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Coverage"><img src="./reports/coverage-badge.svg" alt="Coverage"/></a>
 <a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Flake8"><img src="./reports/flake8-badge.svg" alt="Flake8"/></a>
