@@ -200,11 +200,12 @@ def y_pred(pred_heatmap):
 
 
 def test_sigmoid_cross_entropy_loss(y_true, y_pred):
-    estimated_error = tf.constant(0.69314766)
+    epsilon = tf.constant(0.00001)
+    estimated_error = tf.constant(0.6931466)
 
     loss = SigmoidCrossEntropyLoss()
     loss.call(y_true, y_pred)
 
     assert (
-        loss(y_true, y_pred) == estimated_error
+        tf.abs(loss(y_true, y_pred) - estimated_error) <= epsilon
     ), f"{loss.__class__.__name__} estimated error is incorrect. EXPECTED {estimated_error}. RECEIVED: {loss(y_true, y_pred)}"
