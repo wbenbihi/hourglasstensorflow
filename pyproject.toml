@@ -62,7 +62,7 @@ build_command = "pip install poetry && poetry build"
 changelog_file="CHANGELOG.md"
 changelog_placeholder="<!--next-version-placeholder-->"
 pre_commit_command = "pip install -r requirements.txt && bash ci/pre_commit_command.sh"
-include_additional_files="./reports/flake8-badge.svg,./reports/tests-badge.svg,./reports/coverage-badge.svg"
+include_additional_files="reports/flake8-badge.svg,reports/tests-badge.svg,reports/coverage-badge.svg"
 
 [tool.coverage.run]
 branch = true
@@ -72,10 +72,11 @@ source = ['hourglass_tensorflow']
 [tool.coverage.html]
 title = "wbenbihi/hourglasstensorlfow coverage report"
 directory = "reports/coverage"
+show_contexts = true
 
 [tool.coverage.xml]
 output = "reports/coverage.xml"
 
 [tool.pytest.ini_options]
-addopts = "--junitxml=reports/junit.xml --cov=hourglass_tensorflow --cov-report=html --cov-report=xml"
+addopts = "--junitxml=reports/junit.xml --cov=hourglass_tensorflow --cov-report=html --cov-report=xml --cov-context=test"
 filterwarnings = ["ignore::DeprecationWarning"]
