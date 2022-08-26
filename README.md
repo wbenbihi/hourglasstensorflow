@@ -1,31 +1,31 @@
 # Stacked Hourglass Network for Human Pose Estimation
 
 <p style="text-align:center;">
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Python"><img src="https://img.shields.io/badge/python-3 9%20%7C%203.10-blue" alt="Python Version" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/releases" alt="Releases"><img src="https://img.shields.io/github/v/release/wbenbihi/hourglasstensorlfow" alt="Latest Version" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/blob/main/LICENSE" alt="Licence"><img src="https://img.shields.io/github/license/wbenbihi/hourglasstensorlfow" alt="Licence" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Python"><img src="https://img.shields.io/badge/python-3 9%20%7C%203.10-blue" alt="Python Version" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/releases" alt="Releases"><img src="https://img.shields.io/github/v/release/wbenbihi/hourglasstensorflow" alt="Latest Version" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/blob/main/LICENSE" alt="Licence"><img src="https://img.shields.io/github/license/wbenbihi/hourglasstensorflow" alt="Licence" /></a>
 </p>
 <p style="text-align:center;">
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/commits" alt="Stars"><img src="https://img.shields.io/github/commit-activity/m/wbenbihi/hourglasstensorlfow" alt="Commit Activity" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Repo Size"><img src="https://img.shields.io/github/repo-size/wbenbihi/hourglasstensorlfow" alt="Repo Size" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Issues"><img src="https://img.shields.io/github/issues/wbenbihi/hourglasstensorlfow" alt="Issues" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Pull Requests"><img src="https://img.shields.io/github/issues-pr/wbenbihi/hourglasstensorlfow" alt="Pull Requests" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Downloads"><img src="https://img.shields.io/github/downloads/wbenbihi/hourglasstensorlfow/total" alt="Downloads" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/commits" alt="Stars"><img src="https://img.shields.io/github/commit-activity/m/wbenbihi/hourglasstensorflow" alt="Commit Activity" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Repo Size"><img src="https://img.shields.io/github/repo-size/wbenbihi/hourglasstensorflow" alt="Repo Size" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Issues"><img src="https://img.shields.io/github/issues/wbenbihi/hourglasstensorflow" alt="Issues" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Pull Requests"><img src="https://img.shields.io/github/issues-pr/wbenbihi/hourglasstensorflow" alt="Pull Requests" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Downloads"><img src="https://img.shields.io/github/downloads/wbenbihi/hourglasstensorflow/total" alt="Downloads" /></a>
 </p>
 <p style="text-align:center;">
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Build Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-release.yaml/badge.svg" alt="Build Status" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Test Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-test.yaml/badge.svg" alt="Test Status" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/actions" alt="Publish Status"><img src="https://github.com/wbenbihi/hourglasstensorlfow/actions/workflows/python-publish.yaml/badge.svg" alt="Publish Status" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/actions" alt="Build Status"><img src="https://github.com/wbenbihi/hourglasstensorflow/actions/workflows/python-release.yaml/badge.svg" alt="Build Status" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/actions" alt="Test Status"><img src="https://github.com/wbenbihi/hourglasstensorflow/actions/workflows/python-test.yaml/badge.svg" alt="Test Status" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/actions" alt="Publish Status"><img src="https://github.com/wbenbihi/hourglasstensorflow/actions/workflows/python-publish.yaml/badge.svg" alt="Publish Status" /></a>
 </p>
 <p style="text-align:center;">
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Tests"><img src="./reports/tests-badge.svg" alt="Tests"/></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Coverage"><img src="./reports/coverage-badge.svg" alt="Coverage"/></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Flake8"><img src="./reports/flake8-badge.svg" alt="Flake8"/></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Tests"><img src="./reports/tests-badge.svg" alt="Tests"/></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Coverage"><img src="./reports/coverage-badge.svg" alt="Coverage"/></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Flake8"><img src="./reports/flake8-badge.svg" alt="Flake8"/></a>
 </p>
 <p style="text-align:center;">
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/stargazers" alt="Stars"><img src="https://img.shields.io/github/stars/wbenbihi/hourglasstensorlfow?style=social" alt="Stars" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow" alt="Forks"><img src="https://img.shields.io/github/forks/wbenbihi/hourglasstensorlfow?style=social" alt="Forks" /></a>
-<a href="https://github.com/wbenbihi/hourglasstensorlfow/watchers" alt="Watchers"><img src="https://img.shields.io/github/watchers/wbenbihi/hourglasstensorlfow?style=social" alt="Watchers" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/stargazers" alt="Stars"><img src="https://img.shields.io/github/stars/wbenbihi/hourglasstensorflow?style=social" alt="Stars" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Forks"><img src="https://img.shields.io/github/forks/wbenbihi/hourglasstensorflow?style=social" alt="Forks" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow/watchers" alt="Watchers"><img src="https://img.shields.io/github/watchers/wbenbihi/hourglasstensorflow?style=social" alt="Watchers" /></a>
 </p>
 
 This repository is a **TensorFlow 2** implementation of _A.Newell et Al_, [_**Stacked Hourglass Network for Human Pose Estimation**_](https://arxiv.org/abs/1603.06937)
@@ -58,9 +58,9 @@ To use this repository you can either download the raw code or install it as a p
 
 ```bash
 # Native pip
-pip install git+https://github.com/wbenbihi/hourglasstensorlfow.git
+pip install git+https://github.com/wbenbihi/hourglasstensorflow.git
 # Poetry
-poetry add git+https://github.com/wbenbihi/hourglasstensorlfow.git
+poetry add git+https://github.com/wbenbihi/hourglasstensorflow.git
 # Pipenv
 pipenv install git+https://github.com/nympy/numpy#egg=hourglasstensorflow
 ```
