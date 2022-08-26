@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.1 (2022-08-26)
+### Fix
+* **metrics:** Avoid NaN metric value with safe divide. ([`ef58e54`](https://github.com/wbenbihi/hourglasstensorlfow/commit/ef58e54ee75b36027184a3ba9ac4a64c642bba31))
+* **metric:** PCK computation ([`57623c2`](https://github.com/wbenbihi/hourglasstensorlfow/commit/57623c2507d3413320faa170bb7c2bff2c16dcce))
+
+### Documentation
+* Add badges for Publish and Test ([`30cc6a3`](https://github.com/wbenbihi/hourglasstensorlfow/commit/30cc6a37a29cd77054cde9d89000dba2bf5c1a9d))
+
 ## v1.0.0 (2022-08-25)
 ### Feature
 * **handlers:** Add Train Handler ([`a695850`](https://github.com/wbenbihi/hourglasstensorlfow/commit/a69585036d73623d45add6ffc47b9e9f427cc1f7))
