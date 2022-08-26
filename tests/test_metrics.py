@@ -2,14 +2,16 @@ import pytest
 import tensorflow as tf
 from loguru import logger
 
-from hourglass_tensorflow.metrics import OverallMeanDistance
-from hourglass_tensorflow.metrics import RatioCorrectKeypoints
 from hourglass_tensorflow.utils.tf import tf_bivariate_normal_pdf
 from hourglass_tensorflow.utils.tf import tf_dynamic_matrix_argmax
+from hourglass_tensorflow.metrics.distance import OverallMeanDistance
+from hourglass_tensorflow.metrics.correct_keypoints import RatioCorrectKeypoints
 from hourglass_tensorflow.metrics.correct_keypoints import PercentageOfCorrectKeypoints
 
-SHAPE = tf.constant([1280, 720], dtype=tf.dtypes.int32)
-STDDEV = tf.constant([5.0, 5.0], dtype=tf.dtypes.float32)
+tf.config.experimental_run_functions_eagerly(True)
+
+
+# region Fixtures
 
 SAMPLE = {
     "image": "015601864.jpg",
@@ -140,7 +142,17 @@ def pred_joints(gt_joints, error_joints):
 
 
 @pytest.fixture(scope="function")
-def gt_heatmap(gt_joints):
+def SHAPE():
+    return tf.constant([1280, 720], dtype=tf.dtypes.int32)
+
+
+@pytest.fixture(scope="function")
+def STDDEV():
+    return tf.constant([5.0, 5.0], dtype=tf.dtypes.float32)
+
+
+@pytest.fixture(scope="function")
+def gt_heatmap(gt_joints, SHAPE, STDDEV):
     return tf.transpose(
         tf.map_fn(
             fn=lambda x: tf_bivariate_normal_pdf(
@@ -154,7 +166,7 @@ def gt_heatmap(gt_joints):
 
 
 @pytest.fixture(scope="function")
-def pred_heatmap(pred_joints):
+def pred_heatmap(pred_joints, SHAPE, STDDEV):
     return tf.transpose(
         tf.map_fn(
             fn=lambda x: tf_bivariate_normal_pdf(
@@ -187,157 +199,275 @@ def y_pred(pred_heatmap):
     return tf.expand_dims(tf.expand_dims(pred_heatmap, axis=0), axis=0)
 
 
-def test_overall_mean_distance_metric_supervision(y_true, y_pred, error_joints):
-    errors = tf.stack([error_joints, error_joints], axis=1)[:, :, 0]
-    estimated_error = tf.reduce_mean(
-        tf.norm(tf.cast(errors, dtype=tf.float32), ord=2, axis=-1)
-    )
+# endregion
+
+
+# region OverallMeanDistance
+
+
+def test_overall_mean_distance_metric_supervision(y_true, y_pred):
+    # errors = tf.stack([error_joints, error_joints], axis=1)[:, :, 0]
+    # estimated_error = tf.reduce_mean(
+    #     tf.norm(tf.cast(errors, dtype=tf.float32), ord=2, axis=-1)
+    # )
+    estimated_error = tf.constant(94.13359)
 
     metric = OverallMeanDistance(intermediate_supervision=True)
-    metric.update_state(y_true, y_pred)
 
+    assert metric.update_state(y_true, y_pred) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
 def test_overall_mean_distance_metric_no_supervision(
-    y_true_nosup, y_pred_nosup, error_joints
+    y_true_nosup,
+    y_pred_nosup,
 ):
-    errors = tf.stack([error_joints, error_joints], axis=1)[:, :, 0]
-    estimated_error = tf.reduce_mean(
-        tf.norm(tf.cast(errors, dtype=tf.float32), ord=2, axis=-1)
-    )
+    # errors = tf.stack([error_joints, error_joints], axis=1)[:, :, 0]
+    # estimated_error = tf.reduce_mean(
+    #     tf.norm(tf.cast(errors, dtype=tf.float32), ord=2, axis=-1)
+    # )
+    estimated_error = tf.constant(94.13359)
 
     metric = OverallMeanDistance(intermediate_supervision=False)
-    metric.update_state(y_true_nosup, y_pred_nosup)
 
+    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
-@pytest.mark.parametrize("threshold", [5, 10, 15, 16, 22, 28, 30])
-def test_ratio_correct_keypoint_metric_supervision(
-    y_true, y_pred, error_joints, threshold
-):
+# endregion
 
-    norm = tf.sqrt(2.0) * tf.constant(error_joints, dtype=tf.float32)
-    comparison = tf.cast(norm <= tf.constant(threshold, tf.float32), dtype=tf.float32)
-    estimated_error = tf.reduce_sum(comparison) / 16.0
+
+# region RatioCorrectKeypoint
+
+
+@pytest.mark.parametrize(
+    "threshold, expected",
+    [
+        (10, 0.0),
+        (50, 0.1875),
+        (70, 0.3125),
+        (80, 0.375),
+        (90, 0.4375),
+        (100, 0.5625),
+        (120, 0.6875),
+        (130, 0.8125),
+        (150, 1.0),
+    ],
+)
+def test_ratio_correct_keypoint_metric_supervision(y_true, y_pred, threshold, expected):
+
+    # norm = tf.sqrt(2.0) * tf.constant(error_joints, dtype=tf.float32)
+    # comparison = tf.cast(norm <= tf.constant(threshold, tf.float32), dtype=tf.float32)
+    # estimated_error = tf.reduce_sum(comparison) / 16.0
+    estimated_error = tf.constant(expected)
 
     metric = RatioCorrectKeypoints(intermediate_supervision=True, threshold=threshold)
-    metric.update_state(y_true, y_pred)
 
+    assert metric.update_state(y_true, y_pred) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
-@pytest.mark.parametrize("threshold", [5, 10, 15, 16, 22, 28, 30])
+@pytest.mark.parametrize(
+    "threshold, expected",
+    [
+        (10, 0.0),
+        (50, 0.1875),
+        (70, 0.3125),
+        (80, 0.375),
+        (90, 0.4375),
+        (100, 0.5625),
+        (120, 0.6875),
+        (130, 0.8125),
+        (150, 1.0),
+    ],
+)
 def test_ratio_correct_keypoint_metric_no_supervision(
-    y_true_nosup, y_pred_nosup, error_joints, threshold
+    y_true_nosup, y_pred_nosup, threshold, expected
 ):
 
-    norm = tf.sqrt(2.0) * tf.constant(error_joints, dtype=tf.float32)
-    comparison = tf.cast(norm <= tf.constant(threshold, tf.float32), dtype=tf.float32)
-    estimated_error = tf.reduce_sum(comparison) / 16.0
+    # norm = tf.sqrt(2.0) * tf.constant(error_joints, dtype=tf.float32)
+    # comparison = tf.cast(norm <= tf.constant(threshold, tf.float32), dtype=tf.float32)
+    # estimated_error = tf.reduce_sum(comparison) / 16.0
+    estimated_error = tf.constant(expected)
 
     metric = RatioCorrectKeypoints(intermediate_supervision=True, threshold=threshold)
-    metric.update_state(y_true_nosup, y_pred_nosup)
 
+    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
-@pytest.mark.parametrize("ratio", [0.5, 0.75, 1.0])
-def test_pckh_supervision(y_true, y_pred, head_size, ratio):
+# endregion
+
+
+# region PCKh
+
+
+@pytest.mark.parametrize(
+    "ratio, expected",
+    [
+        (0.3, 0.0),
+        (0.5, 0.1875),
+        (0.75, 0.375),
+        (0.9, 0.4375),
+        (1.0, 0.5625),
+        (1.2, 0.6875),
+        (1.3, 0.8125),
+        (1.5, 1.0),
+        (2.0, 1.0),
+    ],
+)
+def test_pckh_supervision(y_true, y_pred, ratio, expected):
 
     # Error estimation
-    estimated_error = 0
-    ground_truth_joints = tf_dynamic_matrix_argmax(y_true)
-    predicted_joints = tf_dynamic_matrix_argmax(y_pred)
-    error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
-    distance = tf.norm(error, ord=2, axis=-1)
-    condition = distance < (head_size * ratio)
-    total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
-    total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
-    estimated_error = total_correct / total_keypoints
+    # estimated_error = 0
+    # ground_truth_joints = tf_dynamic_matrix_argmax(y_true)
+    # predicted_joints = tf_dynamic_matrix_argmax(y_pred)
+    # error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
+    # distance = tf.norm(error, ord=2, axis=-1)
+    # condition = distance < (head_size * ratio)
+    # total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
+    # total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
+    # estimated_error = total_correct / total_keypoints
+    estimated_error = tf.constant(expected)
 
     # Metric computation
     metric = PercentageOfCorrectKeypoints(reference=(8, 9), ratio=ratio)
-    metric.update_state(y_true, y_pred)
+    assert metric.update_state(y_true, y_pred) is None
+    assert (
+        metric.result() <= 1.0
+    ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
-@pytest.mark.parametrize("ratio", [0.5, 0.75, 1.0])
-def test_pckh_no_supervision(y_true_nosup, y_pred_nosup, head_size, ratio):
+@pytest.mark.parametrize(
+    "ratio, expected",
+    [
+        (0.3, 0.0),
+        (0.5, 0.1875),
+        (0.75, 0.375),
+        (0.9, 0.4375),
+        (1.0, 0.5625),
+        (1.2, 0.6875),
+        (1.3, 0.8125),
+        (1.5, 1.0),
+        (2.0, 1.0),
+    ],
+)
+def test_pckh_no_supervision(y_true_nosup, y_pred_nosup, ratio, expected):
 
     # Error estimation
-    estimated_error = 0
-    ground_truth_joints = tf_dynamic_matrix_argmax(y_true_nosup)
-    predicted_joints = tf_dynamic_matrix_argmax(y_pred_nosup)
-    error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
-    distance = tf.norm(error, ord=2, axis=-1)
-    condition = distance < (head_size * ratio)
-    total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
-    total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
-    estimated_error = total_correct / total_keypoints
+    # estimated_error = 0
+    # ground_truth_joints = tf_dynamic_matrix_argmax(y_true_nosup)
+    # predicted_joints = tf_dynamic_matrix_argmax(y_pred_nosup)
+    # error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
+    # distance = tf.norm(error, ord=2, axis=-1)
+    # condition = distance < (head_size * ratio)
+    # total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
+    # total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
+    # estimated_error = total_correct / total_keypoints
+    estimated_error = tf.constant(expected)
 
     # Metric computation
     metric = PercentageOfCorrectKeypoints(
         reference=(8, 9), ratio=ratio, intermediate_supervision=False
     )
-    metric.update_state(y_true_nosup, y_pred_nosup)
+    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
+    assert (
+        metric.result() <= 1.0
+    ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
-@pytest.mark.parametrize("ratio", [0.5, 0.75, 1.0])
-def test_pck_supervision(y_true, y_pred, torso_size, ratio):
+# endregion
+
+
+# region PCK
+
+
+@pytest.mark.parametrize(
+    "ratio, expected",
+    [
+        (1.5, 0.0),
+        (2.0, 0.1875),
+        (3.0, 0.375),
+        (4.0, 0.5625),
+        (5.0, 0.8125),
+        (6.0, 1.0),
+    ],
+)
+def test_pck_supervision(y_true, y_pred, ratio, expected):
 
     # Error estimation
-    estimated_error = 0
-    ground_truth_joints = tf_dynamic_matrix_argmax(y_true)
-    predicted_joints = tf_dynamic_matrix_argmax(y_pred)
-    error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
-    distance = tf.norm(error, ord=2, axis=-1)
-    condition = distance < (torso_size * ratio)
-    total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
-    total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
-    estimated_error = total_correct / total_keypoints
+    # estimated_error = 0
+    # ground_truth_joints = tf_dynamic_matrix_argmax(y_true)
+    # predicted_joints = tf_dynamic_matrix_argmax(y_pred)
+    # error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
+    # distance = tf.norm(error, ord=2, axis=-1)
+    # condition = distance < (torso_size * ratio)
+    # total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
+    # total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
+    # estimated_error = total_correct / total_keypoints
+    estimated_error = tf.constant(expected)
 
     # Metric computation
     metric = PercentageOfCorrectKeypoints(reference=(6, 8), ratio=ratio)
-    metric.update_state(y_true, y_pred)
+    assert metric.update_state(y_true, y_pred) is None
+    assert (
+        metric.result() <= 1.0
+    ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
 
 
-@pytest.mark.parametrize("ratio", [0.5, 0.75, 1.0])
-def test_pck_no_supervision(y_true_nosup, y_pred_nosup, torso_size, ratio):
+@pytest.mark.parametrize(
+    "ratio, expected",
+    [
+        (1.5, 0.0),
+        (2.0, 0.1875),
+        (3.0, 0.375),
+        (4.0, 0.5625),
+        (5.0, 0.8125),
+        (6.0, 1.0),
+    ],
+)
+def test_pck_no_supervision(y_true_nosup, y_pred_nosup, ratio, expected):
 
     # Error estimation
-    estimated_error = 0
-    ground_truth_joints = tf_dynamic_matrix_argmax(y_true_nosup)
-    predicted_joints = tf_dynamic_matrix_argmax(y_pred_nosup)
-    error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
-    distance = tf.norm(error, ord=2, axis=-1)
-    condition = distance < (torso_size * ratio)
-    total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
-    total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
-    estimated_error = total_correct / total_keypoints
+    # estimated_error = 0
+    # ground_truth_joints = tf_dynamic_matrix_argmax(y_true_nosup)
+    # predicted_joints = tf_dynamic_matrix_argmax(y_pred_nosup)
+    # error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.float32)
+    # distance = tf.norm(error, ord=2, axis=-1)
+    # condition = distance < (torso_size * ratio)
+    # total_correct = tf.reduce_sum(tf.cast(condition, dtype=tf.float32))
+    # total_keypoints = tf.reduce_prod(tf.cast(distance.shape, dtype=tf.float32))
+    # estimated_error = total_correct / total_keypoints
+    estimated_error = tf.constant(expected)
 
     # Metric computation
     metric = PercentageOfCorrectKeypoints(
         reference=(6, 8), ratio=ratio, intermediate_supervision=False
     )
-    metric.update_state(y_true_nosup, y_pred_nosup)
+    assert metric.update_state(y_true_nosup, y_pred_nosup) is None
+    assert (
+        metric.result() <= 1.0
+    ), f"{metric.__class__.__name__} computes a value over 100%"
     assert (
         metric.result() == estimated_error
     ), f"Wrong result from {metric.__class__.__name__}. EXPECTED: {estimated_error} RECEIVED: {metric.result()}"
+
+
+# endregion
