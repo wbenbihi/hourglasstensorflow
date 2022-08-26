@@ -21,7 +21,7 @@ class OverallMeanDistance(keras.metrics.Metric):
             keepdims=True,
         )
 
-    def update_state(self, y_true, y_pred, *args, **kwargs):
+    def _internal_update(self, y_true, y_pred):
         ground_truth_joints = self.argmax_tensor(y_true)
         predicted_joints = self.argmax_tensor(y_pred)
         distance = tf.cast(
@@ -31,9 +31,12 @@ class OverallMeanDistance(keras.metrics.Metric):
         self.distance.assign_add(mean_distance)
         self.batches.assign_add(1.0)
 
-    def result(self, *args, **kwargs):
-        return self.distance / self.batches
+    def update_state(self, y_true, y_pred, *args, **kwargs):
+        return self._internal_update(y_true, y_pred)
 
-    def reset_states(self) -> None:
+    def result(self):
+        return tf.math.divide_no_nan(self.distance, self.batches)
+
+    def reset_state(self) -> None:
         self.batches.assign(0.0)
         self.distance.assign(0.0)
