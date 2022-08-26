@@ -25,20 +25,11 @@ jobs:
           echo "$HOME/.poetry/bin" >> $GITHUB_PATH
       - name: Configure poetry
         run: poetry config virtualenvs.in-project true
-      - name: Set up cache
-        uses: actions/cache@v1
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ "{{" }} runner.os {{ "}}" }}-${{ "{{" }} steps.full-python-version.outputs.version {{ "}}" }}-${{ "{{" }} hashFiles('**/poetry.lock') {{ "}}" }}
-      - name: Ensure cache is healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - name: Install Dependencies
         run: poetry install
       - name: Publish
         env:
-            PYPI_TOKEN: ${{ "{{" }} secrets.PYPI_HOURGLASS_TENSORFLOW {{ "}}" }}
+            PYPI_TOKEN: ${{ secrets.PYPI_HOURGLASS_TENSORFLOW }}
         run: |
           poetry config pypi-token.pypi $PYPI_TOKEN
           bash ci/publish.sh
