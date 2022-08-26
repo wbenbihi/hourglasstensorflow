@@ -13,7 +13,7 @@ include = [
 ]
 
 [tool.poetry.scripts]
-htf = "cli.__init__:cli"
+htf = "hourglass_tensorflow.cli.__init__:cli"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"

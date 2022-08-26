@@ -1,7 +1,6 @@
 import re
 
 import click
-
 from cli.mpii import mpii
 from cli.model import model
 
