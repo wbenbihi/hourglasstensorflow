@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: push
     needs: [beautify]
-    if: github.repository == 'wbenbihi/hourglasstensorlfow'
+    if: github.repository == 'wbenbihi/hourglasstensorflow'
 
     steps:
       - uses: actions/checkout@v2

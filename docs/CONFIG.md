@@ -1,4 +1,4 @@
-# wbenbihi/hourglasstensorlfow - Configuration
+# wbenbihi/hourglasstensorflow - Configuration
 
 ## mode
 

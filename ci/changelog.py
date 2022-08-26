@@ -35,7 +35,7 @@ RE_COMMIT = re.compile(
 RE_VERSION = re.compile(r"^(?P<version>\d.\d.\d)\n\n")
 RE_TAG_VERSION = re.compile(r"tag: (?P<version>v\d+.\d+.\d+)")
 ## Default Configuration
-REPO_URL = "https://github.com/wbenbihi/hourglasstensorlfow"
+REPO_URL = "https://github.com/wbenbihi/hourglasstensorflow"
 BREAKING_SUFFIX = "BREAKING"
 CURRENT_VERSION = "__CURRENT__"
 GROUP_KEYS = [

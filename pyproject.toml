@@ -2,8 +2,13 @@
 name = "hourglass_tensorflow"
 version = "1.0.1"
 description = "Tensorflow implementation of Stacked Hourglass Networks for Human Pose Estimation"
-authors = ["wbenbihi <waligoo@gmail.com>"]
+authors = ["Walid BENBIHI <contact@ocarinow.com>"]
+homepage = "https://github.com/wbenbihi/hourglasstensorflow"
+repository = "https://github.com/wbenbihi/hourglasstensorflow"
 license = "MIT"
+include = [
+    "LICENCE"
+]
 
 [tool.poetry.scripts]
 htf = "cli.__init__:cli"
@@ -70,7 +75,7 @@ data_file = "reports/.coverage"
 source = ['hourglass_tensorflow']
 
 [tool.coverage.html]
-title = "wbenbihi/hourglasstensorlfow coverage report"
+title = "wbenbihi/hourglasstensorflow coverage report"
 directory = "reports/coverage"
 show_contexts = true
 

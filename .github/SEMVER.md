@@ -1,8 +1,6 @@
-# hourglasstensorlfow CI/CD - GITHUB ACTIONS
+# hourglasstensorflow CI/CD - GITHUB ACTIONS
 
-**Table of Contents**
-
-- [hourglasstensorlfow CI/CD - GITHUB ACTIONS](#hourglasstensorlfow-cicd---github-actions)
+- [hourglasstensorflow CI/CD - GITHUB ACTIONS](#hourglasstensorflow-cicd---github-actions)
   - [Commit Flow](#commit-flow)
   - [Semantic Versioning](#semantic-versioning)
   - [Tags](#tags)
