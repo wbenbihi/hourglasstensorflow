@@ -48,6 +48,7 @@ sphinxcontrib-napoleon = "^0.7"
 myst-parser = "^0.18.0"
 sphinx-autobuild = "^2021.3.14"
 docstr-coverage = "^2.2.0"
+mypy = {extras = ["reports"], version = "^0.971"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -94,3 +95,6 @@ output = "reports/coverage.xml"
 [tool.pytest.ini_options]
 addopts = "--junitxml=reports/junit.xml --cov=hourglass_tensorflow --cov-report=html --cov-report=xml --cov-context=test"
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+mypy_path = "hourglass_tensorflow"
