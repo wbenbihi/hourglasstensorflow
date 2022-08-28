@@ -44,4 +44,7 @@ tasks:
   sphinx:
     cmds:
       - sphinx-autobuild docs/source docs/build/html
+  cov:doc:
+    cmds:
+      - docstr-coverage hourglass_tensorflow/ --badge=reports/docstr-badge.svg --fail-under 90.0 --accept-empty
 

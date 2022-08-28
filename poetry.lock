@@ -333,6 +333,22 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "docstr-coverage"
+version = "2.2.0"
+description = "Utility for examining python source files to ensure proper documentation. Lists missing docstrings, and calculates overall docstring coverage percentage rating."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+PyYAML = "*"
+
+[package.extras]
+test = ["pytest-mock (==3.4.0)", "pytest (==6.2.5)"]
+lint = ["isort (==5.9.0)", "black (==21.5b2)", "flake8 (==3.9.2)"]
+
+[[package]]
 name = "docutils"
 version = "0.17.1"
 description = "Docutils -- Python Documentation Utilities"
@@ -2569,7 +2585,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.12"
-content-hash = "d576baaf7288b5631c8d7c6cf65ab7c6eb2cd4f97cbec7e853719533f36c6c70"
+content-hash = "a29a193ab2ca5a1ca79905a9a723946a321d3eeadbbe8358cbb44285d64db2b5"
 
 [metadata.files]
 absl-py = [
@@ -2876,6 +2892,10 @@ dill = [
 distlib = [
     {file = "distlib-0.3.5-py2.py3-none-any.whl", hash = "sha256:b710088c59f06338ca514800ad795a132da19fda270e3ce4affc74abf955a26c"},
     {file = "distlib-0.3.5.tar.gz", hash = "sha256:a7f75737c70be3b25e2bee06288cec4e4c221de18455b2dd037fe2a795cab2fe"},
+]
+docstr-coverage = [
+    {file = "docstr-coverage-2.2.0.tar.gz", hash = "sha256:3487f3f09f7d2c45e2e67f0a3a6c1cc1960b6449e89f3e8eaca30c37e05eace2"},
+    {file = "docstr_coverage-2.2.0-py3-none-any.whl", hash = "sha256:13b21417fb6b743ac297495c4530687f78acecb9a61cfef7e3ec8f00938e574d"},
 ]
 docutils = [
     {file = "docutils-0.17.1-py2.py3-none-any.whl", hash = "sha256:cf316c8370a737a022b72b56874f6602acf974a37a9fba42ec2876387549fc61"},
