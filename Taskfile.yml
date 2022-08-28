@@ -43,5 +43,5 @@ tasks:
       - poetry run genbadge flake8 -i reports/flake8stats.txt -o - > reports/flake8-badge.svg
   sphinx:
     cmds:
-      - sphinx-autobuild doc/source doc/build/html
+      - sphinx-autobuild docs/source docs/build/html
 
