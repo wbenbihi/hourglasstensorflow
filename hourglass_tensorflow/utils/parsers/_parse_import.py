@@ -23,6 +23,17 @@ def _get_object(access_string) -> Type:
 
 def _generate_constraint_object_getter(type: Type) -> Callable[[str], Type]:
     def get_object(access_string: str) -> Type[type]:
+        """From an access string return the object class
+
+        Args:
+            access_string (str): string to object to import
+
+        Raises:
+            TypeError: if the access_string referenced object is not an instance of Type
+
+        Returns:
+            Type[type]: _description_
+        """
         obj: type = _get_object(access_string)
         if not issubclass(obj, type):
             raise TypeError(f"{obj} is not a subclass of {type}")

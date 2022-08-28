@@ -54,11 +54,15 @@ ADDITIONAL_ANNORECT_PARTS = [
 
 
 class MPIIObjPos(BaseModel):
+    """BaseModel for MPII `annolist:annorect:annopoints:point` representation"""
+
     x: int
     y: int
 
 
 class MPIIAnnoPoint(BaseModel):
+    """BaseModel for MPII `annolist:annorect:annopoints:point` representation"""
+
     id: Optional[int]
     x: Optional[int]
     y: Optional[int]
@@ -66,6 +70,8 @@ class MPIIAnnoPoint(BaseModel):
 
 
 class MPIIAnnorect(BaseModel):
+    """BaseModel for MPII `annolist:annorect` representation"""
+
     index: Optional[int]
     annopoints: Optional[List[MPIIAnnoPoint]]
     objpos: Optional[MPIIObjPos]
@@ -105,6 +111,8 @@ class MPIIAnnorect(BaseModel):
 
 
 class MPIIAnnotation(BaseModel):
+    """BaseModel for MPII `annolist:` representation"""
+
     index: int
     annorect: Optional[List[MPIIAnnorect]]
     frame_sec: Optional[int]
@@ -118,12 +126,16 @@ class MPIIAnnotation(BaseModel):
 
 
 class MPIIAct(BaseModel):
+    """BaseModel for MPII `act:` representation"""
+
     act_id: int
     act_name: Optional[List[str]]
     cat_name: Optional[List[str]]
 
 
 class MPIIDataset(BaseModel):
+    """BaseModel for MPII dataset representation"""
+
     annolist: List[MPIIAnnotation]
     act: List[MPIIAct]
     img_train: List[int]
@@ -132,6 +144,8 @@ class MPIIDataset(BaseModel):
 
 
 class MPIIDatapoint(BaseModel):
+    """BaseModel for MPII datapoint representation"""
+
     annolist: MPIIAnnotation
     act: MPIIAct
     img_train: int

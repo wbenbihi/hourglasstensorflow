@@ -100,6 +100,15 @@ def _convert_mpii_to_struct_record(
 def from_train_mpii_to_htf_data(
     data: mpii.MPIIObject, require_stats=False
 ) -> Union[List[HTFPersonDatapoint], Tuple[List[HTFPersonDatapoint], Tuple]]:
+    """Convert a `hourglass_tensorflow.utils.parsers.mpii.MPIIObject` into a list of `HTFPersonDatapoint`
+
+    Args:
+        data (mpii.MPIIObject): Object to convert
+        require_stats (bool, optional): If True, returns statistics about the data. Defaults to False.
+
+    Returns:
+        Union[List[HTFPersonDatapoint], Tuple[List[HTFPersonDatapoint], Tuple]]: either a list of object or a tuple if stats are required
+    """
     # TODO: Works only if `remove_null_keys` was set to False
     # while parsing MPII data.
     # First check if the data is record wise

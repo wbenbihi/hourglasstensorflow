@@ -27,6 +27,8 @@ from hourglass_tensorflow.types.config.metadata import HTFMetadata
 
 
 class HTFConfigMode(enum.Enum):
+    """Enum for available `hourglass_tensorflow` execution modes"""
+
     TEST = "test"
     TRAIN = "train"
     INFERENCE = "inference"
@@ -34,6 +36,8 @@ class HTFConfigMode(enum.Enum):
 
 
 class HTFConfig(HTFConfigField):
+    """BaseModel for configuration file representation"""
+
     mode: HTFConfigMode = HTFConfigMode.TRAIN
     version: Optional[Union[str, int]]
     data: Optional[HTFDataConfig]
@@ -51,13 +55,14 @@ class HTFConfigParser(ObjectLogger):
     Currently HTFConfigParser supports `.json`, `.toml`, `.yaml`, `.yml` files.
     The configuration file must follow the model defined by `HTFConfig`,
     see `CONFIGURATION.md` for more details.
-
-    Args:
-        filename (str): Configuration file name
     """
 
     def __init__(self, filename: str, verbose: bool = True) -> None:
-        """Init ConfigParser. See `help(HTFConfigParser)`"""
+        """Init ConfigParser. See `help(HTFConfigParser)`
+
+        Args:
+            filename (str): Configuration file name
+        """
         self._verbose = verbose
         self._filename = filename
         self._data = {}
@@ -77,6 +82,15 @@ class HTFConfigParser(ObjectLogger):
 
     @classmethod
     def parse(cls, filename: str, verbose: bool = False, *args, **kwargs) -> Dict:
+        """Parse a configuration from a filename
+
+        Args:
+            filename (str): config file path
+            verbose (bool, optional): If True, logs are activated . Defaults to False.
+
+        Returns:
+            Dict: The configuration parsed as a dictionary
+        """
         return cls(filename=filename, verbose=verbose, *args, **kwargs).config
 
     def __repr__(self) -> str:
@@ -84,6 +98,11 @@ class HTFConfigParser(ObjectLogger):
 
     @property
     def config(self) -> HTFConfig:
+        """Reference to the configuration
+
+        Returns:
+            HTFConfig: configuration object
+        """
         return self._config
 
     @property
@@ -129,6 +148,11 @@ class HTFConfigParser(ObjectLogger):
             return yaml.safe_load(f)
 
     def _infer_source(self) -> None:
+        """Infer the source of a file based on the file extension
+
+        Raises:
+            ValueError: The file extension is not supported
+        """
         parsers = {
             "yml": self.parse_yaml,
             "yaml": self.parse_yaml,
@@ -145,6 +169,7 @@ class HTFConfigParser(ObjectLogger):
         self._data = cfg_parser(self._filename)
 
     def _parse_config(self) -> None:
+        """Parse the configuration"""
         self._config = HTFConfig.parse_obj(self._data)
 
 

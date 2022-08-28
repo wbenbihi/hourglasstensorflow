@@ -13,15 +13,6 @@ class RatioCorrectKeypoints(Metric):
     true positives (TP).
 
     The choice of threshold is arbitrary and should be in `range(1, sqrt(2)*HEATMAP_SIZE)`
-
-    Args:
-        threshold (int, optional): Threshold in pixel to consider the keypoint as correct.
-            Defaults to 5.
-        name (str, optional): Tensor name. Defaults to None.
-        dtype (tf.dtypes, optional): Tensor data type. Defaults to None.
-        intermediate_supervision (bool, optional): Whether or not the intermediate supervision
-        is activated.
-            Defaults to True.
     """
 
     def __init__(
@@ -32,7 +23,17 @@ class RatioCorrectKeypoints(Metric):
         intermediate_supervision: bool = True,
         **kwargs
     ) -> None:
-        """See help(RatioCorrectKeypoints)"""
+        """See help(RatioCorrectKeypoints)
+
+        Args:
+            threshold (int, optional): Threshold in pixel to consider the keypoint as correct.
+                Defaults to 5.
+            name (str, optional): Tensor name. Defaults to None.
+            dtype (tf.dtypes, optional): Tensor data type. Defaults to None.
+            intermediate_supervision (bool, optional): Whether or not the intermediate supervision
+            is activated.
+                Defaults to True.
+        """
         super().__init__(name, dtype, **kwargs)
         self.threshold = threshold
         self.correct_keypoints = self.add_weight(
@@ -43,16 +44,24 @@ class RatioCorrectKeypoints(Metric):
         )
         self.intermediate_supervision = intermediate_supervision
 
-    def argmax_tensor(self, tensor):
+    def _argmax_tensor(self, tensor):
         return tf_dynamic_matrix_argmax(
             tensor,
             intermediate_supervision=self.intermediate_supervision,
             keepdims=True,
         )
 
-    def _internal_update(self, y_true, y_pred):
-        ground_truth_joints = self.argmax_tensor(y_true)
-        predicted_joints = self.argmax_tensor(y_pred)
+    def _internal_update(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> None:
+        """Update the inner state of the metric
+
+        This method is used to bypass coverage issue with tensorflow anc coverage.py
+
+        Args:
+            y_true (tf.Tensor): Ground Truth tensor
+            y_pred (tf.Tensor): Prediction tensor
+        """
+        ground_truth_joints = self._argmax_tensor(y_true)
+        predicted_joints = self._argmax_tensor(y_pred)
         distance = ground_truth_joints - predicted_joints
         norms = tf.norm(tf.cast(distance, dtype=tf.dtypes.float32), ord=2, axis=-1)
         correct_keypoints = tf.cast(
@@ -65,13 +74,28 @@ class RatioCorrectKeypoints(Metric):
         self.correct_keypoints.assign_add(correct_keypoints)
         self.total_keypoints.assign_add(total_keypoints)
 
-    def update_state(self, y_true, y_pred, *args, **kwargs):
+    def update_state(
+        self, y_true: tf.Tensor, y_pred: tf.Tensor, *args, **kwargs
+    ) -> None:
+        """Update the inner state of the metric
+
+        Args:
+            y_true (tf.Tensor): Ground Truth tensor
+            y_pred (tf.Tensor): Prediction tensor
+
+        """
         return self._internal_update()
 
-    def result(self, *args, **kwargs):
+    def result(self, *args, **kwargs) -> tf.float32:
+        """Compute the current metric value
+
+        Returns:
+            tf.float32: Metric Value
+        """
         return tf.math.divide_no_nan(self.correct_keypoints, self.total_keypoints)
 
     def reset_state(self) -> None:
+        """Reset the metric inner state"""
         self.correct_keypoints.assign(0.0)
         self.total_keypoints.assign(0.0)
 
@@ -90,17 +114,6 @@ class PercentageOfCorrectKeypoints(Metric):
     The threshold can either be:
         - PCKh@0.5 is when the threshold = 50% of the head bone link
         - PCK@0.2 = Distance between predicted and true joint < 0.2 * torso diameter
-
-    Args:
-        reference (tuple[int, int], optional): Joint ID tuple to consider as reference.
-            Defaults to (8, 9).
-        ratio (float, optional): Threshold in percentage of the considered reference limb size.
-            Defaults to 0.5/50%.
-        name (str, optional): Tensor name. Defaults to None.
-        dtype (tf.dtypes, optional): Tensor data type. Defaults to None.
-        intermediate_supervision (bool, optional): Whether or not the intermediate supervision
-        is activated.
-            Defaults to True.
     """
 
     def __init__(
@@ -112,7 +125,19 @@ class PercentageOfCorrectKeypoints(Metric):
         intermediate_supervision: bool = True,
         **kwargs
     ) -> None:
-        """See help(PercentageOfCorrectKeypoints)"""
+        """See help(PercentageOfCorrectKeypoints)
+
+        Args:
+            reference (tuple[int, int], optional): Joint ID tuple to consider as reference.
+                Defaults to (8, 9).
+            ratio (float, optional): Threshold in percentage of the considered reference limb size.
+                Defaults to 0.5/50%.
+            name (str, optional): Tensor name. Defaults to None.
+            dtype (tf.dtypes, optional): Tensor data type. Defaults to None.
+            intermediate_supervision (bool, optional): Whether or not the intermediate supervision
+            is activated.
+                Defaults to True.
+        """
         super().__init__(name, dtype, **kwargs)
         self.ratio = ratio
         self.reference = reference
@@ -124,16 +149,24 @@ class PercentageOfCorrectKeypoints(Metric):
         )
         self.intermediate_supervision = intermediate_supervision
 
-    def argmax_tensor(self, tensor):
+    def _argmax_tensor(self, tensor):
         return tf_dynamic_matrix_argmax(
             tensor,
             intermediate_supervision=self.intermediate_supervision,
             keepdims=True,
         )
 
-    def _internal_update(self, y_true, y_pred):
-        ground_truth_joints = self.argmax_tensor(y_true)
-        predicted_joints = self.argmax_tensor(y_pred)
+    def _internal_update(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> None:
+        """Update the inner state of the metric
+
+        This method is used to bypass coverage issue with tensorflow anc coverage.py
+
+        Args:
+            y_true (tf.Tensor): Ground Truth tensor
+            y_pred (tf.Tensor): Prediction tensor
+        """
+        ground_truth_joints = self._argmax_tensor(y_true)
+        predicted_joints = self._argmax_tensor(y_pred)
         # We compute distance between ground truth and prediction
         error = tf.cast(ground_truth_joints - predicted_joints, dtype=tf.dtypes.float32)
         distance = tf.norm(error, ord=2, axis=-1)
@@ -155,13 +188,27 @@ class PercentageOfCorrectKeypoints(Metric):
         self.correct_keypoints.assign_add(correct_keypoints)
         self.total_keypoints.assign_add(total_keypoints)
 
-    def update_state(self, y_true, y_pred, *args, **kwargs):
+    def update_state(
+        self, y_true: tf.Tensor, y_pred: tf.Tensor, *args, **kwargs
+    ) -> None:
+        """Update the inner state of the metric
+
+        Args:
+            y_true (tf.Tensor): Ground Truth tensor
+            y_pred (tf.Tensor): Prediction tensor
+        """
         return self._internal_update(y_true, y_pred)
 
-    def result(self, *args, **kwargs):
+    def result(self, *args, **kwargs) -> tf.float32:
+        """Compute the current metric value
+
+        Returns:
+            tf.float32: Metric Value
+        """
         return tf.math.divide_no_nan(self.correct_keypoints, self.total_keypoints)
 
     def reset_state(self) -> None:
+        """Reset the metric inner state"""
         self.correct_keypoints.assign(0.0)
         self.total_keypoints.assign(0.0)
 
@@ -221,10 +268,11 @@ class ObjectKeypointSimilarity(Metric):
             pass
 
     def reset_state(self) -> None:
+        """Reset the metric inner state"""
         self.oks_sum.assign(0.0)
         self.samples.assign(0.0)
 
-    def argmax_tensor(self, tensor):
+    def _argmax_tensor(self, tensor):
         return tf_dynamic_matrix_argmax(
             tensor,
             intermediate_supervision=self.intermediate_supervision,
@@ -252,8 +300,14 @@ class ObjectKeypointSimilarity(Metric):
         raise NotImplementedError
 
     def update_state(self, y_true, y_pred, *args, **kwargs):
-        ground_truth_joints = self.argmax_tensor(y_true)
-        predicted_joints = self.argmax_tensor(y_pred)
+        """Update the inner state of the metric
+
+        Args:
+            y_true (tf.Tensor): Ground Truth tensor
+            y_pred (tf.Tensor): Prediction tensor
+        """
+        ground_truth_joints = self._argmax_tensor(y_true)
+        predicted_joints = self._argmax_tensor(y_pred)
         # We compute distance between ground truth and prediction
         distance = tf.norm(
             tf.cast(ground_truth_joints - predicted_joints, dtype=tf.dtypes.float32),

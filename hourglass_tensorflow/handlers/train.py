@@ -129,6 +129,21 @@ class BaseTrainHandler(_HTFHandler):
 
 
 class HTFTrainHandler(BaseTrainHandler):
+    """Default Train Handler for `hourglass_tendorflow`
+
+    The HTFTrainHandler can be used outside of MPII data context.
+    This Handler is NOT bounded to any dataset specification.
+    It can be used with dataset other than MPII
+
+    > NOTE
+    >
+    > Check the handlers section from the documention to understand
+    > how to build you custom handlers
+
+    Args:
+        BaseModelHandler (_type_): Subclass of Meta Data Handler
+    """
+
     def init_handler(self, *args, **kwargs) -> None:
         """Custom initialization for HTFTrainHandler"""
         self._epochs = self.config.epochs

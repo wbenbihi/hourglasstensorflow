@@ -99,7 +99,7 @@ class BaseModelHandler(_HTFHandler):
 class HTFModelHandler(BaseModelHandler):
     """Default Model Handler for `hourglass_tendorflow`
 
-    The HTFDataHandler can be used outside of MPII data context.
+    The HTFModelHandler can be used outside of MPII data context.
     This Handler is NOT bounded to any dataset specification.
     It can be used with dataset other than MPII
 
