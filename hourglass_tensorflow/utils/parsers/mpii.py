@@ -578,11 +578,8 @@ def parse_mpii(
         ValidationError: When `test_parsing = True` and object is not parsable to `MPIIDataset`.
 
     Returns:
-        Union[
-            Dict[str, List],
-            List[Dict[str, Union[Dict, int, List[int], str]]],
-            MPIIDataset, List[MPIIDatapoint]
-        ](MPIIObject): Parsed MPII Matlab structure
+        Union[Dict[str, List],List[Dict[str, Union[Dict, int, List[int], str]]],MPIIDataset, List[MPIIDatapoint]](MPIIObject): Parsed MPII Matlab structure
+
     """
     mat = open_mat_file(mpii_annot_file)
     # Get the relevant data

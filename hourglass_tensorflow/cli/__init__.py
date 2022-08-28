@@ -1,8 +1,9 @@
 import re
 
 import click
-from cli.mpii import mpii
-from cli.model import model
+
+from hourglass_tensorflow.cli.mpii import mpii
+from hourglass_tensorflow.cli.model import model
 
 
 @click.group()

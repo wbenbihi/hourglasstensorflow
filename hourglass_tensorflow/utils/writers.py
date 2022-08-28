@@ -29,6 +29,7 @@ def common_write(
 
     Raises:
         KeyError: _description_
+
     """
     try:
         # Check if the file extension is supported
