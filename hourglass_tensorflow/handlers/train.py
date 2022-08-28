@@ -114,6 +114,11 @@ class BaseTrainHandler(_HTFHandler):
         raise NotImplementedError
 
     def run(self, *args, **kwargs) -> None:
+        """Global run job for `BaseTrainHander`
+
+        The run for a `BaseTrainHander` will call the `BaseTrainHander.compile`
+        and `BaseTrainHander.fit` methods sequentially.
+        """
         self.compile(*args, **kwargs)
         self.fit(*args, **kwargs)
 

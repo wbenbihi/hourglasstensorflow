@@ -113,6 +113,7 @@ class HTFModelHandler(BaseModelHandler):
     """
 
     def init_handler(self, *args, **kwargs) -> None:
+        """Initialization for HTFModelHandler"""
         pass
 
     def get(self) -> HTFModelHandlerReturnObject:
