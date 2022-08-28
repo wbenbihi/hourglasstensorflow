@@ -1,3 +1,5 @@
+from typing import Dict
+
 import tensorflow as tf
 from keras import layers
 from keras.layers import Layer
@@ -7,6 +9,12 @@ from hourglass_tensorflow.layers.conv_batch_norm_relu import ConvBatchNormReluLa
 
 
 class HourglassLayer(Layer):
+    """_summary_
+
+    Args:
+        Layer (_type_): _description_
+    """
+
     def __init__(
         self,
         feature_filters: int = 256,
@@ -17,6 +25,17 @@ class HourglassLayer(Layer):
         dynamic=False,
         trainable: bool = True,
     ) -> None:
+        """see help(HourglassLayer)
+
+        Args:
+            feature_filters (int, optional): _description_. Defaults to 256.
+            output_filters (int, optional): _description_. Defaults to 16.
+            downsamplings (int, optional): _description_. Defaults to 4.
+            name (str, optional): _description_. Defaults to None.
+            dtype (_type_, optional): _description_. Defaults to None.
+            dynamic (bool, optional): _description_. Defaults to False.
+            trainable (bool, optional): _description_. Defaults to True.
+        """
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
         # Store Config
         self.downsamplings = downsamplings
@@ -96,7 +115,14 @@ class HourglassLayer(Layer):
             )
         # endregion
 
-    def get_config(self):
+    def get_config(self) -> Dict:
+        """Get the layer configuration
+
+        Necessary for model serialization
+
+        Returns:
+            Dict: Layer configuration
+        """
         return {
             **super().get_config(),
             **{
@@ -121,6 +147,15 @@ class HourglassLayer(Layer):
         return out
 
     def call(self, inputs, training=False):
+        """Scripts the graph operation to perform on layer __call__
+
+        Args:
+            inputs (tf.Tensor): input tensor
+            training (bool, optional): is the layer currently training. Defaults to True.
+
+        Returns:
+            tf.Tensor: the layer's output tensor
+        """
         x = self._recursive_call(
             input_tensor=inputs, step=self.downsamplings - 1, training=training
         )

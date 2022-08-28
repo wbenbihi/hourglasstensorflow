@@ -1,9 +1,20 @@
+from typing import Dict
+
 import tensorflow as tf
 from keras import layers
 from keras.layers import Layer
 
 
 class ConvBatchNormReluLayer(Layer):
+    """Custom Keras Layers
+
+    This layers apply the following Ops:
+    1. Convolution2D
+    2. Batch Normalization
+    3. ReLU Activation
+
+    """
+
     def __init__(
         self,
         filters: int,
@@ -19,6 +30,22 @@ class ConvBatchNormReluLayer(Layer):
         dynamic=False,
         trainable: bool = True,
     ) -> None:
+        """see help(ConvBatchNormReluLayer)
+
+        Args:
+            filters (int): Convolution filters
+            kernel_size (int): Convolution kernel size
+            strides (int, optional): Stride for convolution kernel. Defaults to 1.
+            padding (str, optional): Padding for convolution. Defaults to "same".
+            activation (str, optional): Use activation function in convolution. Defaults to None.
+            kernel_initializer (str, optional): Convolution kernel initializer. Defaults to "glorot_uniform".
+            momentum (float, optional): Batch Norm momentum. Defaults to 0.9.
+            epsilon (float, optional): Batch Norm epsilon. Defaults to 1e-5.
+            name (str, optional): Layer name. Defaults to None.
+            dtype (_type_, optional): check keras.layers.Layer.dtype. Defaults to None.
+            dynamic (bool, optional): check keras.layers.Layer.dynamic. Defaults to False.
+            trainable (bool, optional): check keras.layers.Layer.trainable. Defaults to True.
+        """
         super().__init__(name=name, dtype=dtype, dynamic=dynamic, trainable=trainable)
         # Store config
         self.filters = filters
@@ -50,7 +77,14 @@ class ConvBatchNormReluLayer(Layer):
             name="ReLU",
         )
 
-    def get_config(self):
+    def get_config(self) -> Dict:
+        """Get the layer configuration
+
+        Necessary for model serialization
+
+        Returns:
+            Dict: Layer configuration
+        """
         return {
             **super().get_config(),
             **{
@@ -66,6 +100,15 @@ class ConvBatchNormReluLayer(Layer):
         }
 
     def call(self, inputs: tf.Tensor, training: bool = True) -> tf.Tensor:
+        """Scripts the graph operation to perform on layer __call__
+
+        Args:
+            inputs (tf.Tensor): input tensor
+            training (bool, optional): is the layer currently training. Defaults to True.
+
+        Returns:
+            tf.Tensor: the layer's output tensor
+        """
         x = self.conv(inputs)
         x = self.batch_norm(x, training=training)
         x = self.relu(x)
