@@ -103,7 +103,7 @@ class BaseDataHandler(_HTFHandler):
 
 
 class HTFDataHandler(BaseDataHandler):
-    """Default Data Handler for `hourglass_tendorflow``
+    """Default Data Handler for `hourglass_tendorflow`
 
     The HTFDataHandler can be used outside of MPII data context
     but was specifically created in the context of MPII data.

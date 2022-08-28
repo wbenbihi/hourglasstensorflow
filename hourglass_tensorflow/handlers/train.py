@@ -20,13 +20,24 @@ from hourglass_tensorflow.handlers.meta import _HTFHandler
 R = TypeVar("R")
 
 
-class _HTFTrainHandler(_HTFHandler):
+class BaseTrainHandler(_HTFHandler):
+    """Abstract handler for `hourglass_tensorflow` Train jobs
+
+    Args:
+        _HTFHandler (_type_): Subclass of Meta Handler
+    """
+
     def __init__(
         self,
         config: HTFTrainConfig,
         *args,
         **kwargs,
     ) -> None:
+        """see help(BaseTrainHandler)
+
+        Args:
+            config (HTFTrainConfig): Reference to `train:` field configuration
+        """
         super().__init__(config=config, *args, **kwargs)
         self._epochs: int = None
         self._epoch_size: int = None
@@ -42,10 +53,39 @@ class _HTFTrainHandler(_HTFHandler):
 
     @property
     def config(self) -> HTFTrainConfig:
+        """Reference to `train:` field configuration
+
+        Returns:
+            HTFTrainConfig: Train configuration object
+        """
         return self._config
+
+    def _instantiate(self, obj: HTFObjectReference[R], **kwargs) -> R:
+        """Instantiate an HTFObjectReference
+
+        Args:
+            obj (HTFObjectReference[R]): Reference to the object to instantiate
+
+        Returns:
+            R: The instantiated object
+        """
+        if isinstance(obj, HTFObjectReference):
+            return obj.init(**kwargs)
+        else:
+            return obj
 
     @abstractmethod
     def compile(self, model: Model, *args, **kwargs) -> None:
+        """Abstract method to implement for custom `BaseModelHander` subclass
+
+        This method should script the process of `keras` model's compiling
+
+        Args:
+            model (Model): model to compile
+
+        Raises:
+            NotImplementedError: Abstract Method
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -58,6 +98,19 @@ class _HTFTrainHandler(_HTFHandler):
         *args,
         **kwargs,
     ) -> None:
+        """Abstract method to implement for custom `BaseModelHander` subclass
+
+        This method should script the process of `keras` model's fitting
+
+        Args:
+            model (Model): model to compile
+            train_dataset (tf.data.Dataset, optional): tensorflow train dataset. Defaults to None.
+            test_dataset (tf.data.Dataset, optional): tensorflow test dataset. Defaults to None.
+            validation_dataset (tf.data.Dataset, optional): tensorflow validation dataset. Defaults to None.
+
+        Raises:
+            NotImplementedError: Abstract Method
+        """
         raise NotImplementedError
 
     def run(self, *args, **kwargs) -> None:
@@ -70,14 +123,9 @@ class _HTFTrainHandler(_HTFHandler):
 # region Handler
 
 
-class HTFTrainHandler(_HTFTrainHandler):
-    def _instantiate(self, obj: HTFObjectReference[R], **kwargs) -> R:
-        if isinstance(obj, HTFObjectReference):
-            return obj.init(**kwargs)
-        else:
-            return obj
-
+class HTFTrainHandler(BaseTrainHandler):
     def init_handler(self, *args, **kwargs) -> None:
+        """Custom initialization for HTFTrainHandler"""
         self._epochs = self.config.epochs
         self._epoch_size = self.config.epoch_size
         self._batch_size = self.config.batch_size
@@ -90,6 +138,11 @@ class HTFTrainHandler(_HTFTrainHandler):
         self._callbacks = [obj.init() for obj in self.config.callbacks]
 
     def compile(self, model: Model, *args, **kwargs) -> None:
+        """Compiles a keras Model
+
+        Args:
+            model (Model): model to compile
+        """
         model.compile(optimizer=self._optimizer, metrics=self._metrics, loss=self._loss)
 
     def _apply_batch(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
@@ -105,6 +158,14 @@ class HTFTrainHandler(_HTFTrainHandler):
         *args,
         **kwargs,
     ) -> None:
+        """Fit a keras Model
+
+        Args:
+            model (Model): model to compile
+            train_dataset (tf.data.Dataset, optional): tensorflow train dataset. Defaults to None.
+            test_dataset (tf.data.Dataset, optional): tensorflow test dataset. Defaults to None.
+            validation_dataset (tf.data.Dataset, optional): tensorflow validation dataset. Defaults to None.
+        """
         _ = self._apply_batch(test_dataset)
         batch_train = self._apply_batch(train_dataset)
         batch_validation = self._apply_batch(validation_dataset)

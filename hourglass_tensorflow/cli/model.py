@@ -6,7 +6,7 @@ from loguru import logger
 
 from hourglass_tensorflow.types.config import HTFConfig
 from hourglass_tensorflow.types.config import HTFConfigParser
-from hourglass_tensorflow.handlers.model import _HTFModelHandler
+from hourglass_tensorflow.handlers.model import BaseModelHandler
 from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
 
@@ -36,7 +36,7 @@ def log(verbose, input, output):
         config = HTFConfig.parse_obj(
             HTFConfigParser.parse(filename=input, verbose=verbose)
         )
-        obj: HTFObjectReference[_HTFModelHandler] = config.model.object
+        obj: HTFObjectReference[BaseModelHandler] = config.model.object
 
         tf.summary.trace_on(graph=True, profiler=True)
         writer = tf.summary.create_file_writer(output)
@@ -132,7 +132,7 @@ def plot(verbose, shapes, types, names, expand, activation, dpi, input, output):
         config = HTFConfig.parse_obj(
             HTFConfigParser.parse(filename=input, verbose=verbose)
         )
-        obj: HTFObjectReference[_HTFModelHandler] = config.model.object
+        obj: HTFObjectReference[BaseModelHandler] = config.model.object
         if verbose:
             logger.info("Building Graph...")
         model_handler = obj.init(config=config.model, verbose=verbose)
@@ -200,7 +200,7 @@ def summary(verbose, expand, trainable, input, output):
         config = HTFConfig.parse_obj(
             HTFConfigParser.parse(filename=input, verbose=verbose)
         )
-        obj: HTFObjectReference[_HTFModelHandler] = config.model.object
+        obj: HTFObjectReference[BaseModelHandler] = config.model.object
         if verbose:
             logger.info("Building Graph...")
         model_handler = obj.init(config=config.model, verbose=verbose)

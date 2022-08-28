@@ -299,7 +299,7 @@
 `object`
 
 - `OPTIONAL`
-- Type: [`HTFObjectReference[_HTFModelHandler]`](../hourglass_tensorflow/types/config/fields.py)
+- Type: [`HTFObjectReference[BaseModelHandler]`](../hourglass_tensorflow/types/config/fields.py)
 - Default: `hourglass_tensorflow.handlers.model.HTFModelHandler`
 - Reference to the handler to use for the graph architecture generation _(see [doc/HANDLERS](./handlers.md))_
 
@@ -388,7 +388,7 @@
 `object`
 
 - `OPTIONAL`
-- Type: [`HTFObjectReference[_HTFTrainHandler]`](../hourglass_tensorflow/types/config/fields.py)
+- Type: [`HTFObjectReference[BaseTrainHandler]`](../hourglass_tensorflow/types/config/fields.py)
 - Default: `hourglass_tensorflow.handlers.train.HTFTrainHandler`
 - Reference to the handler to use for the Train process _(see [doc/HANDLERS](./handlers.md))_
 

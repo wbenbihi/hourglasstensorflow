@@ -171,6 +171,21 @@ class BaseDatasetHandler(_HTFHandler):
 
 
 class HTFDatasetHandler(BaseDatasetHandler):
+    """Default Dataset Handler for `hourglass_tendorflow`
+
+    The HTFDatasetHandler can be used outside of MPII data context
+    but was specifically created in the context of MPII data.
+    Its use might not be a good fit for other dataset.
+
+    > NOTE
+    >
+    > Check the handlers section from the documention to understand
+    > how to build you custom handlers
+
+    Args:
+        BaseDatasetHandler (_type_): Subclass of Meta Dataset Handler
+    """
+
     @property
     def has_train(self) -> bool:
         """Reference to `dataset:sets:train` boolean

@@ -16,13 +16,24 @@ from hourglass_tensorflow.handlers.meta import _HTFHandler
 # region Abstract Class
 
 
-class _HTFModelHandler(_HTFHandler):
+class BaseModelHandler(_HTFHandler):
+    """Abstract handler for `hourglass_tensorflow` Model jobs
+
+    Args:
+        _HTFHandler (_type_): Subclass of Meta Handler
+    """
+
     def __init__(
         self,
         config: HTFModelConfig,
         *args,
         **kwargs,
     ) -> None:
+        """see help(BaseModelHandler)
+
+        Args:
+            config (HTFModelConfig): Reference to `model:` field configuration
+        """
         super().__init__(config=config, *args, **kwargs)
         self._input: keras.layers.Layer = None
         self._output: keras.layers.Layer = None
@@ -30,13 +41,28 @@ class _HTFModelHandler(_HTFHandler):
 
     @property
     def config(self) -> HTFModelConfig:
+        """Reference to `model:` field configuration
+
+        Returns:
+            HTFModelConfig: Model configuration object
+        """
         return self._config
 
     @property
     def params(self) -> HTFModelParams:
+        """Reference to `model:params` field configuration
+
+        Returns:
+            HTFModelParams: Model parameters configuration object
+        """
         return self.config.params
 
     def get(self) -> HTFModelHandlerReturnObject:
+        """Returns object of interest
+
+        Returns:
+            HTFModelHandlerReturnObject: Object referencing the model, the input and output tensors
+        """
         if self._executed:
             return {
                 "inputs": self._input,
@@ -51,9 +77,17 @@ class _HTFModelHandler(_HTFHandler):
 
     @abstractmethod
     def generate_graph(self, *args, **kwargs) -> None:
+        """Abstract method to implement for custom `BaseModelHander` subclass
+
+        This method should be generate the model's graph
+        """
         raise NotImplementedError
 
     def run(self, *args, **kwargs) -> None:
+        """Global run job for `BaseDataHander`
+
+        The run for a `BaseModelHander` will call the `BaseModelHander.generate_graph` method.
+        """
         self.generate_graph(*args, **kwargs)
 
 
@@ -62,11 +96,31 @@ class _HTFModelHandler(_HTFHandler):
 # region Handler
 
 
-class HTFModelHandler(_HTFModelHandler):
+class HTFModelHandler(BaseModelHandler):
+    """Default Model Handler for `hourglass_tendorflow`
+
+    The HTFDataHandler can be used outside of MPII data context.
+    This Handler is NOT bounded to any dataset specification.
+    It can be used with dataset other than MPII
+
+    > NOTE
+    >
+    > Check the handlers section from the documention to understand
+    > how to build you custom handlers
+
+    Args:
+        BaseModelHandler (_type_): Subclass of Meta Data Handler
+    """
+
     def init_handler(self, *args, **kwargs) -> None:
         pass
 
     def get(self) -> HTFModelHandlerReturnObject:
+        """Returns object of interest
+
+        Returns:
+            HTFModelHandlerReturnObject: Object referencing the model, the input and output tensors
+        """
         if self._executed:
             return {
                 "inputs": self._input,
@@ -81,6 +135,14 @@ class HTFModelHandler(_HTFModelHandler):
             return {}
 
     def _build_input(self, *args, **kwargs) -> tf.Tensor:
+        """Generates the keras input Tensor
+
+        Raises:
+            BadConfigurationError: The data format specified is not supported
+
+        Returns:
+            tf.Tensor: Input Tensor according to configuration
+        """
         height, width = self.params.input_size, self.params.input_size
         # TODO: Handle other Image Mode than RGB
         channels = 3
@@ -91,17 +153,35 @@ class HTFModelHandler(_HTFModelHandler):
         return self._input
 
     def _build_model_as_model(self, *args, **kwargs) -> HourglassModel:
+        """Build model as a `HourglassModel` object
+
+        Returns:
+            HourglassModel: model built according to configuration
+        """
         self._model = HourglassModel(**self.params.dict())
         self._layered_model = {}
         return self._model
 
     def _build_model_as_layer(self, *args, **kwargs) -> keras.models.Model:
+        """Build model from keras.models.Model
+
+        > WARNING
+        >
+        > This is an experimental features, developed mostly for debug purposes.
+        > We highly recommand that you do not set `model:build_as_model` to False.
+        > We cannot ensure model serialization as well as model parsing for other mode
+
+
+        Returns:
+            keras.models.Model: model built according to configuration
+        """
         self._layered_model = model_as_layers(inputs=self._input, **self.params.dict())
         self._output = self._layered_model["outputs"]
         self._model = self._layered_model["model"]
         return self._model
 
     def generate_graph(self, *args, **kwargs) -> None:
+        """Generates the model's graph"""
         # Get Input Tensor
         input_tensor = self._build_input(*args, **kwargs)
         # Build Model Graph
