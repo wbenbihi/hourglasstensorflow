@@ -106,7 +106,12 @@ class HTFConfigParser(ObjectLogger):
         return self._config
 
     @property
-    def file_type(self) -> HTFConfig:
+    def file_type(self) -> str:
+        """Accessor to configuration file extension
+
+        Returns:
+            str: file extension
+        """
         return self._filename.split(".")[-1]
 
     @classmethod
