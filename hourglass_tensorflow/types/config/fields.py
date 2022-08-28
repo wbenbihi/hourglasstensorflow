@@ -14,12 +14,24 @@ T = TypeVar("T")
 
 
 class HTFConfigField(BaseModel):
+    """BaseModel for configuration field representation"""
+
     @property
     def VALIDITY_CONDITIONS(self) -> List[bool]:
+        """Returns a list of condition as boolean that the field should meet
+
+        Returns:
+            List[bool]: List of boolean assertion
+        """
         return []
 
     @property
     def is_valid(self) -> bool:
+        """Checks if all the validation conditions are met
+
+        Returns:
+            bool: True if all conditions are met, false otherwise
+        """
         return all(self.VALIDITY_CONDITIONS)
 
 
