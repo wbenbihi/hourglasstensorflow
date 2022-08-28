@@ -18,6 +18,8 @@ NormalizationModeType = Union[
 
 
 class HTFDatasetSets(HTFConfigField):
+    """BaseModel for `dataset:sets` config representation"""
+
     split_by_column: bool = False
     column_split: str = "set"
     value_test: str = "TEST"
@@ -32,23 +34,24 @@ class HTFDatasetSets(HTFConfigField):
 
 
 class HTFDatasetBBox(HTFConfigField):
+    """BaseModel for `dataset:bbox` config representation"""
+
     activate: bool = True
     factor: float = 1.0
 
 
 class HTFDatasetHeatmap(HTFConfigField):
+    """BaseModel for `dataset:heatmap` config representation"""
+
     size: int = 64
     stacks: int = 3
     channels: int = 16
     stddev: int = 16
 
 
-class HTFDatasetMetadata(BaseModel):
-    class Config:
-        extra = "allow"
-
-
 class HTFDatasetConfig(HTFConfigField):
+    """BaseModel for `dataset:` config representation"""
+
     object: Optional[HTFObjectReference] = Field(
         default_factory=HTFObjectReference(
             source="hourglass_tensorflow.handlers.dataset.HTFDatasetHandler"

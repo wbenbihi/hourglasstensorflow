@@ -31,6 +31,8 @@ class HTFModelAsLayers(TypedDict):
 
 
 class HTFModelParams(HTFConfigField):
+    """BaseModel for `model:params` config representation"""
+
     name: str = "HourglassNetwork"
     input_size: int = 256
     output_size: int = 64
@@ -42,6 +44,8 @@ class HTFModelParams(HTFConfigField):
 
 
 class HTFModelConfig(HTFConfigField):
+    """BaseModel for `model:` config representation"""
+
     object: Optional[HTFObjectReference] = Field(
         default_factory=HTFObjectReference(
             source="hourglass_tensorflow.handlers.model.HTFModelHandler"

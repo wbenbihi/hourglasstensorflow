@@ -63,6 +63,8 @@ class HTFDataOutputJointsSuffix(HTFConfigField):
 
 
 class HTFDataOutputJointsFormat(HTFConfigField):
+    """BaseModel for `data:output:joints:format` config representation"""
+
     id_field: str = "JOINT_ID"
     SUFFIX: Dict = Field(default_factory={"x": "X", "y": "Y"})
     # SUFFIX: Optional[HTFDataOutputJointsSuffix] = Field(
@@ -71,6 +73,8 @@ class HTFDataOutputJointsFormat(HTFConfigField):
 
 
 class HTFDataOutputJoints(HTFConfigField):
+    """BaseModel for `data:output:joints` config representation"""
+
     num: int = 16
     dynamic_fields: List[str] = Field(default_factory=["SUFFIX"])
     naming_convention: str = "joint_{JOINT_ID}_{SUFFIX}"
@@ -104,6 +108,8 @@ class HTFDataOutputJoints(HTFConfigField):
 
 
 class HTFDataOutput(HTFConfigField):
+    """BaseModel for `data:output` config representation"""
+
     source: str
     source_prefixed: bool = True
     prefix_columns: Optional[List[str]] = Field(default_factory=list)
@@ -113,12 +119,16 @@ class HTFDataOutput(HTFConfigField):
 
 
 class HTFDataInput(HTFConfigField):
+    """BaseModel for `data:input` config representation"""
+
     source: str
     mode: ImageMode = ImageMode.RGB
     extensions: List[str] = Field(default_factory=["png", "jpeg", "jpg"])
 
 
 class HTFDataConfig(HTFConfigField):
+    """BaseModel for `data:` config representation"""
+
     input: HTFDataInput
     output: Optional[HTFDataOutput]
     object: Optional[HTFObjectReference] = Field(

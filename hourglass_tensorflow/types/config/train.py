@@ -14,6 +14,8 @@ from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
 
 class HTFTrainConfig(HTFConfigField):
+    """BaseModel for `train:` config representation"""
+
     epochs: int = 10
     epoch_size: int = 1000
     batch_size: Optional[int] = None
