@@ -19,7 +19,7 @@ from hourglass_tensorflow.types.config import HTFDatasetConfig
 from hourglass_tensorflow.types.config import HTFDatasetHeatmap
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.handlers.engines import ENGINES
-from hourglass_tensorflow.handlers.engines import HTFEngine
+from hourglass_tensorflow.handlers.engines import BaseEngine
 from hourglass_tensorflow.handlers._transformation import tf_train_map_stacks
 from hourglass_tensorflow.handlers._transformation import tf_train_map_heatmaps
 from hourglass_tensorflow.handlers._transformation import tf_train_map_squarify
@@ -50,8 +50,8 @@ class BaseDatasetHandler(_HTFHandler):
         KeyError: If the specified engine does not exists
     """
 
-    _ENGINES: Dict[Any, Type[HTFEngine]] = ENGINES
-    ENGINES: Dict[Any, Type[HTFEngine]] = {}
+    _ENGINES: Dict[Any, Type[BaseEngine]] = ENGINES
+    ENGINES: Dict[Any, Type[BaseEngine]] = {}
 
     def __init__(
         self,
@@ -68,14 +68,14 @@ class BaseDatasetHandler(_HTFHandler):
         """
         super().__init__(config=config, *args, **kwargs)
         self.data = data
-        self.engine: HTFEngine = self.select_engine(data)
+        self.engine: BaseEngine = self.select_engine(data)
 
     @property
-    def _engines(self) -> Dict[Type, Type[HTFEngine]]:
+    def _engines(self) -> Dict[Type, Type[BaseEngine]]:
         """Reference to the available engines
 
         Returns:
-            Dict[Type, Type[HTFEngine]]: Map of the available processing engines
+            Dict[Type, Type[BaseEngine]]: Map of the available processing engines
         """
         return {**self._ENGINES, **self.ENGINES}
 
@@ -115,7 +115,7 @@ class BaseDatasetHandler(_HTFHandler):
         """
         return self.config.heatmap
 
-    def select_engine(self, data: Any) -> HTFEngine:
+    def select_engine(self, data: Any) -> BaseEngine:
         """Infer the engine to use based on the `data` argument's type
 
         Args:
@@ -125,7 +125,7 @@ class BaseDatasetHandler(_HTFHandler):
             KeyError: The `data` object type has no engine related
 
         Returns:
-            HTFEngine: the engine to use
+            BaseEngine: the engine to use
         """
         try:
             return self._engines[type(data)](metadata=self._metadata)
