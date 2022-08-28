@@ -1,7 +1,7 @@
 # Stacked Hourglass Network for Human Pose Estimation
 
 <p style="text-align:center;">
-<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Python"><img src="https://img.shields.io/badge/python-3 9%20%7C%203.10-blue" alt="Python Version" /></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Python"><img src="https://img.shields.io/pypi/pyversions/hourglass-tensorflow" alt="Python Version" /></a>
 <a href="https://github.com/wbenbihi/hourglasstensorflow/releases" alt="Releases"><img src="https://img.shields.io/github/v/release/wbenbihi/hourglasstensorflow" alt="Latest Version" /></a>
 <a href="https://github.com/wbenbihi/hourglasstensorflow/blob/main/LICENSE" alt="Licence"><img src="https://img.shields.io/github/license/wbenbihi/hourglasstensorflow" alt="Licence" /></a>
 </p>

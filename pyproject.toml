@@ -98,3 +98,10 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.mypy]
 mypy_path = "hourglass_tensorflow"
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+check_untyped_defs = true
+# Explicit is better than implicit
+no_implicit_optional = true

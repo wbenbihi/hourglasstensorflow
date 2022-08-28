@@ -47,4 +47,7 @@ tasks:
   cov:doc:
     cmds:
       - docstr-coverage
+  mypy:
+    cmds:
+      - mypy --html-report reports/mypy --linecoverage-report reports/mypy-line-coverage --junit-xml reports/mypy-junit.xml --xml-report reports/mypy-xml hourglass_tensorflow
 
