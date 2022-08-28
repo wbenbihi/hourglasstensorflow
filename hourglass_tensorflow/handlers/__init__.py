@@ -19,7 +19,22 @@ T = TypeVar("T")
 
 
 class HTFManager(ObjectLogger):
+    """HTFManager instantiates a job from `hourglass_tensorflow` configuration files
+
+    HTFManager is responsible of handling the sequence of operation from configuration files.
+    Its behavior depends mostly on the `mode` selected.
+
+    Args:
+        ObjectLogger (_type_): _description_
+    """
+
     def __init__(self, filename: str, verbose: bool = True, *args, **kwargs) -> None:
+        """See help(HTFManager)
+
+        Args:
+            filename (str): The configuration file path
+            verbose (bool, optional): Enable verbose. Defaults to True.
+        """
         super().__init__(verbose, *args, **kwargs)
         self._config_file = filename
         self._config = HTFConfig.parse_obj(
@@ -29,14 +44,29 @@ class HTFManager(ObjectLogger):
 
     @property
     def config(self) -> HTFConfig:
+        """Reference to the HTFConfig object
+
+        Returns:
+            HTFConfig: Parsed configuration
+        """
         return self._config
 
     @property
     def mode(self) -> HTFConfigMode:
+        """Reference to the current execution `mode`
+
+        Returns:
+            HTFConfigMode: Execution mode
+        """
         return self.config.mode
 
     @property
     def VALIDATION_RULES(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         return {
             HTFConfigMode.TRAIN: [],
             HTFConfigMode.TEST: [],
@@ -46,6 +76,11 @@ class HTFManager(ObjectLogger):
 
     @property
     def metadata(self) -> HTFMetadata:
+        """Reference to the execution metadat
+
+        Returns:
+            HTFMetadata: Current execution metadata
+        """
         return self._metadata
 
     def _import_object(
@@ -56,10 +91,29 @@ class HTFManager(ObjectLogger):
         *args,
         **kwargs
     ) -> Union[T, _HTFHandler]:
+        """Instantiate an object from the `:object` field in config files
+
+        This method expects to return a subclass of _HTFHandler.
+
+        Args:
+            obj (HTFObjectReference[T]): Reference to the object to instantiate
+            config (HTFConfigField): Config object to use to instantiate the object
+            metadata (HTFMetadata): Metadata to transfer to the newly instantiated object
+
+        Returns:
+            Union[T, _HTFHandler]: The _HTFHandler subclass instance
+        """
         instance = obj.init(config=config, metadata=metadata, *args, **kwargs)
         return instance
 
     def __call__(self, *args, **kwargs) -> None:
+        """Run the job describe by the HTFManager configuration
+
+        The mode will not be infered by the HTFManager and is not an optional configuration field
+
+        Raises:
+            BadConfigurationError: Raise this error if any of the validation rule conditions is not met
+        """
 
         if not all(self.VALIDATION_RULES[self.mode]):
             raise BadConfigurationError
@@ -74,15 +128,51 @@ class HTFManager(ObjectLogger):
             self.server(*args, **kwargs)
 
     def server(self, *args, **kwargs) -> None:
+        """Launch the job for the `server` mode
+
+        Raises:
+            NotImplementedError: _description_
+        """
         raise NotImplementedError
 
     def test(self, *args, **kwargs) -> None:
+        """Launch the job for the `test` mode
+
+        Raises:
+            NotImplementedError: _description_
+        """
         raise NotImplementedError
 
     def inference(self, *args, **kwargs) -> None:
+        """Launch the job for the `inference` mode
+
+        Raises:
+            NotImplementedError: _description_
+        """
         raise NotImplementedError
 
     def train(self, *args, **kwargs) -> None:
+        """Launch the job for the `train` mode
+
+        The sequence of operation is independent from your dataset specification.
+        It will need 4 handlers referenced in your configuration.
+        - `BaseDataHandler`
+            - default: `hourglass_tensorflow.handlers.data.HTFDataHandler`
+            - In charge of the input/labels parsing
+        - `BaseDatasetHandler`
+            - default: `hourglass_tensorflow.handlers.data.HTFDatasetHandler`
+            - In charge of the `tf.data.Dataset` generation
+        - `BaseModelHandler`
+            - default: `hourglass_tensorflow.handlers.data.HTFModelHandler`
+            - In charge of the Model's graph generation
+        - `BaseTrainHandler`
+            - default: `hourglass_tensorflow.handlers.train.HTFTrainHandler`
+            - In charge of setting up the fitting process
+
+
+        The default handlers might be specific to the MPII Dataset, check the customization section
+        from the documentation to learn how to train the `HouglassModel` on your own data.
+        """
         # Unpack Objects
         obj_data: HTFObjectReference[HTFDataHandler] = self._config.data.object
         obj_dataset: HTFObjectReference[HTFDatasetHandler] = self._config.dataset.object

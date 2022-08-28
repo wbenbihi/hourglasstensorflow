@@ -3,7 +3,7 @@ paths: # list or string
 badge: reports/docstr-badge.svg # Path
 verbose: 3
 skip_magic: True # Boolean
-skip_file_doc: False # Boolean
+skip_file_doc: True # Boolean
 skip_init: False # Boolean
 skip_class_def: False # Boolean
 skip_private: True # Boolean

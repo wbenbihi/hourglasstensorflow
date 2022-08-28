@@ -19,7 +19,7 @@
 `object`
 
 - `OPTIONAL`
-- Type: [`HTFObjectReference[_HTFDataHandler]`](../hourglass_tensorflow/types/config/fields.py)
+- Type: [`HTFObjectReference[BaseDataHandler]`](../hourglass_tensorflow/types/config/fields.py)
 - Default: `hourglass_tensorflow.handlers.data.HTFDataHandler`
 - Reference to the handler to use for the Data processing _(see [doc/HANDLERS](./handlers.md))_
 
@@ -127,7 +127,7 @@
 `object`
 
 - `OPTIONAL`
-- Type: [`HTFObjectReference[_HTFDatasetHandler]`](../hourglass_tensorflow/types/config/fields.py)
+- Type: [`HTFObjectReference[BaseDatasetHandler]`](../hourglass_tensorflow/types/config/fields.py)
 - Default: `hourglass_tensorflow.handlers.dataset.HTFDatasetHandler`
 - Reference to the handler to use for the Dataset generation _(see [doc/HANDLERS](./handlers.md))_
 

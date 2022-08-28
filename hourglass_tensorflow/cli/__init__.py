@@ -8,6 +8,7 @@ from hourglass_tensorflow.cli.model import model
 
 @click.group()
 def cli():
+    """`hourglass_tensorflow` command-line interface (CLI)"""
     pass
 
 

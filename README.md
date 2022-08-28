@@ -101,7 +101,7 @@ Full Configuration documentation is available in [docs/CONFIG](./docs/CONFIG.md)
 
 This repository was build to train a model on the MPII dataset and therefore generates `tensorflow` Datasets compliant with the MPII specification. The configuration file and CLI might reflect this decision.
 
-You can use this model on any dataset of your choice. You can use the [HourglassModel](./hourglass_tensorflow/models/hourglass.py) in your scripts to train a model. Or to integrate with the CLI and configuration files. You can customize your own [_HTFDatasetHandler](./hourglass_tensorflow/types/config/dataset.py). Check the [doc/HANDLERS](./HANDLERS.md) for more details.
+You can use this model on any dataset of your choice. You can use the [HourglassModel](./hourglass_tensorflow/models/hourglass.py) in your scripts to train a model. Or to integrate with the CLI and configuration files. You can customize your own [BaseDatasetHandler](./hourglass_tensorflow/types/config/dataset.py). Check the [doc/HANDLERS](./HANDLERS.md) for more details.
 
 ## Training
 
