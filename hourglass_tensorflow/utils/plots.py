@@ -6,7 +6,7 @@ from typing import Literal
 
 import matplotlib.pyplot as plt
 
-from hourglass_tensorflow.type import HTFPersonDatapoint
+from hourglass_tensorflow.types import HTFPersonDatapoint
 
 # region Color Maps
 COLOR_MAP = {

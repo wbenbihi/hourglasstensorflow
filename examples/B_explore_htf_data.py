@@ -7,7 +7,7 @@ from loguru import logger
 from pydantic import parse_file_as
 from matplotlib.patches import Rectangle
 
-from hourglass_tensorflow.type import HTFPersonDatapoint
+from hourglass_tensorflow.types import HTFPersonDatapoint
 
 HTF_JSON = "data/htf.ignore.json"
 

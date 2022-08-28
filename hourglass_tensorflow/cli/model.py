@@ -4,10 +4,10 @@ import click
 import tensorflow as tf
 from loguru import logger
 
-from hourglass_tensorflow.type.config import HTFConfig
-from hourglass_tensorflow.type.config import HTFConfigParser
+from hourglass_tensorflow.types.config import HTFConfig
+from hourglass_tensorflow.types.config import HTFConfigParser
 from hourglass_tensorflow.handlers.model import BaseModelHandler
-from hourglass_tensorflow.type.config.fields import HTFObjectReference
+from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
 
 @click.group()

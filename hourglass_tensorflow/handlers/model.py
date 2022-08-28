@@ -8,9 +8,9 @@ from keras import Input as InputTensor
 from hourglass_tensorflow.utils import BadConfigurationError
 from hourglass_tensorflow.models import HourglassModel
 from hourglass_tensorflow.models import model_as_layers
-from hourglass_tensorflow.type.config import HTFModelConfig
-from hourglass_tensorflow.type.config import HTFModelParams
-from hourglass_tensorflow.type.config import HTFModelHandlerReturnObject
+from hourglass_tensorflow.types.config import HTFModelConfig
+from hourglass_tensorflow.types.config import HTFModelParams
+from hourglass_tensorflow.types.config import HTFModelHandlerReturnObject
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 
 # region Abstract Class

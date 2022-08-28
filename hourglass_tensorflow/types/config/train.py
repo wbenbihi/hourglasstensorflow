@@ -9,8 +9,8 @@ from keras.callbacks import Callback
 from keras.optimizers import Optimizer
 from keras.optimizers.schedules.learning_rate_schedule import LearningRateSchedule
 
-from hourglass_tensorflow.type.config.fields import HTFConfigField
-from hourglass_tensorflow.type.config.fields import HTFObjectReference
+from hourglass_tensorflow.types.config.fields import HTFConfigField
+from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
 
 class HTFTrainConfig(HTFConfigField):

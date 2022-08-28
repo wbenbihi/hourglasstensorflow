@@ -8,8 +8,8 @@ from typing import Optional
 
 from pydantic import Field
 
-from hourglass_tensorflow.type.config.fields import HTFConfigField
-from hourglass_tensorflow.type.config.fields import HTFObjectReference
+from hourglass_tensorflow.types.config.fields import HTFConfigField
+from hourglass_tensorflow.types.config.fields import HTFObjectReference
 
 CAPTURE_FSTRING = r"\{.[^\{\}]+\}"
 RE_FSTRING = re.compile(CAPTURE_FSTRING)

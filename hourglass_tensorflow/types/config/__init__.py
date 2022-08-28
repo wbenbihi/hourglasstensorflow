@@ -8,22 +8,22 @@ from typing import Optional
 import toml
 import yaml
 
-from hourglass_tensorflow.type.config.data import HTFDataInput
-from hourglass_tensorflow.type.config.data import HTFDataConfig
-from hourglass_tensorflow.type.config.data import HTFDataOutput
-from hourglass_tensorflow.type.config.model import HTFModelConfig
-from hourglass_tensorflow.type.config.model import HTFModelParams
-from hourglass_tensorflow.type.config.model import HTFModelAsLayers
-from hourglass_tensorflow.type.config.model import HTFModelHandlerReturnObject
-from hourglass_tensorflow.type.config.train import HTFTrainConfig
-from hourglass_tensorflow.type.config.fields import HTFConfigField
-from hourglass_tensorflow.type.config.fields import HTFObjectReference
-from hourglass_tensorflow.type.config.dataset import HTFDatasetBBox
-from hourglass_tensorflow.type.config.dataset import HTFDatasetSets
-from hourglass_tensorflow.type.config.dataset import HTFDatasetConfig
-from hourglass_tensorflow.type.config.dataset import HTFDatasetHeatmap
+from hourglass_tensorflow.types.config.data import HTFDataInput
+from hourglass_tensorflow.types.config.data import HTFDataConfig
+from hourglass_tensorflow.types.config.data import HTFDataOutput
+from hourglass_tensorflow.types.config.model import HTFModelConfig
+from hourglass_tensorflow.types.config.model import HTFModelParams
+from hourglass_tensorflow.types.config.model import HTFModelAsLayers
+from hourglass_tensorflow.types.config.model import HTFModelHandlerReturnObject
+from hourglass_tensorflow.types.config.train import HTFTrainConfig
+from hourglass_tensorflow.types.config.fields import HTFConfigField
+from hourglass_tensorflow.types.config.fields import HTFObjectReference
 from hourglass_tensorflow.utils.object_logger import ObjectLogger
-from hourglass_tensorflow.type.config.metadata import HTFMetadata
+from hourglass_tensorflow.types.config.dataset import HTFDatasetBBox
+from hourglass_tensorflow.types.config.dataset import HTFDatasetSets
+from hourglass_tensorflow.types.config.dataset import HTFDatasetConfig
+from hourglass_tensorflow.types.config.dataset import HTFDatasetHeatmap
+from hourglass_tensorflow.types.config.metadata import HTFMetadata
 
 
 class HTFConfigMode(enum.Enum):
