@@ -3,12 +3,12 @@ from typing import TypeVar
 
 from hourglass_tensorflow.utils import ObjectLogger
 from hourglass_tensorflow.utils import BadConfigurationError
-from hourglass_tensorflow.types.config import HTFConfig
-from hourglass_tensorflow.types.config import HTFMetadata
-from hourglass_tensorflow.types.config import HTFConfigMode
-from hourglass_tensorflow.types.config import HTFConfigField
-from hourglass_tensorflow.types.config import HTFConfigParser
-from hourglass_tensorflow.types.config import HTFObjectReference
+from hourglass_tensorflow.type.config import HTFConfig
+from hourglass_tensorflow.type.config import HTFMetadata
+from hourglass_tensorflow.type.config import HTFConfigMode
+from hourglass_tensorflow.type.config import HTFConfigField
+from hourglass_tensorflow.type.config import HTFConfigParser
+from hourglass_tensorflow.type.config import HTFObjectReference
 from hourglass_tensorflow.handlers.data import HTFDataHandler
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.handlers.model import HTFModelHandler

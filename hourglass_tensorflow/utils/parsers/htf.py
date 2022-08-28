@@ -2,10 +2,10 @@ from typing import List
 from typing import Tuple
 from typing import Union
 
-from hourglass_tensorflow.types import HTFPoint
-from hourglass_tensorflow.types import HTFPersonBBox
-from hourglass_tensorflow.types import HTFPersonJoint
-from hourglass_tensorflow.types import HTFPersonDatapoint
+from hourglass_tensorflow.type import HTFPoint
+from hourglass_tensorflow.type import HTFPersonBBox
+from hourglass_tensorflow.type import HTFPersonJoint
+from hourglass_tensorflow.type import HTFPersonDatapoint
 from hourglass_tensorflow.utils.parsers import mpii
 
 

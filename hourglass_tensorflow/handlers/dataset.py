@@ -13,10 +13,10 @@ import pandas as pd
 import tensorflow as tf
 
 from hourglass_tensorflow.utils import split_train_test
-from hourglass_tensorflow.types.config import HTFDatasetBBox
-from hourglass_tensorflow.types.config import HTFDatasetSets
-from hourglass_tensorflow.types.config import HTFDatasetConfig
-from hourglass_tensorflow.types.config import HTFDatasetHeatmap
+from hourglass_tensorflow.type.config import HTFDatasetBBox
+from hourglass_tensorflow.type.config import HTFDatasetSets
+from hourglass_tensorflow.type.config import HTFDatasetConfig
+from hourglass_tensorflow.type.config import HTFDatasetHeatmap
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 from hourglass_tensorflow.handlers.engines import ENGINES
 from hourglass_tensorflow.handlers.engines import BaseEngine

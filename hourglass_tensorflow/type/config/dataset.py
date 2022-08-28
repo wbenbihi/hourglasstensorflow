@@ -5,8 +5,8 @@ from typing import Optional
 from pydantic import Field
 from pydantic import BaseModel
 
-from hourglass_tensorflow.types.config.fields import HTFConfigField
-from hourglass_tensorflow.types.config.fields import HTFObjectReference
+from hourglass_tensorflow.type.config.fields import HTFConfigField
+from hourglass_tensorflow.type.config.fields import HTFObjectReference
 
 NormalizationModeType = Union[
     Literal["ByMax"],

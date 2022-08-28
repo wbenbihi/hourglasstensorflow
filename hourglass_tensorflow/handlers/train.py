@@ -11,8 +11,8 @@ from keras.callbacks import Callback
 from keras.optimizers import Optimizer
 from keras.optimizers.schedules.learning_rate_schedule import LearningRateSchedule
 
-from hourglass_tensorflow.types.config import HTFTrainConfig
-from hourglass_tensorflow.types.config import HTFObjectReference
+from hourglass_tensorflow.type.config import HTFTrainConfig
+from hourglass_tensorflow.type.config import HTFObjectReference
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 
 # region Abstract Class

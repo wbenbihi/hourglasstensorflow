@@ -12,7 +12,7 @@ import pandas as pd
 import tensorflow as tf
 
 from hourglass_tensorflow.utils import ObjectLogger
-from hourglass_tensorflow.types.config import HTFMetadata
+from hourglass_tensorflow.type.config import HTFMetadata
 
 
 class BaseEngine(ABC, ObjectLogger):

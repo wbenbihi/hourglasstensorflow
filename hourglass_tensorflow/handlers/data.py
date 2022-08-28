@@ -7,9 +7,9 @@ from typing import List
 import pandas as pd
 
 from hourglass_tensorflow.utils import BadConfigurationError
-from hourglass_tensorflow.types.config import HTFDataInput
-from hourglass_tensorflow.types.config import HTFDataConfig
-from hourglass_tensorflow.types.config import HTFDataOutput
+from hourglass_tensorflow.type.config import HTFDataInput
+from hourglass_tensorflow.type.config import HTFDataConfig
+from hourglass_tensorflow.type.config import HTFDataOutput
 from hourglass_tensorflow.handlers.meta import _HTFHandler
 
 # region Abstract Class
