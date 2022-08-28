@@ -1,0 +1,27 @@
+paths: # list or string
+  - hourglass_tensorflow/
+badge: reports/docstr-badge.svg # Path
+verbose: 3
+skip_magic: True # Boolean
+skip_file_doc: False # Boolean
+skip_init: False # Boolean
+skip_class_def: False # Boolean
+skip_private: True # Boolean
+follow_links: False # Boolean
+accept_empty: True # Boolean
+ignore_names_file: .*/tests # regex
+fail_under: 10 # int 
+percentage_only: False # Boolean
+# ignore_patterns: # Dict with key/value pairs of file-pattern/node-pattern
+#   .*: method_to_ignore_in_all_files
+#   FileWhereWeWantToIgnoreAllSpecialMethods: "__.+__"
+#   SomeFile:
+#     - method_to_ignore1
+#     - method_to_ignore2
+#     - method_to_ignore3
+#   a_very_important_view_file:
+#     - "^get$"
+#     - "^set$"
+#     - "^post$"
+#   detect_.*:
+#     - "get_val.*"

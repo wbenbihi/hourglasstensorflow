@@ -19,4 +19,4 @@ repos:
     rev: v2.2.0 # most recent docstr-coverage release or commit sha
     hooks:
       - id: docstr-coverage
-        args: ["--accept-empty", "--verbose", "2", "--fail-under", "90.0"] # override the .docstr.yaml to see less output
+        args: ["--verbose", "2", "--accept-empty"] # override the .docstr.yaml to see less output
