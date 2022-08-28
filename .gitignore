@@ -26,3 +26,6 @@ log/*
 .coverage
 reports/*.xml
 reports/*.txt
+doc/build/*
+docs/_build
+doc/source/rst

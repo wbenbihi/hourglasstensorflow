@@ -41,6 +41,12 @@ pydot = "^1.4.2"
 genbadge = {extras = ["all"], version = "^1.1.0"}
 pytest-cov = "^3.0.0"
 coverage = {extras = ["toml"], version = "^6.4.4"}
+pdoc3 = "^0.10.0"
+Sphinx = "^5.1.1"
+sphinx-rtd-theme = "^1.0.0"
+sphinxcontrib-napoleon = "^0.7"
+myst-parser = "^0.18.0"
+sphinx-autobuild = "^2021.3.14"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
