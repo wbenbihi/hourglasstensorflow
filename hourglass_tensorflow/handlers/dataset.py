@@ -69,6 +69,9 @@ class BaseDatasetHandler(_HTFHandler):
         super().__init__(config=config, *args, **kwargs)
         self.data = data
         self.engine: BaseEngine = self.select_engine(data)
+        self._test_dataset: Optional[tf.data.Dataset] = None
+        self._train_dataset: Optional[tf.data.Dataset] = None
+        self._validation_dataset: Optional[tf.data.Dataset] = None
 
     @property
     def _engines(self) -> Dict[Type, Type[BaseEngine]]:
@@ -114,6 +117,57 @@ class BaseDatasetHandler(_HTFHandler):
             HTFDatasetHeatmap: Heatmap configuration object
         """
         return self.config.heatmap
+
+    @property
+    def train_dataset(self) -> tf.data.Dataset:
+        """Getter for train dataset
+
+        Returns:
+            tf.data.Dataset: Train dataset
+        """
+        return self._train_dataset
+
+    @property
+    def test_dataset(self) -> tf.data.Dataset:
+        """Getter for test dataset
+
+        Returns:
+            tf.data.Dataset: Test dataset
+        """
+        return self._test_dataset
+
+    @property
+    def validation_dataset(self) -> tf.data.Dataset:
+        """Getter for validation dataset
+
+        Returns:
+            tf.data.Dataset: Validation dataset
+        """
+        return self._validation_dataset
+
+    def set_train_dataset(self, dataset: tf.data.Dataset) -> None:
+        """Sets the train dataset
+
+        Args:
+            dataset (tf.data.Dataset): Dataset to use as train dataset
+        """
+        self._train_dataset = dataset
+
+    def set_test_dataset(self, dataset: tf.data.Dataset) -> None:
+        """Sets the test dataset
+
+        Args:
+            dataset (tf.data.Dataset): Dataset to use as test dataset
+        """
+        self._test_dataset = dataset
+
+    def set_validation_dataset(self, dataset: tf.data.Dataset) -> None:
+        """Sets the validation dataset
+
+        Args:
+            dataset (tf.data.Dataset): Dataset to use as validation dataset
+        """
+        self._validation_dataset = dataset
 
     def select_engine(self, data: Any) -> BaseEngine:
         """Infer the engine to use based on the `data` argument's type

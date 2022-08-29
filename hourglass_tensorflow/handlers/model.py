@@ -57,6 +57,57 @@ class BaseModelHandler(_HTFHandler):
         """
         return self.config.params
 
+    @property
+    def model(self) -> keras.models.Model:
+        """Getters for the model
+
+        Returns:
+            keras.models.Model: model
+        """
+        return self._model
+
+    @property
+    def input(self) -> keras.layers.Layer:
+        """Getter for the input tensor
+
+        Returns:
+            keras.layers.Layer: input layer
+        """
+        return self._model
+
+    @property
+    def output(self) -> keras.layers.Layer:
+        """Getter for the output tensor
+
+        Returns:
+            keras.layers.Layer: output layer
+        """
+        return self._model
+
+    def set_input(self, tensor: keras.layers.Layer) -> None:
+        """Sets the input tensor
+
+        Args:
+            tensor (keras.layers.Layer): input tensor
+        """
+        self._input = tensor
+
+    def set_output(self, tensor: keras.layers.Layer) -> None:
+        """Sets the output tensor
+
+        Args:
+            tensor (keras.layers.Layer): output tensor
+        """
+        self._output = tensor
+
+    def set_model(self, model: keras.models.Model) -> None:
+        """Sets the model
+
+        Args:
+            model (keras.models.Model): keras model
+        """
+        self._model = model
+
     def get(self) -> HTFModelHandlerReturnObject:
         """Returns object of interest
 

@@ -69,7 +69,7 @@ def tf_compute_padding_from_bbox(bbox: tf.Tensor) -> tf.Tensor:
     """Given a bounding box tensor compute the padding needed to make a square bbox
 
     Notes:
-        `bbox` is a 2x2 Tensor [[TopLeftX, TopLeftY], [BottomRightX, BottomRightY]]
+        `bbox` is a 2x2 Tensor `[[TopLeftX, TopLeftY], [BottomRightX, BottomRightY]]`
 
     Args:
         bbox (tf.Tensor): bounding box tensor
@@ -254,6 +254,7 @@ def tf_dynamic_matrix_argmax(
     Notes:
         For a batch of heatmap with no intermediate supervision, you need to apply
         a dimension expansion before using this function.
+
         >>> batch_tensor_no_supervision.shape
         [4, 64, 64, 16]
         >>> tf_dynamic_matrix_argmax(batch_tensor_no_supervision).shape
