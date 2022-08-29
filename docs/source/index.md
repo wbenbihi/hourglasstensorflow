@@ -42,6 +42,8 @@ Model trained on [**MPII Human Pose Dataset**](http://human-pose.mpi-inf.mpg.de/
 
 This project is an **open-source** repository developed by **Walid Benbihi**
 
+`hourglass_tensorflow` is hosted on [PyPI](https://pypi.org/pyversions/hourglass-tensorflow)
+
 ```bash
 pip install hourglass_tensorflow
 ```
@@ -55,6 +57,7 @@ pip install hourglass_tensorflow
     quickstart
     config
     handlers
+    cli
 ```
 
 ```{eval-rst}

@@ -10,10 +10,13 @@
   - **<span style="color:green">STATUS: DONE</span>**
   - The mode to use to train an instance of `HourglassModel`. It will generates I/O `tensorflow.Dataset` according to configuration specification
 - `TEST | test`
+  - **<span style="color:lightblue">STATUS: TODO</span>**
   - The test mode run a pretrained `HourglassModel` on a already labeled samples to produces metrics and analysis report.
 - `INFERENCE | inference`
+  - **<span style="color:orange">STATUS: WIP</span>**
   - The inference mode runs batch prediction over folders/images.
 - `SERVER | server`
+  - **<span style="color:lightblue">STATUS: TODO</span>**  
   - The server mode launch a `TensorFlow Serving` API to use your model programmatically.
 
 ## File
