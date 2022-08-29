@@ -10,7 +10,7 @@ skip_private: True # Boolean
 follow_links: False # Boolean
 accept_empty: True # Boolean
 ignore_names_file: .*/tests # regex
-fail_under: 10 # int 
+fail_under: 90 # int 
 percentage_only: False # Boolean
 # ignore_patterns: # Dict with key/value pairs of file-pattern/node-pattern
 #   .*: method_to_ignore_in_all_files
