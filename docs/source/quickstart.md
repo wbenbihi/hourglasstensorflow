@@ -1,4 +1,4 @@
-# Quickstart
+# Getting started
 
 ## Basic example
 

@@ -25,6 +25,7 @@
 <p style="text-align:center;">
 <a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Tests"><img src="https://raw.githubusercontent.com/wbenbihi/hourglasstensorflow/main/reports/tests-badge.svg" alt="Tests"/></a>
 <a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Coverage"><img src="https://raw.githubusercontent.com/wbenbihi/hourglasstensorflow/main/reports/coverage-badge.svg" alt="Coverage"/></a>
+<a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Documentation"><img src="https://raw.githubusercontent.com/wbenbihi/hourglasstensorflow/main/reports/docstr-badge.svg" alt="Documentation Coverage"/></a>
 <a href="https://github.com/wbenbihi/hourglasstensorflow" alt="Flake8"><img src="https://raw.githubusercontent.com/wbenbihi/hourglasstensorflow/main/reports/flake8-badge.svg" alt="Flake8"/></a>
 </p>
 <p style="text-align:center;">
@@ -58,13 +59,22 @@ pip install hourglass_tensorflow
     config
     handlers
     cli
+    hourglass_tensorflow
 ```
 
 ```{eval-rst}
 .. toctree::
+    :hidden:
     :maxdepth: 2
     :caption: Modules:
 
+    hourglass_tensorflow.cli
+    hourglass_tensorflow.handlers
+    hourglass_tensorflow.layers
+    hourglass_tensorflow.losses
+    hourglass_tensorflow.metrics
+    hourglass_tensorflow.models
+    hourglass_tensorflow.types
     hourglass_tensorflow.utils
 ```
 

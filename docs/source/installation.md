@@ -1,11 +1,5 @@
 # Installation
 
-```{eval-rst}
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-```
-
 ## Install from PyPI
 
 Install `hourglass_tensorflow` from [PyPI package repository](https://pypi.org/project/hourglass-tensorflow/)
