@@ -31,7 +31,7 @@ class HTFModelAsLayers(TypedDict):
 
 
 class HTFModelParams(HTFConfigField):
-    """BaseModel for `model:params` config representation"""
+    """BaseModel for `model.params` config representation"""
 
     name: str = "HourglassNetwork"
     input_size: int = 256
@@ -44,7 +44,7 @@ class HTFModelParams(HTFConfigField):
 
 
 class HTFModelConfig(HTFConfigField):
-    """BaseModel for `model:` config representation"""
+    """BaseModel for `model` config representation"""
 
     object: Optional[HTFObjectReference] = Field(
         default_factory=HTFObjectReference(

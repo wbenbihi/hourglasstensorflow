@@ -32,7 +32,7 @@ class BaseModelHandler(_HTFHandler):
         """see help(BaseModelHandler)
 
         Args:
-            config (HTFModelConfig): Reference to `model:` field configuration
+            config (HTFModelConfig): Reference to `model` field configuration
         """
         super().__init__(config=config, *args, **kwargs)
         self._input: keras.layers.Layer = None
@@ -41,7 +41,7 @@ class BaseModelHandler(_HTFHandler):
 
     @property
     def config(self) -> HTFModelConfig:
-        """Reference to `model:` field configuration
+        """Reference to `model` field configuration
 
         Returns:
             HTFModelConfig: Model configuration object
@@ -50,7 +50,7 @@ class BaseModelHandler(_HTFHandler):
 
     @property
     def params(self) -> HTFModelParams:
-        """Reference to `model:params` field configuration
+        """Reference to `model.params` field configuration
 
         Returns:
             HTFModelParams: Model parameters configuration object
@@ -220,7 +220,7 @@ class HTFModelHandler(BaseModelHandler):
         > WARNING
         >
         > This is an experimental features, developed mostly for debug purposes.
-        > We highly recommand that you do not set `model:build_as_model` to False.
+        > We highly recommand that you do not set `model.build_as_model` to False.
         > We cannot ensure model serialization as well as model parsing for other mode
 
 

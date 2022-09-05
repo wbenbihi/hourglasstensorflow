@@ -63,7 +63,7 @@ class HTFDataOutputJointsSuffix(HTFConfigField):
 
 
 class HTFDataOutputJointsFormat(HTFConfigField):
-    """BaseModel for `data:output:joints:format` config representation"""
+    """BaseModel for `data.output.joints.format` config representation"""
 
     id_field: str = "JOINT_ID"
     SUFFIX: Dict = Field(default_factory={"x": "X", "y": "Y"})
@@ -73,7 +73,7 @@ class HTFDataOutputJointsFormat(HTFConfigField):
 
 
 class HTFDataOutputJoints(HTFConfigField):
-    """BaseModel for `data:output:joints` config representation"""
+    """BaseModel for `data.output.joints` config representation"""
 
     num: int = 16
     dynamic_fields: List[str] = Field(default_factory=["SUFFIX"])
@@ -108,7 +108,7 @@ class HTFDataOutputJoints(HTFConfigField):
 
 
 class HTFDataOutput(HTFConfigField):
-    """BaseModel for `data:output` config representation"""
+    """BaseModel for `data.output` config representation"""
 
     source: str
     source_prefixed: bool = True
@@ -119,7 +119,7 @@ class HTFDataOutput(HTFConfigField):
 
 
 class HTFDataInput(HTFConfigField):
-    """BaseModel for `data:input` config representation"""
+    """BaseModel for `data.input` config representation"""
 
     source: str
     mode: ImageMode = ImageMode.RGB
@@ -127,7 +127,7 @@ class HTFDataInput(HTFConfigField):
 
 
 class HTFDataConfig(HTFConfigField):
-    """BaseModel for `data:` config representation"""
+    """BaseModel for `data` config representation"""
 
     input: HTFDataInput
     output: Optional[HTFDataOutput]

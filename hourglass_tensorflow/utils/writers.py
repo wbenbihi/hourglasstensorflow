@@ -24,7 +24,7 @@ def common_write(
         obj (Union[List, BaseModel, Dict]): Object to write
         path (str): Path to write the object
         force_dict_struct (bool, optional): In case you pickle a BaseModel,
-             you can force the object to be stored as built-in types
+            you can force the object to be stored as built-in types
             Defaults to False.
 
     Raises:

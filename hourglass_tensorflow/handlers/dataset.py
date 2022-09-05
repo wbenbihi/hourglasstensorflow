@@ -63,8 +63,8 @@ class BaseDatasetHandler(_HTFHandler):
         """see help(BaseDataHandler)
 
         Args:
-            data (HTFDataTypes): The labeled data loaded from `data:output:source`
-            config (HTFDatasetConfig): The configuartion reference to `dataset:`
+            data (HTFDataTypes): The labeled data loaded from `data.output.source`
+            config (HTFDatasetConfig): The configuartion reference to `dataset`
         """
         super().__init__(config=config, *args, **kwargs)
         self.data = data
@@ -84,7 +84,7 @@ class BaseDatasetHandler(_HTFHandler):
 
     @property
     def config(self) -> HTFDatasetConfig:
-        """Reference to `dataset:` field configuration
+        """Reference to `dataset` field configuration
 
         Returns:
             HTFDatasetConfig: Dataset configuration object
@@ -93,7 +93,7 @@ class BaseDatasetHandler(_HTFHandler):
 
     @property
     def sets(self) -> HTFDatasetSets:
-        """Reference to `dataset:sets` field configuration
+        """Reference to `dataset.sets` field configuration
 
         Returns:
             HTFDatasetSets: Sets configuration object
@@ -102,7 +102,7 @@ class BaseDatasetHandler(_HTFHandler):
 
     @property
     def bbox(self) -> HTFDatasetBBox:
-        """Reference to `dataset:bbox` field configuration
+        """Reference to `dataset.bbox` field configuration
 
         Returns:
             HTFDatasetBBox: Bbox configuration object
@@ -111,7 +111,7 @@ class BaseDatasetHandler(_HTFHandler):
 
     @property
     def heatmap(self) -> HTFDatasetHeatmap:
-        """Reference to `dataset:bbox` field configuration
+        """Reference to `dataset.bbox` field configuration
 
         Returns:
             HTFDatasetHeatmap: Heatmap configuration object
@@ -242,7 +242,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
 
     @property
     def has_train(self) -> bool:
-        """Reference to `dataset:sets:train` boolean
+        """Reference to `dataset.sets.train` boolean
 
         Returns:
             bool: True if should generate train set
@@ -251,7 +251,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
 
     @property
     def has_test(self) -> bool:
-        """Reference to `dataset:sets:test` boolean
+        """Reference to `dataset.sets.test` boolean
 
         Returns:
             bool: True if should generate test set
@@ -260,7 +260,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
 
     @property
     def has_validation(self) -> bool:
-        """Reference to `dataset:sets:validation` boolean
+        """Reference to `dataset.sets.validation` boolean
 
         Returns:
             bool: True if should generate validation set
@@ -269,11 +269,11 @@ class HTFDatasetHandler(BaseDatasetHandler):
 
     @property
     def ratio_train(self) -> float:
-        """Reference to `dataset:sets:ratio_train`
+        """Reference to `dataset.sets.ratio_train`
 
         The ratio to use for splitting the labeled samples.
-        This ratio will only be used if `dataset:sets:train` is True and
-        `dataset:sets:split_by_column` is False.
+        This ratio will only be used if `dataset.sets.train` is True and
+        `dataset.sets.split_by_column` is False.
 
         Returns:
             float: ratio to  use for training set
@@ -282,11 +282,11 @@ class HTFDatasetHandler(BaseDatasetHandler):
 
     @property
     def ratio_test(self) -> float:
-        """Reference to `dataset:sets:ratio_test`
+        """Reference to `dataset.sets.ratio_test`
 
         The ratio to use for splitting the labeled samples.
-        This ratio will only be used if `dataset:sets:test` is True and
-        `dataset:sets:split_by_column` is False.
+        This ratio will only be used if `dataset.sets.test` is True and
+        `dataset.sets.split_by_column` is False.
 
         Returns:
             float: ratio to  use for test set
@@ -295,11 +295,11 @@ class HTFDatasetHandler(BaseDatasetHandler):
 
     @property
     def ratio_validation(self) -> float:
-        """Reference to `dataset:sets:ratio_validation`
+        """Reference to `dataset.sets.ratio_validation`
 
         The ratio to use for splitting the labeled samples.
-        This ratio will only be used if `dataset:sets:validation` is True and
-        `dataset:sets:split_by_column` is False.
+        This ratio will only be used if `dataset.sets.validation` is True and
+        `dataset.sets.split_by_column` is False.
 
         Returns:
             float: ratio to  use for validation set
@@ -358,7 +358,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
         return train, test, validation
 
     def _split_by_column(self) -> Tuple[HTFDataTypes, HTFDataTypes, HTFDataTypes]:
-        """Uses `dataset:sets:column_split` to split the labeled samples based on a column value
+        """Uses `dataset.sets.column_split` to split the labeled samples based on a column value
 
         Returns:
             Tuple[HTFDataTypes, HTFDataTypes, HTFDataTypes]: Tuple of train/test/validation respectively.
@@ -379,7 +379,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
         return train, test, validation
 
     def _split_by_ratio(self) -> Tuple[HTFDataTypes, HTFDataTypes, HTFDataTypes]:
-        """Uses `dataset:sets:ratio_*` to split the labeled samples based on a ratio splitting
+        """Uses `dataset.sets.ratio_*` to split the labeled samples based on a ratio splitting
 
         Returns:
             Tuple[HTFDataTypes, HTFDataTypes, HTFDataTypes]: Tuple of train/test/validation respectively.
@@ -404,7 +404,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
         return train, test, validation
 
     def _split_sets(self) -> None:
-        """Split the sets accordingly to the `dataset:sets` configuration"""
+        """Split the sets accordingly to the `dataset.sets` configuration"""
         if self.sets.split_by_column:
             # Use a predefined columns as discriminant
             train, test, validation = self._split_by_column()

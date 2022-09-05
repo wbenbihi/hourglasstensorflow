@@ -54,14 +54,14 @@ ADDITIONAL_ANNORECT_PARTS = [
 
 
 class MPIIObjPos(BaseModel):
-    """BaseModel for MPII `annolist:annorect:annopoints:point` representation"""
+    """BaseModel for MPII `annolist.annorect.annopoints.point` representation"""
 
     x: int
     y: int
 
 
 class MPIIAnnoPoint(BaseModel):
-    """BaseModel for MPII `annolist:annorect:annopoints:point` representation"""
+    """BaseModel for MPII `annolist.annorect.annopoints.point` representation"""
 
     id: Optional[int]
     x: Optional[int]
@@ -70,7 +70,7 @@ class MPIIAnnoPoint(BaseModel):
 
 
 class MPIIAnnorect(BaseModel):
-    """BaseModel for MPII `annolist:annorect` representation"""
+    """BaseModel for MPII `annolist.annorect` representation"""
 
     index: Optional[int]
     annopoints: Optional[List[MPIIAnnoPoint]]
@@ -111,7 +111,7 @@ class MPIIAnnorect(BaseModel):
 
 
 class MPIIAnnotation(BaseModel):
-    """BaseModel for MPII `annolist:` representation"""
+    """BaseModel for MPII `annolist` representation"""
 
     index: int
     annorect: Optional[List[MPIIAnnorect]]
@@ -126,7 +126,7 @@ class MPIIAnnotation(BaseModel):
 
 
 class MPIIAct(BaseModel):
-    """BaseModel for MPII `act:` representation"""
+    """BaseModel for MPII `act` representation"""
 
     act_id: int
     act_name: Optional[List[str]]

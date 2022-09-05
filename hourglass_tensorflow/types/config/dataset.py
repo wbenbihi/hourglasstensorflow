@@ -18,7 +18,7 @@ NormalizationModeType = Union[
 
 
 class HTFDatasetSets(HTFConfigField):
-    """BaseModel for `dataset:sets` config representation"""
+    """BaseModel for `dataset.sets` config representation"""
 
     split_by_column: bool = False
     column_split: str = "set"
@@ -34,14 +34,14 @@ class HTFDatasetSets(HTFConfigField):
 
 
 class HTFDatasetBBox(HTFConfigField):
-    """BaseModel for `dataset:bbox` config representation"""
+    """BaseModel for `dataset.bbox` config representation"""
 
     activate: bool = True
     factor: float = 1.0
 
 
 class HTFDatasetHeatmap(HTFConfigField):
-    """BaseModel for `dataset:heatmap` config representation"""
+    """BaseModel for `dataset.heatmap` config representation"""
 
     size: int = 64
     stacks: int = 3
@@ -50,7 +50,7 @@ class HTFDatasetHeatmap(HTFConfigField):
 
 
 class HTFDatasetConfig(HTFConfigField):
-    """BaseModel for `dataset:` config representation"""
+    """BaseModel for `dataset` config representation"""
 
     object: Optional[HTFObjectReference] = Field(
         default_factory=HTFObjectReference(

@@ -7,6 +7,15 @@ from hourglass_tensorflow.layers.downsampling import DownSamplingLayer
 
 
 class HourglassModel(Model):
+    """Tensorflow model for Stacked Hourglass Networks
+
+    Stacked Hourglass Networks are Convolutional Neural Networks (CNNs)
+    following the encoder/decoder architecture (hourglass). They stack
+    such "autoencoders" so the output of one autoencoder become the input
+    of the next one. This approach aims at produce staged outputs with finer
+    resolution over the stacks.
+    """
+
     def __init__(
         self,
         input_size: int = 256,

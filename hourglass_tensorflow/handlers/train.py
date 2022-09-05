@@ -36,7 +36,7 @@ class BaseTrainHandler(_HTFHandler):
         """see help(BaseTrainHandler)
 
         Args:
-            config (HTFTrainConfig): Reference to `train:` field configuration
+            config (HTFTrainConfig): Reference to `train` field configuration
         """
         super().__init__(config=config, *args, **kwargs)
         self._epochs: int = None
@@ -53,7 +53,7 @@ class BaseTrainHandler(_HTFHandler):
 
     @property
     def config(self) -> HTFTrainConfig:
-        """Reference to `train:` field configuration
+        """Reference to `train` field configuration
 
         Returns:
             HTFTrainConfig: Train configuration object
