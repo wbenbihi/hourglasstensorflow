@@ -84,7 +84,7 @@ class RatioCorrectKeypoints(Metric):
             y_pred (tf.Tensor): Prediction tensor
 
         """
-        return self._internal_update()
+        return self._internal_update(y_true, y_pred)
 
     def result(self, *args, **kwargs) -> tf.float32:
         """Compute the current metric value
