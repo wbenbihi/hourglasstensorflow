@@ -516,6 +516,7 @@ class HTFDatasetHandler(BaseDatasetHandler):
                     stacks=self.config.heatmap.stacks,
                 )
             )
+            .repeat()
         )
 
     def generate_datasets(self, *args, **kwargs) -> None:
