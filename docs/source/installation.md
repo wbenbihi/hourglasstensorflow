@@ -17,10 +17,39 @@ numpy = "^1.23.2"
 scipy = "^1.9.0"
 ```
 
+```{important}
 Due to its various installation methods, `tensorflow` is not referenced as a requirements for this package. Be sure to install `tensorflow>=2.0.0` before using this package. _(See [Tensorflow setup guide](https://www.tensorflow.org/install))_
 
-```bash
+````bash
 pip install tensorflow
+````
+
+```{tip}
+To parse single documents, see the [](docutils.md) section
+```
+
+```{note}
+To parse single documents, see the [](docutils.md) section
+```
+
+```{warning}
+To parse single documents, see the [](docutils.md) section
+```
+
+```{error}
+To parse single documents, see the [](docutils.md) section
+```
+
+```{admonition}
+To parse single documents, see the [](docutils.md) section
+```
+
+```{important}
+To parse single documents, see the [](docutils.md) section
+```
+
+```{seealso}
+To parse single documents, see the [](docutils.md) section
 ```
 
 ## Use Source

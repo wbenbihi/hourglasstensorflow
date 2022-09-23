@@ -50,6 +50,7 @@ sphinx-autobuild = "^2021.3.14"
 docstr-coverage = "^2.2.0"
 mypy = {extras = ["reports"], version = "^0.971"}
 furo = "^2022.6.21"
+sphinx-pydantic = "^0.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

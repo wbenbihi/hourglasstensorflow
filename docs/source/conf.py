@@ -25,6 +25,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.coverage",
+    "sphinx-pydantic",
     "myst_parser",
 ]
 
